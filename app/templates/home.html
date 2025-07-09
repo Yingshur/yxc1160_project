@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block head_extra %}
+<style>
+    html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    }
+    .left-half {
+    background-image: url("{{url_for('static', filename = 'images/Palaio.jpg' )}}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    }
+    .right-half {
+    background-image: url("{{url_for('static', filename = 'images/Jesus.jpg' )}}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    }
+    .transparent-button {
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(240, 242, 245, 0.45);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #800020;
+    border: 2px #f0f3f5;
+    font-size: 1.25rem;
+    border-radius: 6px;
+    min-width: 200px;
+    min-height: 80px;
+    transition: background-color 1s ease;
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 2 rem;
+    }
+    .transparent-button:hover {
+    background-color: rgba(240, 242, 0245, 0.99);
+    }
+    .latin-heading_1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2 rem;
+    color: #702963;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+    .greek-heading_1 {
+    font-family: 'GFS Didot', serif;
+    font-size: 2 rem;
+    color: #702963;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+</style>
+{% endblock %}
+{% block flash_messages %}{% endblock %}
+{% block content %}
+<div class="container-fluid vh-100 p-0">
+    <div class="row h-100 m-0">
+        <div class="col-6 d-flex flex-column justify-content-center align-items-center left-half">
+            <a href="#" class="transparent-button animate__animated animate__fadeInDown">
+                <div class="greek-heading_1">Βασιλείς </div>
+                <div class="latin-heading_1">Imperatores</div>
+                <div class="latin-heading_1">Emperors</div>
+            </a>
+        </div>
+        <div class="col-6 d-flex flex-column justify-content-center align-items-center right-half">
+            <a href="#" class="transparent-button animate__animated animate__fadeInDown">
+                <div class="greek-heading_1">Ῥωμαϊκὴ παιδεία </div>
+                <div class="latin-heading_1">Roman Culture </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
