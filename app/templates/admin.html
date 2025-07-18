@@ -1,192 +1,126 @@
 {% extends "base.html" %}
 {% import "bootstrap_wtf.html" as wtf %}
 
+
+
+
+{% block head_extra %}
+
+<style>
+    .latin-heading_2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+    .latin-heading_3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+    .greek-heading_2 {
+    font-family: 'GFS Didot', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+
+    .background-container {
+    background-image: url("{{url_for('static', filename = 'images/parchment_color.jpg')}}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height:100vh;
+    display: flex;
+    flex-direction:column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 3rem 0rem 0rem 5rem;
+    }
+        .table {
+  background-color: transparent !important;}
+
+.table td,
+.table th {
+  background-color: transparent !important;
+  border: 1px solid transparent;}
+
+
+</style>
+{% endblock %}
+
+{% block flash_messages %}{% endblock %}
+
 {% block content %}
-<h1>Admin</h1>
+<div class="background-container">
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+
+<h1 class="latin-heading_3">Admin</h1>
 <div class="col-lg-9">
-<table class="table mt-5">
+<table class="table" style="background-color: transparent;">
     <thead>
         <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>User type</th>
-            <th></th>
+            <th class="latin-heading_3">ID</th>
+            <th class="latin-heading_3">Username</th>
+            <th class="latin-heading_3">Email</th>
+            <th class="latin-heading_3">Role</th>
+            <th class="latin-heading_3">User type</th>
+            <th class="latin-heading_3"></th>
         </tr>
     </thead>
     {% for user in user_lst %}
         <tr>
-            <td>{{ user.id }}</td>
-            <td>{{ user.username }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.role }}</td>
-            <td>{{user.user_type}}</td>
+            <td class="latin-heading_3">{{ user.id }}</td>
+            <td class="latin-heading_3">{{ user.username }}</td>
+            <td class="latin-heading_3">{{ user.email }}</td>
+            <td class="latin-heading_3">{{ user.role }}</td>
+            <td class="latin-heading_3">{{user.user_type}}</td>
             <td>
                 <form action="{{ url_for('delete_user') }}" method="post">
                     {{ form.csrf_token() }}
                     {{ form.choice(value=user.id) }}
                     <button class="btn" type="submit">
-                        <i class="bi bi-trash"> Delete</i>
-                    </button>
-                </form>
-            </td>
-            {% if user.user_type != "Psychologist" %}
-            <td>
-                <form action="{{ url_for('toggle_user_role') }}" method="post">
-                    {{ form.csrf_token() }}
-                    {{ form.choice(value=user.id) }}
-                    <button class="btn" type="submit">
-                        {% if user.role == "Admin" %}
-                        <i class="bi bi-toggle-on"> Switch Role</i>
-                        {% else %}
-                        <i class="bi bi-toggle-off"> Switch Role</i>
-                        {% endif %}
-                    </button>
-                </form>
-            </td>
-            {% endif %}
-            {% if user.role == "Normal" %}
-            <td>
-                <form action="{{ url_for('toggle_user_type') }}" method="post">
-                    {{ form.csrf_token() }}
-                    {{ form.choice(value=user.id) }}
-                    <button class="btn" type="submit">
-                        {% if user.user_type == "Psychologist" %}
-                        <i class="bi bi-toggle-on"> Switch user type</i>
-                        {% else %}
-                        <i class="bi bi-toggle-off"> Switch user type</i>
-                        {% endif %}
-                    </button>
-                </form>
-            </td>
-            {% endif %}
-        </tr>
-    {% endfor %}
-</table>
-</div>
-
-<h5>Student enrollments</h5>
-<div class="col-lg-3">
-<table class="table">
-<thead>
-        <tr>
-            <th>Title</th>
-            <th>Name</th>
-        </tr>
-    </thead>
-    {% for enrollment in list_of_enrollments %}
-        <tr>
-            <td>{{enrollment.title}}</td>
-              <td>{{enrollment.username}}</td>
-            <td><form action="{{ url_for('delete_enrollment_') }}" method="post">
-                    {{ form.csrf_token() }}
-                    {{ form.choice(value=enrollment.id) }}
-                    <button class="btn btn-dark">Remove</button>
-                </form></td>
-        </tr>
-    {% endfor %}
-
-
-</table>
-</div>
-
-
-    <h5>Enrollments statistics</h5>
-<div class="container mb-3">
-    <form action="{{ url_for('download_enrollments_csv') }}" method="post">
-        <button class="btn btn-dark" type="submit">Download Enrollments Statistics</button>
-    </form>
-</div>
-
-
-
-<h2 class="mt-5">Psychologists' profile</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Name
-            </th>
-            <th>
-                Availability
-            </th>
-        </tr>
-    </thead>
-    {% for psychologist in list_of_psychologists %}
-
-        <tr>
-            <td>
-                {{ psychologist.username }}
-            </td>
-            <td>
-                {{ psychologist.availability }}
-            </td>
-            <td>
-                <form action="{{ url_for('toggle_user_availability_', psychologist_id = psychologist.id) }}" method="post">
-                    {{ form.csrf_token() }}
-                    <button class="btn" type="submit">
-                        {% if psychologist.availability == "Available" %}
-                        <i class="bi bi-toggle-on"> Change user availability</i>
-                        {% else %}
-                        <i class="bi bi-toggle-off"> Change user availability</i>
-                        {% endif %}
-                    </button>
-                </form>
-            </td>
-        </tr>
-    {% endfor %}
-</table>
-
-<h2 class="mt-5"> Appointments</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Date
-            </th>
-            <th>
-                Weekday
-            </th>
-            <th>
-                Start
-            </th>
-            <th>
-                Psychologist
-            </th>
-        </tr>
-    </thead>
-    {% for appo in list_of_appointments %}
-        <tr>
-            <td>
-                {{ appo.date }}
-            </td>
-            <td>
-                {{ appo.weekday }}
-            </td>
-            <td>
-                {{ appo.slot }}
-            </td>
-            <td>
-                {{ appo.user_name }}
-            </td>
-            <td>
-                <form action="{{ url_for('delete_appointment_') }}" method="post">
-                    {{ choose_form.csrf_token() }}
-                    {{ choose_form.appo_id(value=appo.id) }}
-                    {{ choose_form.user_id(value=appo.user_id)}}
-                    <button class="btn" type="submit">
                         <i class="bi bi-trash"></i>
                     </button>
                 </form>
             </td>
+            {% if user.role == "Normal" %}
+            <td> <form action="{{ url_for('invitation_code', id=user.id) }}" method="get" style="display:inline;">
+                       <button type="submit" class="btn" title="Info">
+                            <i class="bi bi-arrow-up-circle-fill"></i>
+                    </button>
+                 </form></td>
+            {% endif %}
+            {% if user.role == "Admin" and user.id != current_user.id %}
+            <td> <form action="{{ url_for('de_admin', id=user.id) }}" method="get" style="display:inline;">
+                       <button type="submit" class="btn" title="Info">
+                            <i class="bi bi-arrow-down-circle-fill"></i>
+                    </button>
+                 </form></td>
+            {% endif %}
         </tr>
     {% endfor %}
 </table>
-
-
-
-
+</div>
+</div>
 
 
 

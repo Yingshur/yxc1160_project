@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% import "bootstrap_wtf.html" as wtf %}
+{% block head_extra %}
+
+<style>
+    .circle-button{
+    display: inline-block;
+    width: 210px;
+    height: 210px;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    }
+    .circle-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    }
+
+    .button-label {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #333;
+    }
+
+    .button-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;}
+
+    .button-row{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    }
+
+    .button-row.centered{
+    justify-content: center;
+    gap: 2rem;
+    }
+    .latin-heading_2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+    .latin-heading_3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+    .greek-heading_2 {
+    font-family: 'GFS Didot', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+
+    .background-container {
+    background-image: url("{{url_for('static', filename = 'images/parchment_color.jpg')}}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height:100vh;
+    display: flex;
+    flex-direction:column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    }
+
+
+    @media (max-width: 768px) {
+    .button-row{
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    }
+
+    .coin-row{
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    }
+
+    .circle-button {
+    width:160px;
+    height: 160px;
+    }
+
+    .greek-heading_2,
+    .latin-heading_2 {
+    font-size: 0.8rem;
+    text-align: center;
+    }
+    .button-label {
+    text-align: center;
+    margin-bottom: 0.8rem;
+    }
+    .background-container{
+    padding: 1rem;
+    }}
+    .centered-line {
+    width:100%;
+    max-width: 700px;
+    text-align: center;
+    font-size: 2.6rem;
+    margin: 1rem 0 0.5rem;
+    }
+
+     .coin-row-and-text{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto 1rem;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    }
+
+    .coin-row{
+    display:flex;
+    gap: 2rem;
+    justify-content: center;
+    }
+    .side-text {
+    width: 170px;
+    }
+
+    .side-text p{
+    margin: 0.25rem 0;
+    line-height: 1.2;
+    }
+
+    .left {
+    text-align: left;
+    }
+
+    .right {
+    text-align: right;
+    }
+
+
+    }
+
+
+
+
+</style>
+{% endblock %}
+{% block flash_messages %}{% endblock %}
+
+{% block content %}
+<div class="background-container">
+    <div class="container-fluid mt-4">
+    <div class="button-row">
+        <div class="button-column">
+            <div class="button-label">
+                <div class="greek-heading_2">Δυναστεία των Μακεδόνων</div>
+                <div class="latin-heading_2"> Macedonian Dynasty </div>
+            </div>
+        <a href="{{url_for('macedonians')}}" class="circle-button">
+            <img src="{{ url_for('static', filename = 'images/Basil_II_coin.png')}}" alt="Left">
+        </a>
+        </div>
+
+        <div class="button-column">
+            <div class="centered-line greek-heading_2"> δυναστεῖαι </div>
+            <div class="centered-line latin-heading_2"> Dynasties</div>
+            <div class="centered-line latin-heading_3" style="font-size: 0.85rem; text-align: left;"> Unlike medieval kingdoms in the west, the Roman Empire generally did not employ coat of arms until its last dynasty, the Palaiologos dynasty. Therefore, each of the other four dynasties here is represented by the coinage portrait of a famous Emperor.</div>
+        </div>
+
+        <div class="button-column">
+            <div class="button-label">
+                <div class="greek-heading_2">Δυναστεία των Παλαιολόγων</div>
+                <div class="latin-heading_2">Palaiologos Dynasty</div>
+            </div>
+        <a href="#" class="circle-button">
+            <img src="{{ url_for('static', filename = 'images/Palaiologos_Eagle.png')}}" alt="Right">
+        </a>
+        </div>
+
+    </div>
+        <div class="coin-row-and-text">
+            <div class="side-text left latin-heading_3" style="font-size: 0.85rem;">
+                <p>Anticlockwise:</p>
+                <p>Basil II "the Bulgar Slayer" of the Macedonian dynasty</p>
+                <p>Romanos IV Diogenes of the Doukas dynasty</p>
+            </div>
+            <div class="coin-row">
+        <div class="button-column">
+            <div class="button-label">
+                <div class="greek-heading_2">Δυναστεία των Δουκών</div>
+                <div class="latin-heading_2">Doukas Dynasty</div>
+            </div>
+        <a href="#" class="circle-button">
+            <img src= "{{ url_for('static', filename = 'images/Romanos_IV_coin.png')}}" alt="Button 1">
+        </a>
+        </div>
+        <div class="button-column">
+            <div class="button-label">
+                <div class="greek-heading_2">Δυναστεία των Κομνηνών</div>
+                 <div class="latin-heading_2">Komnenos Dynasty</div>
+            </div>
+        <a href="#" class="circle-button">
+            <img src="{{ url_for('static', filename = 'images/Alexios_I_coin.png')}}" alt="Button 2">
+        </a>
+        </div>
+        <div class="button-column">
+            <div class="button-label">
+                <div class="greek-heading_2">Δυναστεία των Αγγέλων</div>
+                <div class="latin-heading_2">Angelos Dynasty</div>
+            </div>
+        <a href="#" class="circle-button">
+            <img src="{{ url_for('static', filename = 'images/Isaac_2_coin.png')}}" alt="Button 3">
+        </a>
+        </div>
+    </div>
+
+            <div class="side-text right latin-heading_3" style="font-size: 0.85rem;">
+                <p>John II "The Good" of the Komnenos dynasty</p>
+                <p>Isaac II of the Angelos dynasty</p>
+                <p>Double-headed eagle of the Palaiologos dynasty</p></div>
+        </div>
+  </div>
+</div>
+{% endblock %}

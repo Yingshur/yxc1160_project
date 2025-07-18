@@ -1,7 +1,11 @@
-from app import app
+from app import app, schedule_start
 import os
 
-#if __name__ == '__main__':
+if __name__ == '__main__':
+    with app.app_context():
+        schedule_start()
+        app.run(port=5805)
+
+
     #app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 7899)))
 
-app.run(port=5902)

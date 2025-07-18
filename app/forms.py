@@ -1,14 +1,41 @@
 from random import choices
 
+from datetime import datetime
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, HiddenField, StringField, PasswordField, BooleanField, SelectField, IntegerField
+from flask_wtf.file import FileAllowed, FileRequired, FileField
 #from wtforms.fields.numeric import IntegerField
 from wtforms.fields.simple import TextAreaField
 from wtforms.validators import DataRequired, EqualTo, NumberRange, ValidationError, Email, Optional, Length, Regexp, AnyOf
-from app import db
+from app.new_file import db
 from app.models import User
 import datetime
+
+
+
+class AdminCodeForm(FlaskForm):
+    code = StringField('Admin Invitation Code', validators=[DataRequired(message="Data is required")])
+    submit = SubmitField('Submit')
+
+class InvitationCodeForm(FlaskForm):
+    code = StringField('Admin Invitation Code', validators=[DataRequired(message="Data is required")])
+    user_id = IntegerField('user_id', validators=[DataRequired(message="Data is required")])
+
+class AllEmperorForm(FlaskForm):
+    edit = HiddenField(default='-1')
+    title = StringField('Name of the Emperor', validators=[DataRequired('Data is required')])
+    in_greek = StringField('Name of the Emperor in Greek', validators=[DataRequired('Data is required')])
+    birth = StringField('Birth date of the Emperor', validators=[DataRequired('Data is required')])
+    death = StringField('Death date of the Emperor', validators=[DataRequired('Data is required')])
+    reign = StringField('Reign of the Emperor', validators=[DataRequired('Data is required')])
+    dynasty = SelectField('Choose a dynasty', choices=[('Macedonian', 'Macedonian'), ('Doukas', 'Doukas'), ('Komnenos', 'Komnenos'), ('Angelos', 'Angelos'), ('Palaiologos', 'Palaiologos')],validators=[DataRequired('Data is required')] )
+    portrait = FileField('Upload Portrait', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Images Only')])
+    life = TextAreaField('Life', validators=[DataRequired('Data is required')])
+    submit = SubmitField('Submit')
+
+
+
 
 def password_policy(form, field):
     message = """A password must be at least 8 characters long, and have an
@@ -37,6 +64,7 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
 
+
 class ChangePasswordForm(FlaskForm):
     password = PasswordField('Current Password',validators=[DataRequired()])
     new_password = PasswordField('New Password', validators=[DataRequired(),password_policy])
@@ -59,6 +87,7 @@ class RegisterForm(FlaskForm):
     email = StringField('Email',validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired(),password_policy])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    verification_code = StringField('Verification code', validators=[DataRequired()])
     submit = SubmitField('Register')
 
     @staticmethod
@@ -73,21 +102,5 @@ class RegisterForm(FlaskForm):
             raise ValidationError('Email already taken. Try again')
 
 class RegisterEmail(FlaskForm):
-    email = StringField('Your University Email', validators=[DataRequired(), Email()])
+    email = StringField('Your Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Verify Email')
-
-class RegisterEmailVerify(FlaskForm):
-    email = StringField('Your University Email', validators=[DataRequired(), Email()])
-    verify = StringField('Verification Code', validators=[DataRequired()])
-    submit = SubmitField('Verify')
-
-class EventsForm(FlaskForm):
-    edit = HiddenField(default='-1')
-    title = StringField('Event Title', validators=[DataRequired()])
-    text = TextAreaField('Event information', validators=[DataRequired()])
-    date = StringField('Date (dd-mm-yyyy)', validators= [Regexp(r'^\d{2}-\d{2}-\d{4}$', message = "Date must be in format dd-mm-yyyy")])
-    start_time = StringField('Start (hh-mm)', validators= [Regexp(r'^\d{2}-\d{2}$', message = "Start time must be in format hh-mm")])
-    end_time = StringField('End (hh-mm)', validators= [Regexp(r'^\d{2}-\d{2}$', message = "End time must be in format hh-mm")])
-    status = StringField('Status (Open or Closed)', validators=[AnyOf(values=["Open","Closed"], message= "Status must be either 'Open' or 'Closed'")])
-    address = StringField("Address", validators=[DataRequired()])
-    submit = SubmitField('Publish Event')

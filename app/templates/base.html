@@ -16,6 +16,29 @@
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
   />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baskervville:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<style>
+    .latin-heading_new {
+    font-family: 'Baskervville', serif;
+    font-size: 0.8rem;
+    color: black;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+    .btn-dark {
+    background-color: #702963 !important;
+    color: white !important;
+    border: none !important;
+    }
+    .btn-dark:hover {
+    background-color: #5D3954 !important;
+    }
+
+
+</style>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +46,7 @@
 <style>
     .latin-heading {
     font-family: 'Cinzel', serif;
-    font-size: 2 rem;
+    font-size: 1.3rem;
     color: white;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -36,7 +59,7 @@
 <style>
     .greek-heading {
     font-family: 'GFS Didot', serif;
-    font-size: 2 rem;
+    font-size: 1.3rem;
     color: white;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -63,15 +86,13 @@
                     <a class="nav-link" aria-current="page" href="{{ url_for('login') }}">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('register_email') }}">Register</a>
+                    <a class="nav-link" aria-current="page" href="{{ url_for('register_emails_') }}">Register</a>
                 </li>
                 {% else %}
                 <li class="nav-item">
                     <a class="nav-link" aria-current="page" href="{{ url_for('logout') }}">Logout {{ current_user.username }}</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('chat') }}">Chat</a>
-                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" aria-current="page" href="{{ url_for('account') }}">Account</a>
                 </li>
@@ -81,9 +102,7 @@
                 </li>
                 {% endif %}
                 {% if current_user.is_authenticated and current_user.role == "Organiser" %}
-                <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('manager') }}">Event Management</a>
-                </li>
+
                 {% endif %}
                 {% endif %}
             </ul>
@@ -96,7 +115,7 @@
 </nav>
 
 {% block flash_messages %}
-<div class="container mt-3">
+<div class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}

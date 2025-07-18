@@ -1,0 +1,244 @@
+
+{% extends "base.html" %}
+{% import "bootstrap_wtf.html" as wtf %}
+{% block head_extra %}
+
+<style>
+    .circle-button{
+    display: inline-block;
+    width: 210px;
+    height: 210px;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    }
+
+    .small-image{
+    max-width:150px;
+    height:auto;
+    }
+    .circle-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    }
+
+    .button-label {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #333;
+    }
+
+    .button-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;}
+
+    .button-row{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    }
+
+    .button-row.centered{
+    justify-content: center;
+    gap: 2rem;
+    }
+    .latin-heading_2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+    .latin-heading_3 {
+    font-family: 'Cinzel', serif;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+    .greek-heading_2 {
+    font-family: 'GFS Didot', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+
+    .table {
+  background-color: transparent !important;}
+
+.table td,
+.table th {
+  background-color: transparent !important;
+  border: 1px solid transparent;}
+
+.col-lg-9 {
+  margin-top: 0 !important;
+}
+
+
+    .background-container {
+    background-image: url("{{url_for('static', filename = 'images/macedonians/macedonian_victory.png')}}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height:100vh;
+    background-attachment: fixed;
+    display: flex;
+    flex-direction:column;
+    padding: 0.5rem;
+    }
+
+    .background-container h1 {
+    margin: 20px;
+    }
+
+
+    @media (max-width: 768px) {
+    .button-row{
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    }
+
+    .coin-row{
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    }
+
+    .circle-button {
+    width:160px;
+    height: 160px;
+    }
+
+    .greek-heading_2,
+    .latin-heading_2 {
+    font-size: 0.8rem;
+    text-align: center;
+    }
+    .button-label {
+    text-align: center;
+    margin-bottom: 0.8rem;
+    }
+
+    .centered-line {
+    width:100%;
+    max-width: 700px;
+    text-align: center;
+    font-size: 2.6rem;
+    margin: 1rem 0 0.5rem;
+    }
+
+
+     .coin-row-and-text{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto 1rem;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    }
+
+    .coin-row{
+    display:flex;
+    gap: 2rem;
+    justify-content: center;
+    }
+    .side-text {
+    width: 170px;
+    }
+
+    .side-text p{
+    margin: 0.25rem 0;
+    line-height: 1.2;
+    }
+
+    .left {
+    text-align: left;
+    }
+
+    .right {
+    text-align: right;
+    }
+    }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="background-container">
+<h1 class="latin-heading_3">Macedonian Dynasty (867-1056)</h1>
+<div class="col-lg-9">
+<table class="table" style="background-color: transparent;">
+    <thead>
+        <tr>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Number</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Portrait</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Title</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Title in Greek</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Born</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Died</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Reign</th>
+        </tr>
+    </thead>
+    {% for macedonian in macedonian_lst %}
+        <tr>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.id }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{% if macedonian.images %}
+            <img src="{{macedonian.images[0].url}}" alt = "{{macedonian.images[0].filename}}" style="max-width: 100px; height:auto;">
+            {% else %}
+            No image
+            {% endif %}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.title }}</td>
+            <td class="greek-heading_2" style="font-size: 1rem">{{ macedonian.in_greek }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.birth }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.death }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.reign }}</td>
+            <td> <form action="{{ url_for('macedonian_emperors', id=macedonian.id) }}" method="get" style="display:inline;">
+                       <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
+                            <i class="bi bi-info-square"></i>
+                    </button>
+                 </form></td>
+        </tr>
+    {% endfor %}
+
+
+</table>
+    {% if current_user.is_authenticated %}
+    <button class="btn btn-dark" onclick="document.getElementById('admin-form').style.display='block'; this.style.display ='none';">
+        Add an Emperor
+    </button>
+
+    <div id = 'admin-form' class="latin-heading_new w-50 mx-auto" style="background-color: transparent; display: none; font-size: 1.2rem;">
+        <form method="post" action="{{ url_for('add_new_emperor') }}" novalidate>
+            {{ new_form.csrf_token }}
+            {{new_form.edit}}
+            {{new_form.title.label}}<br>{{new_form.title(class="form-control mb-2")}}
+            {{new_form.in_greek.label}}<br>{{new_form.in_greek(class="form-control mb-2")}}
+            {{new_form.birth.label}}<br>{{new_form.birth(class="form-control mb-2")}}
+            {{new_form.death.label}}<br>{{new_form.death(class="form-control mb-2")}}
+            {{new_form.reign.label}}<br>{{new_form.reign(class="form-control mb-2")}}
+            {{new_form.dynasty.label}}<br>{{new_form.dynasty(class="form-control mb-2")}}
+            {{new_form.portrait.label}}<br>{{new_form.portrait(class="form-control mb-2")}}
+            {{new_form.life.label}}<br>
+            {{new_form.life(class = "form-control mb-3", rows = "30")}}
+            {{new_form.submit(class = "btn btn-dark")}}
+            </form>
+    </div>
+        {% endif %}
+
+</div>
+</div>
+{% endblock %}

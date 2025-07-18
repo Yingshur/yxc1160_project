@@ -55,6 +55,7 @@
     text-transform: uppercase;
     font-weight: bold;
     }
+
 </style>
 {% endblock %}
 {% block flash_messages %}{% endblock %}
@@ -62,7 +63,7 @@
 <div class="container-fluid vh-100 p-0">
     <div class="row h-100 m-0">
         <div class="col-6 d-flex flex-column justify-content-center align-items-center left-half">
-            <a href="#" class="transparent-button animate__animated animate__fadeInDown">
+            <a href="{{url_for('dynasties')}}" class="transparent-button animate__animated animate__fadeInDown">
                 <div class="greek-heading_1">Βασιλείς </div>
                 <div class="latin-heading_1">Imperatores</div>
                 <div class="latin-heading_1">Emperors</div>

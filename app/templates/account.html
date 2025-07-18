@@ -1,205 +1,111 @@
 {% extends "base.html" %}
 {% import "bootstrap_wtf.html" as wtf %}
 
+
+
+{% block head_extra %}
+
+<style>
+    .latin-heading_2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+    .latin-heading_3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+    .greek-heading_2 {
+    font-family: 'GFS Didot', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+
+    .background-container {
+    background-image: url("{{url_for('static', filename = 'images/parchment_color.jpg')}}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height:100vh;
+    display: flex;
+    flex-direction:column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0rem 0rem 0rem 3rem;
+    }
+    .table {
+  background-color: transparent !important;}
+
+.table td,
+.table th {
+  background-color: transparent !important;
+  border: 1px solid transparent;}
+
+
+</style>
+
+
+
+{% endblock %}
+
+
+{% block flash_messages %}{% endblock %}
+
+
 {% block content %}
-<h1>My Account</h1>
 
-<p>Hello {{ current_user.username }}</p>
+<div class="background-container">
 
-<p>This page is only available to you as the currently logged-in user</p>
-
-<p>The email address we have recorded for you is: <b>{{ current_user.email }}</b></p>
-
-{% if current_user.role == "Normal" and current_user.user_type == "user" %}
-<h2 class="mt-5">Your Appointment</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Date
-            </th>
-            <th>
-                Weekday
-            </th>
-            <th>
-                Start
-            </th>
-            <th>
-                Psychologist
-            </th>
-        </tr>
-    </thead>
-    {% for appo in current_user.appointments %}
-        <tr>
-            <td>
-                {{ appo.date }}
-            </td>
-            <td>
-                {{ appo.weekday }}
-            </td>
-            <td>
-                {{ appo.slot }}
-            </td>
-            <td>
-                {{ appo.user_name }}
-            </td>
-            <td>
-                <form action="{{ url_for('cancel_appointment') }}" method="post">
-                    {{ choose_form.csrf_token() }}
-                    {{ choose_form.appo_id(value=appo.id) }}
-                    {{ choose_form.user_id(value=appo.user_id) }}
-                    <button class="btn" type="submit">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </form>
-            </td>
-        </tr>
+<div class="mt-5 container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+    </div>
     {% endfor %}
-</table>
-{% endif %}
+    {% endif %}
+    {% endwith %}
+</div>
+<h1 class="mt-5 latin-heading_new" style="font-size: 3rem;">My Account</h1>
 
-{% if current_user.role == "Normal" and current_user.user_type == "Psychologist" %}
+<p class="latin-heading_new" style="font-size: 1.5rem;">Hello {{ current_user.username }}</p>
 
-<h2 class="mt-5">My profile</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Name
-            </th>
-            <th>
-                Availability
-            </th>
-        </tr>
-    </thead>
-        <tr>
-            <td>
-                {{ psychologist.username }}
-            </td>
-            <td>
-                {{ psychologist.availability }}
-            </td>
-            <td>
-                <form action="{{ url_for('toggle_user_availability') }}" method="post">
-                    {{ form.csrf_token() }}
-                    {{ form.choice(value=current_user.id) }}
-                    <button class="btn" type="submit">
-                        {% if psychologist.availability == "Available" %}
-                        <i class="bi bi-toggle-on"> Change user availability</i>
-                        {% else %}
-                        <i class="bi bi-toggle-off"> Change user availability</i>
-                        {% endif %}
-                    </button>
-                </form>
-            </td>
-        </tr>
-</table>
+<p class="latin-heading_new" style="font-size: 1.5rem;">This page is only available to you as the currently logged-in user</p>
 
+<p class="latin-heading_new" style="font-size: 1.5rem;">The email address we have recorded for you is: <b>{{ current_user.email }}</b></p>
 
-{% endif %}
-
-
-
-
-
-
-
-
-
-<div class="container">
-    <h3 class="mt-5">Manage account</h3>
+    <h3 class="mt-5 latin-heading_new" style="font-size: 1.5rem;">Manage account</h3>
     <ul>
-        <li><a href="{{ url_for('change_pw') }}">Change Password</a></li>
-        <li><a href="{{ url_for('change_email') }}">Update Email</a></li>
+        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('change_pw') }}">Change Password</a></li>
+        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('change_email') }}">Update Email</a></li>
     </ul>
+            {% if current_user.role == "Normal" %}
+
+    <h3 class="mt-3 latin-heading_new" style="font-size: 1.5rem;">Change to Admin role</h3>
+
+<div class="latin-heading_new" style="font-size: 1.2rem;">
+        {{ wtf.quick_form(new_form, action=url_for('change_to_admin'), method="post", id="", novalidate=True, autofocus=False) }}
+    </div>
+    <h3 class="mt-3 latin-heading_new" style="font-size: 1.5rem;">Invitation Code</h3>
+<div class="col-lg-9" style="background-color: transparent;">
+
+    <table class="table" style="background-color: transparent;">
+
+        <tr><td class="latin-heading_new" style="font-size: 1.1rem;">{{ (invitation.code if invitation and invitation.code else "&mdash;") | safe}}</td></tr>
+    </table>
 </div>
-{% if current_user.role == "Normal" and current_user.user_type == "user" %}
-<h2>My enrollment</h2>
-<div class="col-lg-3">
-<table class="table">
-<thead>
-        <tr>
-            <th>Title</th>
-            <th>Status</th>
-            <th>Date</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Address</th>
-        </tr>
-    </thead>
-    {% for enrollment in list_of_enrollments %}
-        <tr>
-            <td>{{enrollment.title}}</td>
-              <td>{{enrollment.status}}</td>
-            <td>{{enrollment.date}}</td>
-            <td>{{enrollment.start_time}}</td>
-            <td>{{enrollment.end_time}}</td>
-            <td>{{enrollment.address}}</td>
-            <td><form action="{{ url_for('delete_enrollment') }}" method="post">
-                    {{ choose_form.csrf_token() }}
-                    {{ choose_form.choice(value=enrollment.id) }}
-                    <button class="btn btn-dark">Unenroll</button>
-                </form></td>
-        </tr>
-    {% endfor %}
-
-
-</table>
-</div>
-{% endif %}
-
-{% if current_user.role == "Normal" and current_user.user_type == "Psychologist" %}
-<h2 class="mt-5"> Appointments</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Date
-            </th>
-            <th>
-                Weekday
-            </th>
-            <th>
-                Start
-            </th>
-            <th>
-                Psychologist
-            </th>
-        </tr>
-    </thead>
-    {% for appo in list_of_appointments %}
-        <tr>
-            <td>
-                {{ appo.date }}
-            </td>
-            <td>
-                {{ appo.weekday }}
-            </td>
-            <td>
-                {{ appo.slot }}
-            </td>
-            <td>
-                {{ appo.user_name }}
-            </td>
-            <td>
-                <form action="{{ url_for('delete_appointment') }}" method="post">
-                    {{ choose_form.csrf_token() }}
-                    {{ choose_form.appo_id(value=appo.id) }}
-                    {{ choose_form.user_id(value=appo.user_id)}}
-                    <button class="btn" type="submit">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </form>
-            </td>
-        </tr>
-    {% endfor %}
-</table>
-{% endif %}
-
-
-
-
-
-
+        </div>
+            {% endif %}
 
 {% endblock %}

@@ -1,16 +1,22 @@
 from os import write
 from functools import wraps
+import os
+from random import randint
+from pandas import date_range
+from werkzeug.utils import secure_filename
+from app import signer, TOKEN_MAX_AGE, verification_email
 from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
 from unicodedata import category
 from urllib3.connection import port_by_scheme
 
 from app import app
-from app.models import User, UniversityEmail, Appointment, Event, Enrollment, Psychologist, BookingLog
+from app.models import User, Emperor, \
+    Verification, Invitation, Image
 from app.forms import ChooseForm, LoginForm, ChangePasswordForm, ChangeEmailForm, RegisterForm, RegisterEmail, \
-    RegisterEmailVerify, EventsForm
+    AdminCodeForm, InvitationCodeForm, AllEmperorForm
 from flask_login import current_user, login_user, logout_user, login_required, fresh_login_required
 import sqlalchemy as sa
-from app import db
+from app.new_file import db
 from urllib.parse import urlsplit
 from sqlalchemy import or_
 import csv
@@ -30,19 +36,97 @@ def admin_only(func):
 
 @app.route("/")
 def home():
-    return render_template('home.html', title="Home")
+
+    return render_template('home.html', title="Roman Empire")
+@app.route("/dynasties")
+def dynasties():
+    return render_template('dynasties.html', title = "Dynasties")
+
+
+
+
+
+@app.route("/dynasties/macedonians", methods=['GET','POST'])
+def macedonians():
+    form = AllEmperorForm()
+    macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
+    #query_email = db.session.query(Verification).filter_by(email=email_data).first()
+    #macedonian_lst = db.session.scalars(m).all()
+    return render_template('macedonians.html', title = "Macedonian dynasty", macedonian_lst = macedonian_lst, new_form = form)
+
+@app.route("/dynasties/macedonians/<int:id>", methods=['GET','POST'])
+def macedonian_emperors(id):
+    #m_e = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
+    m_e = db.session.get(Emperor, id)
+    return render_template("macedonian_emperors.html", m_e = m_e, title = "Macedonian dynasty")
+
 
 @app.route("/account")
 @login_required
 def account():
     form = ChooseForm()
+    invitation = db.session.query(Invitation).filter_by(user_id = current_user.id).first()
     choose_form = ChooseForm()
-    q = db.select(Enrollment).where(Enrollment.username == current_user.username)
-    list_of_enrollments = db.session.scalars(q)
-    psychologist = db.session.get(Psychologist, current_user.id)
-    p = db.select(Appointment).where(Appointment.user_name == current_user.username)
-    list_of_appointments = db.session.scalars(p)
-    return render_template('account.html', title="Account", list_of_enrollments = list_of_enrollments, choose_form = choose_form, psychologist =psychologist, form = form, list_of_appointments = list_of_appointments)
+    new_form = AdminCodeForm()
+    return render_template('account.html', title="Account", choose_form = choose_form, form = form, new_form = new_form, invitation = invitation)
+
+
+@app.route("/register_emails_", methods = ['GET', 'POST'])
+def register_emails_():
+    form = RegisterEmail()
+    if form.validate_on_submit():
+        email_data = form.email.data.strip().lower()
+        success = verification_email(email_data)
+        if success:
+            flash("Check your inbox for the verification code.", "success")
+            return redirect(url_for('register_verify'))
+        else:
+            flash("This email is already registered", "warning")
+            return redirect(url_for('register_emails_'))
+    return render_template('generic_form.html', title = "Register", form = form)
+
+
+@app.route("/change_to_admin", methods = ['POST'])
+def change_to_admin():
+    form = AdminCodeForm()
+    u = db.session.get(User, current_user.id)
+    t = db.session.query(Invitation).filter_by(user_id = current_user.id).first()
+    if form.validate_on_submit() :
+        if form.code.data == t.code and u.role != "Admin":
+            u = db.session.get(User, current_user.id)
+            u.role = "Admin"
+            flash("Role changed to admin", "success")
+            db.session.delete(t)
+            db.session.commit()
+            return redirect(url_for('account'))
+        elif u.role == "Admin":
+            flash("You are already an admin", "warning")
+            return redirect(url_for('account'))
+        elif form.code.data != t.code:
+            flash("Code is not correct", "danger")
+            return redirect(url_for('account'))
+
+    return render_template("account.html", new_form = form, title = "Account")
+
+@app.route("/add_new_emperor", methods = ['POST'])
+def add_new_emperor():
+    form = AllEmperorForm()
+    if form.validate_on_submit() and int(form.edit.data) == -1:
+        new_emperor = Emperor(title = form.title.data, in_greek = form.in_greek.data, birth = form.birth.data, death = form.death.data, reign = form.reign.data, life = form.life.data, dynasty = form.dynasty.data)
+        db.session.add(new_emperor)
+        db.session.commit()
+        if form.portrait.data:
+            file_name = secure_filename(form.portrait.data.filename)
+            path_for_uploading = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+            form.portrait.data.save(path_for_uploading)
+            new_emperor_portrait = Image(filename = file_name, url = url_for('static', filename =f"images/uploaded_photos/{file_name}"), emperor_title = form.title.data)
+            db.session.add(new_emperor_portrait)
+            db.session.commit()
+
+    return redirect(url_for('macedonians'))
+
+
 
 @app.route("/admin")
 @login_required
@@ -53,13 +137,9 @@ def admin():
     form = ChooseForm()
     q = db.select(User)
     user_lst = db.session.scalars(q)
-    q = db.select(Enrollment)
-    list_of_enrollments = db.session.scalars(q)
-    p = db.select(Psychologist)
-    list_of_psychologists = db.session.scalars(p)
-    p = db.select(Appointment)
-    list_of_appointments = db.session.scalars(p)
-    return render_template('admin.html', title="Admin", user_lst=user_lst, form=form, list_of_enrollments = list_of_enrollments, list_of_psychologists = list_of_psychologists, list_of_appointments = list_of_appointments, choose_form = form)
+    #q = db.select(Enrollment)
+
+    return render_template('admin.html', title="Admin", user_lst=user_lst, form=form, choose_form = form)
 
 @app.route('/delete_user', methods=['POST'])
 def delete_user():
@@ -80,63 +160,33 @@ def delete_user():
             db.session.commit()
     return redirect(url_for('admin'))
 
-@app.route('/toggle_user_role', methods=['POST'])
-def toggle_user_role():
+@app.route('/invitation_code/<int:id>', methods=['POST', 'GET'])
+def invitation_code(id):
     form = ChooseForm()
-    if form.validate_on_submit():
-        u = db.session.get(User, int(form.choice.data))
-        q = db.select(User).where((User.role == "Admin") & (User.id != u.id))
-        first = db.session.scalars(q).first()
-        if not first:
-            flash("You can't drop your admin role if there are no other admin users!", "danger")
-        elif u.id == current_user.id:
-                logout_user()
-                u.role = "Normal"
-                db.session.commit()
-                return redirect(url_for('home'))
-        else:
-            # u.role = "Normal" if u.role == "Admin" else "Admin"
-            if u.role == "Normal":
-                u.role = "Organiser"
-            elif u.role == "Organiser":
-                u.role = "Admin"
-            elif u.role == "Admin":
-                u.role = "Normal"
-            db.session.commit()
-    return redirect(url_for('admin'))
+    q = db.select(User)
+    user_lst = db.session.scalars(q)
+    code = randint(10**15, 10**16-1)
+    new_data = Invitation(code = code, user_id = id)
+    flash("invitation code generated successfully", "success")
+
+    db.session.add(new_data)
+    db.session.commit()
+    return render_template("admin.html", title = "Admin", user_lst = user_lst, form = form)
 
 
-@app.route('/toggle_user_type', methods=['POST'])
-def toggle_user_type():
+
+@app.route('/de_admin/<int:id>', methods=['POST', 'GET'])
+def de_admin(id):
     form = ChooseForm()
-    if form.validate_on_submit():
-        u = db.session.get(User, int(form.choice.data))
-        q = db.select(User).where((User.user_type == "Psychologist") & (User.id != u.id))
-        first = db.session.scalars(q).first()
-        if not first:
-            flash("You can't drop your psychologist role if there are no other psychologist users!", "danger")
-        elif u.id == current_user.id:
-                logout_user()
-                u.user_type = "user"
-                db.session.commit()
-                return redirect(url_for('home'))
-        else:
-            # u.role = "Normal" if u.role == "Admin" else "Admin"
-            if u.user_type == "user":
-                u.user_type = "Psychologist"
-                #new = Psychologist(id = u.id, username = u.username, email = u.email, password_hash=u.password_hash, user_type= "Psychologist")
-                #db.session.delete(u)
-                #db.session.add(new)
-                db.session.execute(sa.insert(Psychologist.__table__).values(id=u.id))
-                db.session.commit()
-            elif u.user_type == "Psychologist":
-                u.user_type = "user"
-               #new = User(id = u.id, username = u.username, email = u.email, password_hash=u.password_hash)
-                #db.session.delete(u)
-                #db.session.add(new)
-                db.session.execute(sa.delete(Psychologist).where(Psychologist.id==u.id))
-                db.session.commit()
-    return redirect(url_for('admin'))
+    q = db.select(User)
+    user_lst = db.session.scalars(q)
+    user = db.session.get(User, id)
+    user.role = "Normal"
+    flash("User role has now been changed to normal", "success")
+    db.session.commit()
+    return render_template("admin.html", title = "Admin", user_lst = user_lst, form = form)
+
+
 
 
 
@@ -163,63 +213,29 @@ def change_email():
         return redirect(url_for('account'))
     return render_template('generic_form.html',title='Change Email', form=form)
 
-@app.route("/register",methods=['POST','GET'])
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('account'))
-    form = RegisterForm()
-    if form.validate_on_submit():
-        query_email = db.select(UniversityEmail).where(UniversityEmail.email == form.email.data)
-        check_email = db.session.scalars(query_email).first()
-        if check_email:
-            new_user=User(username=form.username.data, email=form.email.data)
-            new_user.set_password(form.password.data)
-            db.session.add(new_user)
-            db.session.commit()
-            login_user(user=new_user)
-        else:
-            flash("Error: not a valid university email!",'danger')
-            return redirect(url_for('register_email'))
-        return redirect(url_for('account'))
-
-    return render_template('generic_form.html', title='Register',form=form)
-
-@app.route("/register_email",methods=['POST','GET'])
-def register_email():
-    if current_user.is_authenticated:
-        return redirect(url_for('account'))
-    form = RegisterEmail()
-    if form.validate_on_submit():
-        query_email = db.select(UniversityEmail).where(UniversityEmail.email==form.email.data)
-        check_email = db.session.scalars(query_email).first()
-        if check_email:
-            verify_code = str(random.randint(100000,999999))
-            session['email'] = form.email.data
-            session['verify_code'] = verify_code
-
-            form = RegisterEmailVerify(email=check_email.email)
-            flash(f"Verification code {verify_code} was emailed to you. Check your email!",'success')
-            return render_template('register_verify.html', title='Verify', form=form)
-        else:
-            flash("Email not found! Try to check your university email again!",'danger')
-            return redirect(url_for('register_email'))
-    return render_template('generic_form.html', title='Register',form=form)
 
 @app.route("/register_verify",methods=['POST','GET'])
 def register_verify():
     if current_user.is_authenticated:
         return redirect(url_for('account'))
-    form = RegisterEmailVerify()
-    if form.validate_on_submit() and form.verify.data == session['verify_code']:
-        query_email = db.select(UniversityEmail).where(UniversityEmail.email==form.email.data)
-        check_email = db.session.scalars(query_email).first()
-        if check_email:
-            form = RegisterForm(username=check_email.username, email=check_email.email)
-            return render_template('register_complete.html', title='Register', form=form)
-    else:
-        flash("Verification code not correct!",'danger')
-        return render_template('register_verify.html', title='Verify', form=form)
-    return render_template('register_verify.html', title='Verify',form=form)
+    form = RegisterForm()
+    if form.validate_on_submit():
+        email_data = form.email.data
+        query_email = db.session.query(Verification).filter_by(email = email_data).order_by(Verification.id.desc()).first()
+        if not query_email:
+            flash("Email is not correct!", 'danger')
+        else:
+            if query_email.verification_code == form.verification_code.data:
+                new_user = User(username=form.username.data, email=form.email.data)
+                new_user.set_password(form.password.data)
+                db.session.add(new_user)
+                db.session.commit()
+                login_user(user=new_user)
+                return redirect(url_for('register_emails_'))
+            else:
+                flash("Verification code is not correct!", 'danger')
+                return redirect(url_for('register_verify'))
+    return render_template('generic_form.html', title='Verify',form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -243,122 +259,6 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('home'))
-
-@app.route('/events',  methods=['GET', 'POST'])
-@login_required
-def events():
-    choose_form = ChooseForm()
-    q = db.select(Event)
-    list_of_events = db.session.scalars(q)
-    return render_template('events.html', title="Events", list_of_events = list_of_events, choose_form = choose_form)
-
-def generate_schedule():
-    today = datetime.datetime.today().date()
-    slots_per_day = ["09:00", "11:00", "14:00", "16:00"]
-    # slots_per_day = [
-    #     {"start": "09:00", "availability": True},
-    #     {"start": "11:00", "availability": True},
-    #     {"start": "14:00", "availability": True},
-    #     {"start": "16:00", "availability": True},
-    # ]
-    schedule = []
-    for i in range(7):
-        date = today + datetime.timedelta(days=i)
-        schedule.append({
-            "weekday": date.strftime("%A"),
-            "date": date.strftime("%m-%d"),
-            "slots": slots_per_day
-        })
-    return schedule
-
-def check_availability():
-    q = db.select(Appointment).order_by(Appointment.date, Appointment.slot)
-    unavailable_slots = db.session.scalars(q).all()
-    return unavailable_slots
-
-@app.route('/appointments')
-def appointments():
-    form = ChooseForm()
-    schedule = generate_schedule()
-    unavailable_slots = check_availability()
-    return render_template('appointment.html', title='Appointment', schedule=schedule, form=form, unavailable_slots=unavailable_slots)
-
-
-
-
-@app.route('/toggle_user_availability', methods=['POST'])
-def toggle_user_availability():
-    form = ChooseForm()
-    if form.validate_on_submit():
-        u = db.session.get(Psychologist, int(form.choice.data))
-        #q = db.select(User).where((User.user_type == "Psychologist") & (User.id != u.id))
-        #first = db.session.scalars(q).first()
-        #if not first:
-            #flash("You can't drop your psychologist role if there are no other psychologist users!", "danger")
-        #elif u.id == current_user.id:
-                #logout_user()
-                #u.user_type = "user"
-                #db.session.commit()
-                #return redirect(url_for('home'))
-        #else:
-            # u.role = "Normal" if u.role == "Admin" else "Admin"
-        if u.availability == "Available":
-            u.availability = "Unavailable"
-
-            Appointment.query.filter_by(id=u.id).delete()
-            BookingLog.query.filter_by(id=u.id).delete()
-            # new = Psychologist(id = u.id, username = u.username, email = u.email, password_hash=u.password_hash, user_type= "Psychologist")
-            # db.session.delete(u)
-            # db.session.add(new)
-            #db.session.execute(sa.insert(Psychologist.__table__).values(id=u.id))
-            db.session.commit()
-        elif u.availability == "Unavailable":
-            u.availability = "Available"
-            # new = User(id = u.id, username = u.username, email = u.email, password_hash=u.password_hash)
-            # db.session.delete(u)
-            # db.session.add(new)
-            #db.session.execute(sa.delete(Psychologist).where(Psychologist.id == u.id))
-            db.session.commit()
-    return redirect(url_for('account'))
-
-
-
-
-@app.route('/toggle_user_availability_/<int:psychologist_id>', methods=['POST'])
-def toggle_user_availability_(psychologist_id):
-    form = ChooseForm()
-    if form.validate_on_submit():
-        u = db.session.get(Psychologist, int(psychologist_id))
-        #q = db.select(User).where((User.user_type == "Psychologist") & (User.id != u.id))
-        #first = db.session.scalars(q).first()
-        #if not first:
-            #flash("You can't drop your psychologist role if there are no other psychologist users!", "danger")
-        #elif u.id == current_user.id:
-                #logout_user()
-                #u.user_type = "user"
-                #db.session.commit()
-                #return redirect(url_for('home'))
-        #else:
-            # u.role = "Normal" if u.role == "Admin" else "Admin"
-        if u.availability == "Available":
-            u.availability = "Unavailable"
-
-            Appointment.query.filter_by(id=u.id).delete()
-            BookingLog.query.filter_by(id=u.id).delete()
-            # new = Psychologist(id = u.id, username = u.username, email = u.email, password_hash=u.password_hash, user_type= "Psychologist")
-            # db.session.delete(u)
-            # db.session.add(new)
-            #db.session.execute(sa.insert(Psychologist.__table__).values(id=u.id))
-            db.session.commit()
-        elif u.availability == "Unavailable":
-            u.availability = "Available"
-            # new = User(id = u.id, username = u.username, email = u.email, password_hash=u.password_hash)
-            # db.session.delete(u)
-            # db.session.add(new)
-            #db.session.execute(sa.delete(Psychologist).where(Psychologist.id == u.id))
-            db.session.commit()
-    return redirect(url_for('admin'))
-
 
 
 # Error handlers

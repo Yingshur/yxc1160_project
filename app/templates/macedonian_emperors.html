@@ -1,0 +1,238 @@
+
+{% extends "base.html" %}
+{% import "bootstrap_wtf.html" as wtf %}
+{% block head_extra %}
+
+<style>
+    .circle-button{
+    display: inline-block;
+    width: 210px;
+    height: 210px;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    }
+
+    .small-image{
+    max-width:150px;
+    height:auto;
+    }
+    .circle-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    }
+
+    .button-label {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #333;
+    }
+
+    .button-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;}
+
+    .button-row{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    }
+
+    .button-row.centered{
+    justify-content: center;
+    gap: 2rem;
+    }
+    .latin-heading_2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+    .latin-heading_3 {
+    font-family: 'Cinzel', serif;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+    .greek-heading_2 {
+    font-family: 'GFS Didot', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+
+    .table {
+  background-color: transparent !important;}
+
+.table td,
+.table th {
+  background-color: transparent !important;
+  border: 1px solid transparent;}
+
+.col-lg-9 {
+  margin-top: 0 !important;
+}
+
+
+    .background-container {
+    background-image: url("{{url_for('static', filename = 'images/parchment_color.jpg')}}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height:100vh;
+    display: flex;
+    flex-direction:column;
+    padding: 0.5rem;
+    }
+
+    .background-container h1 {
+    margin: 20px;
+    }
+
+
+    @media (max-width: 768px) {
+    .button-row{
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    }
+
+    .coin-row{
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    }
+
+    .circle-button {
+    width:160px;
+    height: 160px;
+    }
+
+    .greek-heading_2,
+    .latin-heading_2 {
+    font-size: 0.8rem;
+    text-align: center;
+    }
+    .button-label {
+    text-align: center;
+    margin-bottom: 0.8rem;
+    }
+
+    .centered-line {
+    width:100%;
+    max-width: 700px;
+    text-align: center;
+    font-size: 2.6rem;
+    margin: 1rem 0 0.5rem;
+    }
+
+
+     .coin-row-and-text{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto 1rem;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    }
+
+    .coin-row{
+    display:flex;
+    gap: 2rem;
+    justify-content: center;
+    }
+    .side-text {
+    width: 170px;
+    }
+
+    .side-text p{
+    margin: 0.25rem 0;
+    line-height: 1.2;
+    }
+
+    .left {
+    text-align: left;
+    }
+
+    .right {
+    text-align: right;
+    }
+    }
+    .container-split{
+    display: flex;
+    justify-content: space-between;
+    margin: 2rem 10%;
+    border-top: 0px solid #000000;
+    border-bottom: 0px solid #000000;
+    padding-top: 2rem;
+    gap: 2rem;
+    flex-wrap: wrap;
+    }
+
+    .container-left {
+    flex:1;
+    text-align: center;
+    }
+
+    .divider {
+    width: 1.5px;
+    background-color: #000000;
+    margin: 0;
+    }
+
+    .container-right {
+    flex:1;
+    text-align: left;
+    line-height:1.5;
+    }
+
+</style>
+{% endblock %}
+
+
+
+{% block content %}
+<div class="background-container">
+    <h1 style="text-align: center; margin-bottom: 1rem;">
+        <span class="greek-heading_2" style="display: block; font-size: 2rem;">{{m_e.in_greek}}</span>
+    <span class="latin-heading_2" style="display: block; font-size: 2rem;">{{m_e.title}}</span>
+    </h1>
+    <div style="text-align: center; margin-bottom: 0rem;">
+        <span class="latin-heading_3"><strong>Born:</strong>{{m_e.birth}}</span>
+    </div>
+    <div style="text-align: center; margin-bottom: 0.2rem;">
+        <span class="latin-heading_3"><strong>Died:</strong>{{m_e.death}}</span>
+    </div>
+     <div style="text-align: center; margin-bottom: 0rem;">
+        <span class="latin-heading_3"><strong>Reign:</strong>{{m_e.reign}}</span>
+    </div>
+
+    <div class="container-split">
+    <div class="container-left" style="font-size: 1rem; text-align: center">{% if m_e.images %}
+            <img src="{{m_e.images[0].url}}" alt = "{{m_e.images[0].filename}}" style="max-width: 100%; height:auto;">
+            <div class="latin-heading_new" style="margin-top: 0.5rem; font-size: 1rem;">{{m_e.images[0].caption}}</div>
+            {% else %}
+            No image
+            {% endif %}</div>
+        <div class="divider"></div>
+
+    <div class="container-right latin-heading_new" style=" text-align: left; line-height: 1.6;">
+        {{ m_e.life.replace('\n', '<br>')| safe }}
+    </div>
+    </div>
+
+</div>
+{% endblock %}

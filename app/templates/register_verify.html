@@ -1,8 +1,53 @@
 {% extends "base.html" %}
 {% import "bootstrap_wtf.html" as wtf %}
+{% block head_extra %}
+
+<style>
+    .latin-heading_2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+    .latin-heading_3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+    .greek-heading_2 {
+    font-family: 'GFS Didot', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+
+    .background-container {
+    background-image: url("{{url_for('static', filename = 'images/parchment_color.jpg')}}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height:100vh;
+    display: flex;
+    flex-direction:column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0rem 0rem 0rem 5rem;
+    }
+
+</style>
+{% endblock %}
+
 
 {% block content %}
-    <div class="container">
+
+    <div class="background-container latin-heading_new" style="font-size: 1.2rem;">
         {{ wtf.quick_form(form, action="register_verify", method="post", id="", novalidate=True, autofocus=False) }}
     </div>
 {% endblock %}
