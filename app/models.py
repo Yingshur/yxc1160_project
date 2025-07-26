@@ -22,10 +22,10 @@ class User(UserMixin, db.Model):
     role: so.Mapped[str] = so.mapped_column(sa.String(10), default="Normal", nullable=True)
     user_type: Mapped[str] = so.mapped_column(sa.String(64), default="user")
     invitations: so.Mapped[list['Invitation']] = relationship(back_populates='user', cascade='all, delete-orphan')
-    __mapper_args__ = {
-        "polymorphic_identity": "user",
-        "polymorphic_on": user_type
-    }
+    #__mapper_args__ = {
+        #"polymorphic_identity": "user",
+        #"polymorphic_on": user_type
+    #}
 
 
     def __repr__(self):
@@ -66,11 +66,16 @@ class Emperor(db.Model):
     birth: so.Mapped[str] = so.mapped_column(sa.String(256))
     death: so.Mapped[str] = so.mapped_column(sa.String(256))
     reign: so.Mapped[str] = so.mapped_column(sa.String(256))
+    reign_start: so.Mapped[int] = so.mapped_column()
     dynasty: so.Mapped[str] = so.mapped_column(sa.String(256))
+    ascent_to_power: so.Mapped[str] = so.mapped_column(sa.String(256))
     first_reign: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
     second_reign: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
     life: so.Mapped[str] = so.mapped_column(sa.Text())
+    references: so.Mapped[str] = so.mapped_column(sa.Text())
     images: so.Mapped[list["Image"]] = so.relationship(back_populates="emperor", cascade="all, delete-orphan")
+
+
 
 
 
@@ -80,20 +85,206 @@ class Image(db.Model):
     filename: so.Mapped[str] = so.mapped_column(sa.String(256))
     url: so.Mapped[str] = so.mapped_column(sa.Text())
     caption: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
-    emperor_title: so.Mapped[str] = so.mapped_column(sa.ForeignKey("emperors.title"), nullable=True)
-    emperor: so.Mapped["Emperor"] = so.relationship(back_populates="images", foreign_keys=[emperor_title])
+    emperor_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("emperors.id"), nullable=True)
+    emperor: so.Mapped["Emperor"] = so.relationship(back_populates="images", foreign_keys=[emperor_id])
+    war_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("wars.id"), nullable=True)
+    war: so.Mapped["War"] = so.relationship(back_populates="images", foreign_keys=[war_id])
+    architecture_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("architecture.id"), nullable=True)
+    architecture: so.Mapped["Architecture"] = so.relationship(back_populates="images", foreign_keys=[architecture_id])
+    literature_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("literature.id"), nullable=True)
+    literature: so.Mapped["Literature"] = so.relationship(back_populates="images", foreign_keys=[literature_id])
 
+
+class TemporaryEmperor(db.Model):
+    __tablename__ = 'temporary_emperors'
+    username: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
+    status: so.Mapped[str] = so.mapped_column(sa.String(256), default="Pending")
+    old_id: so.Mapped[int] = so.mapped_column()
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256))
+    in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
+    birth: so.Mapped[str] = so.mapped_column(sa.String(256))
+    death: so.Mapped[str] = so.mapped_column(sa.String(256))
+    reign: so.Mapped[str] = so.mapped_column(sa.String(256))
+    ascent_to_power: so.Mapped[str] = so.mapped_column(sa.String(256))
+    dynasty: so.Mapped[str] = so.mapped_column(sa.String(256))
+    reign_start: so.Mapped[int] = so.mapped_column()
+    references: so.Mapped[str] = so.mapped_column(sa.Text())
+    first_reign: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
+    second_reign: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
+    created_at: so.Mapped[str] = so.mapped_column(sa.String(256), default=lambda:datetime.now(timezone.utc).isoformat())
+    life: so.Mapped[str] = so.mapped_column(sa.Text())
+    temporary_images: so.Mapped[list["TemporaryImage"]] = so.relationship(back_populates="temporary_emperor", cascade="all, delete-orphan")
+
+
+
+
+
+class TemporaryImage(db.Model):
+    __tablename__ = 'temporary_images'
+    username: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
+    status: so.Mapped[str] = so.mapped_column(sa.String(256), default="Pending")
+    old_id: so.Mapped[int] = so.mapped_column()
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    filename: so.Mapped[str] = so.mapped_column(sa.String(256))
+    url: so.Mapped[str] = so.mapped_column(sa.Text())
+    caption: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
+    temporary_emperor_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("temporary_emperors.id"), nullable=True)
+    temporary_emperor: so.Mapped["TemporaryEmperor"] = so.relationship(back_populates="temporary_images", foreign_keys=[temporary_emperor_id])
+    temporary_war_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("temporary_wars.id"), nullable=True)
+    temporary_war: so.Mapped["TemporaryWar"] = so.relationship(back_populates="temporary_images",
+                                                                       foreign_keys=[temporary_war_id])
+    temporary_architecture_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("temporary_architecture.id"), nullable=True)
+    temporary_architecture: so.Mapped["TemporaryArchitecture"] = so.relationship(back_populates="temporary_images",
+                                                               foreign_keys=[temporary_architecture_id])
+    temporary_literature_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("temporary_literature.id"),
+                                                                 nullable=True)
+    temporary_literature: so.Mapped["TemporaryLiterature"] = so.relationship(back_populates="temporary_images",
+                                                                                 foreign_keys=[
+                                                                                     temporary_literature_id])
 
 
 class Invitation(db.Model):
     __tablename__ = 'invitations'
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     code: so.Mapped[str] = so.mapped_column(sa.String(256))
-    user_id: so.Mapped[str] = so.mapped_column(sa.ForeignKey("users.id"), index=True)
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("users.id"), index=True)
     user: so.Mapped["User"] = so.relationship(back_populates="invitations")
 
 
 
 
+class War(db.Model):
+    __tablename__ = 'wars'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256), unique=True)
+    start_year: so.Mapped[int] = so.mapped_column()
+    dates: so.Mapped[str] = so.mapped_column(sa.String(256))
+    location: so.Mapped[str] = so.mapped_column(sa.String(256))
+    longitude: so.Mapped[float] = so.mapped_column(nullable=True)
+    latitude: so.Mapped[float] = so.mapped_column(nullable=True)
+    roman_commanders: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    enemy_commanders: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    roman_strength: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    enemy_strength: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    roman_loss: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    enemy_loss: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    dynasty: so.Mapped[str] = so.mapped_column(sa.String(256))
+    war_name: so.Mapped[str] = so.mapped_column(sa.String(256))
+    war_type: so.Mapped[str] = so.mapped_column(sa.String(256))
+    result: so.Mapped[str] = so.mapped_column(sa.String(256))
+    description: so.Mapped[str] = so.mapped_column(sa.Text())
+    references: so.Mapped[str] = so.mapped_column(sa.Text())
+    images: so.Mapped[list["Image"]] = so.relationship(back_populates="war", cascade="all, delete-orphan")
 
 
+
+
+
+class TemporaryWar(db.Model):
+    __tablename__ = 'temporary_wars'
+    username: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
+    status: so.Mapped[str] = so.mapped_column(sa.String(256), default="Pending")
+    old_id: so.Mapped[int] = so.mapped_column()
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256))
+    start_year: so.Mapped[int] = so.mapped_column()
+    dates: so.Mapped[str] = so.mapped_column(sa.String(256))
+    location: so.Mapped[str] = so.mapped_column(sa.String(256))
+    longitude: so.Mapped[float] = so.mapped_column(nullable=True)
+    latitude: so.Mapped[float] = so.mapped_column(nullable=True)
+    roman_commanders: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    enemy_commanders: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    roman_strength: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    enemy_strength: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    roman_loss: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    enemy_loss: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    dynasty: so.Mapped[str] = so.mapped_column(sa.String(256))
+    war_name: so.Mapped[str] = so.mapped_column(sa.String(256))
+    war_type: so.Mapped[str] = so.mapped_column(sa.String(256))
+    result: so.Mapped[str] = so.mapped_column(sa.String(256))
+    description: so.Mapped[str] = so.mapped_column(sa.Text())
+    references: so.Mapped[str] = so.mapped_column(sa.Text())
+    created_at: so.Mapped[str] = so.mapped_column(sa.String(256), default=lambda:datetime.now(timezone.utc).isoformat())
+    temporary_images: so.Mapped[list["TemporaryImage"]] = so.relationship(back_populates="temporary_war", cascade="all, delete-orphan")
+
+
+
+
+class Architecture(db.Model):
+    __tablename__ = 'architecture'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256))
+    in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
+    construction_completed: so.Mapped[int] = so.mapped_column()
+    architectural_style: so.Mapped[str] = so.mapped_column(sa.String(256))
+    current_status: so.Mapped[str] = so.mapped_column(sa.String(256))
+    location: so.Mapped[str] = so.mapped_column(sa.String(256))
+    longitude: so.Mapped[float] = so.mapped_column(nullable=True)
+    latitude: so.Mapped[float] = so.mapped_column(nullable=True)
+    description: so.Mapped[str] = so.mapped_column(sa.Text())
+    references: so.Mapped[str] = so.mapped_column(sa.Text())
+    building_type: so.Mapped[str] = so.mapped_column(sa.String(256))
+    images: so.Mapped[list["Image"]] = so.relationship(back_populates="architecture", cascade="all, delete-orphan")
+
+
+
+
+class TemporaryArchitecture(db.Model):
+    __tablename__ = 'temporary_architecture'
+    username: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
+    status: so.Mapped[str] = so.mapped_column(sa.String(256), default="Pending")
+    old_id: so.Mapped[int] = so.mapped_column()
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256))
+    in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
+    construction_completed: so.Mapped[int] = so.mapped_column()
+    architectural_style: so.Mapped[str] = so.mapped_column(sa.String(256))
+    current_status:so.Mapped[str] = so.mapped_column(sa.String(256))
+    location: so.Mapped[str] = so.mapped_column(sa.String(256))
+    longitude: so.Mapped[float] = so.mapped_column(nullable=True)
+    latitude: so.Mapped[float] = so.mapped_column(nullable=True)
+    description: so.Mapped[str] = so.mapped_column(sa.Text())
+    references: so.Mapped[str] = so.mapped_column(sa.Text())
+    created_at: so.Mapped[str] = so.mapped_column(sa.String(256), default=lambda:datetime.now(timezone.utc).isoformat())
+    building_type: so.Mapped[str] = so.mapped_column(sa.String(256))
+    temporary_images: so.Mapped[list["TemporaryImage"]] = so.relationship(back_populates="temporary_architecture", cascade="all, delete-orphan")
+
+
+class LogBook(db.Model):
+    __tablename__ = 'logbooks'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256))
+    username: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
+    created_at: so.Mapped[str] = so.mapped_column(sa.String(256), default=lambda:datetime.now(timezone.utc).isoformat())
+
+
+class Literature(db.Model):
+    __tablename__ = 'literature'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256))
+    in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
+    author: so.Mapped[str] = so.mapped_column(sa.String(256))
+    year_completed: so.Mapped[int] = so.mapped_column()
+    current_location: so.Mapped[str] = so.mapped_column(sa.String(256))
+    genre: so.Mapped[str] = so.mapped_column(sa.String(256))
+    description: so.Mapped[str] = so.mapped_column(sa.Text())
+    references: so.Mapped[str] = so.mapped_column(sa.Text())
+    images: so.Mapped[list["Image"]] = so.relationship(back_populates="literature", cascade="all, delete-orphan")
+
+
+class TemporaryLiterature(db.Model):
+    __tablename__ = 'temporary_literature'
+    username: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
+    status: so.Mapped[str] = so.mapped_column(sa.String(256), default="Pending")
+    old_id: so.Mapped[int] = so.mapped_column()
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256))
+    in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
+    author: so.Mapped[str] = so.mapped_column(sa.String(256))
+    year_completed: so.Mapped[int] = so.mapped_column()
+    current_location: so.Mapped[str] = so.mapped_column(sa.String(256))
+    genre: so.Mapped[str] = so.mapped_column(sa.String(256))
+    description: so.Mapped[str] = so.mapped_column(sa.Text())
+    references: so.Mapped[str] = so.mapped_column(sa.Text())
+    images: so.Mapped[list["Image"]] = so.relationship(back_populates="temporary_literature", cascade="all, delete-orphan")

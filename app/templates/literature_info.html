@@ -129,7 +129,7 @@
 
 
     .background-container {
-    background-image: url("{{url_for('static', filename = 'images/macedonians/macedonian_victory.png')}}");
+    background-image: url("{{url_for('static', filename = 'images/culture/white_tower.png')}}");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -194,6 +194,8 @@
     flex-wrap: wrap;
     }
 
+
+
     .coin-row{
     display:flex;
     gap: 2rem;
@@ -216,6 +218,27 @@
     text-align: right;
     }
     }
+   .map-wrapper {
+    width: 600px;
+    height: 600px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+
+.map-wrapper iframe, .folium-map iframe {
+    width: 100% !important;
+    height: 100% !important;
+    border: none;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.folium-map{
+margin:0 !important;
+padding:0 !important;
+}
 
 </style>
 {% endblock %}
@@ -223,69 +246,40 @@
 
 {% block content %}
 <div class="background-container">
-    <div class="top-right-image-button">
-        <a href="{{url_for('wars_selection')}}">
-            <div class="image-button-content latin-heading_2">
-            <img src="{{url_for('static', filename='images/victory_byzantine_over_bulgar.jpg')}}" alt="Go"/>
-            <span class="button-label-text latin-heading_2" style="font-size: 3rem">Wars</span>
-            </div>
-        </a>
-    </div>
-<h1 class="latin-heading_3">{{ article_title }}</h1>
+<h1 class="latin-heading_3">Literature</h1>
 <div class="col-lg-9">
 <table class="table" style="background-color: transparent;">
     <thead>
         <tr>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Portrait</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Title</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Title in Greek</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Born</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Died</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Reign</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Ascend to Throne by</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Image</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem"> Name</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Greek Name</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Genre</th>
         </tr>
     </thead>
-    {% for macedonian in macedonian_lst %}
+    {% for book in literature_lst %}
         <tr>
-            <td class="latin-heading_2" style="font-size: 1rem">{% if macedonian.images %}
-            <img src="{{macedonian.images[0].url}}" alt = "{{macedonian.images[0].filename}}" style="max-width: 100px; height:auto;">
+            <td class="latin-heading_2" style="font-size: 1rem">{% if book.images %}
+            <img src="{{book.images[0].url}}" alt = "{{book.images[0].filename}}" style="max-width: 100px; height:auto;">
             {% else %}
             No image
             {% endif %}</td>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.title }}</td>
-            <td class="greek-heading_2" style="font-size: 1rem">{{ macedonian.in_greek }}</td>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.birth }}</td>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.death }}</td>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.reign }}</td>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.ascent_to_power}}</td>
-            <td> <form action="{{ url_for('macedonian_emperors', id=macedonian.id) }}" method="get" style="display:inline;">
+            <td class="latin-heading_2" style="font-size: 1rem">{{ book.title }}</td>
+            <td class="greek-heading_2" style="font-size: 1rem">{{ book.in_greek }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ book.year_completed }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ book.current_location }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ book.genre }}</td>
+            <td> <form action="{{ url_for('literature_info_detail', id=book.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>
                  </form></td>
-            {% if current_user.is_authenticated and current_user.user_type == "Autocrat" %}
-            <td> <form action="{{ url_for('delete_emperors_', id=macedonian.id) }}" method="get" style="display:inline;">
-                       <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
-                            <i class="bi bi-trash-fill"></i>
-                    </button>
-                 </form> </td>
-            {% endif %}
         </tr>
+
     {% endfor %}
-
-
 </table>
-    {% if current_user.is_authenticated %}
-    <button class="btn btn-dark" onclick="document.getElementById('admin-form').style.display='block'; this.style.display ='none';">
-        Add an Emperor
-    </button>
 
-    <div id = 'admin-form' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem;">
-<form method="post" action="{{ url_for('add_new_emperor') }}" enctype="multipart/form-data" novalidate>
-                    {{ wtf.quick_form(new_form, novalidate=True, autofocus=False) }}
-            </form>
-    </div>
-        {% endif %}
 
 </div>
 </div>

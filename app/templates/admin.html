@@ -94,6 +94,7 @@
             <td class="latin-heading_3">{{ user.role }}</td>
             <td class="latin-heading_3">{{user.user_type}}</td>
             <td>
+                            {% if current_user.user_type == "Autocrat" and user.user_type != "Autocrat" %}
                 <form action="{{ url_for('delete_user') }}" method="post">
                     {{ form.csrf_token() }}
                     {{ form.choice(value=user.id) }}
@@ -102,6 +103,7 @@
                     </button>
                 </form>
             </td>
+                        {% endif %}
             {% if user.role == "Normal" %}
             <td> <form action="{{ url_for('invitation_code', id=user.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info">
@@ -109,7 +111,7 @@
                     </button>
                  </form></td>
             {% endif %}
-            {% if user.role == "Admin" and user.id != current_user.id %}
+            {% if user.role == "Admin" and user.id != current_user.id and current_user.user_type == "Autocrat"%}
             <td> <form action="{{ url_for('de_admin', id=user.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info">
                             <i class="bi bi-arrow-down-circle-fill"></i>
@@ -119,6 +121,14 @@
         </tr>
     {% endfor %}
 </table>
+    <h3 class="mt-5 latin-heading_new" style="font-size: 1.5rem;">Manage account</h3>
+    <ul>
+        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('manage_edits') }}">Manage Edits</a></li>
+    </ul>
+    <ul>
+        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('manage_additions') }}">Manage Additions</a></li>
+    </ul>
+
 </div>
 </div>
 

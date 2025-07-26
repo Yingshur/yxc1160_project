@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+{% import "bootstrap_wtf.html" as wtf %}
+{% block head_extra %}
+
+<style>
+    .circle-button{
+    display: inline-block;
+    width: 210px;
+    height: 210px;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    }
+
+    .small-image{
+    max-width:150px;
+    height:auto;
+    }
+    .circle-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    }
+
+    .button-label {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #333;
+    }
+
+    .button-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;}
+
+    .button-row{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    }
+
+    .button-row.centered{
+    justify-content: center;
+    gap: 2rem;
+    }
+    .latin-heading_2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+    .latin-heading_3 {
+    font-family: 'Cinzel', serif;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+    .greek-heading_2 {
+    font-family: 'GFS Didot', serif;
+    font-size: 1rem;
+    color: #000000;
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: bold;
+    }
+
+    .table {
+  background-color: transparent !important;}
+
+.table td,
+.table th {
+  background-color: transparent !important;
+  border: 1px solid transparent;}
+
+.col-lg-9 {
+  margin-top: 0 !important;
+}
+
+
+    .background-container {
+    background-image: url("{{url_for('static', filename = 'images/parchment_color.jpg')}}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height:100vh;
+    background-attachment: fixed;
+    display: flex;
+    flex-direction:column;
+    padding: 0.5rem;
+    }
+
+    .background-container h1 {
+    margin: 20px;
+    }
+
+
+    @media (max-width: 768px) {
+    .button-row{
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    }
+
+    .coin-row{
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    }
+
+    .circle-button {
+    width:160px;
+    height: 160px;
+    }
+
+    .greek-heading_2,
+    .latin-heading_2 {
+    font-size: 0.8rem;
+    text-align: center;
+    }
+    .button-label {
+    text-align: center;
+    margin-bottom: 0.8rem;
+    }
+
+    .centered-line {
+    width:100%;
+    max-width: 700px;
+    text-align: center;
+    font-size: 2.6rem;
+    margin: 1rem 0 0.5rem;
+    }
+
+
+     .coin-row-and-text{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto 1rem;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    }
+
+    .coin-row{
+    display:flex;
+    gap: 2rem;
+    justify-content: center;
+    }
+    .side-text {
+    width: 170px;
+    }
+
+    .side-text p{
+    margin: 0.25rem 0;
+    line-height: 1.2;
+    }
+
+    .left {
+    text-align: left;
+    }
+
+    .right {
+    text-align: right;
+    }
+    }
+
+</style>
+{% endblock %}
+
+
+
+
+
+
+
+
+{% block content %}
+<div class="background-container">
+<h1 class="latin-heading_3">Manage Additions</h1>
+<div class="col-lg-9">
+        <h2 class="latin-heading_3">Emperors</h2>
+<table class="table" style="background-color: transparent;">
+    <thead>
+        <tr>
+            <th class="latin-heading_2" style="font-size: 1.5rem">type</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">status</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Title</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Title in Greek</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Born</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Died</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Reign</th>
+        </tr>
+    </thead>
+    {% for each in total_list %}
+        <tr>
+            <td class="latin-heading_2" style="font-size: 1rem">{% if each.old_id == -1 %}
+            Addition {% else %} Edit {% endif %}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ each.status }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ each.title }}</td>
+            <td class="greek-heading_2" style="font-size: 1rem">{{ each.in_greek }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ each.birth }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ each.death }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ each.reign }}</td>
+            <td> <form action="{{ url_for('user_editing', id=each.id) }}" method="get" style="display:inline;">
+                       <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
+                            <i class="bi bi-info-square"></i>
+                    </button>
+                 </form></td>
+        </tr>
+
+    {% endfor %}
+</table>
+            <h2 class="latin-heading_3">Wars</h2>
+    <table class="table" style="background-color: transparent;">
+    <thead>
+        <tr>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Type</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Status</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Title</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">War</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Result</th>
+        </tr>
+    </thead>
+    {% for war in total_list_1 %}
+        <tr>
+            <td class="latin-heading_2" style="font-size: 1rem">{% if war.old_id == -1 %}
+            Addition {% else %} Edit {% endif %}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ war.status }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ war.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ war.war_name }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ war.result }}</td>
+            <td> <form action="{{ url_for('war_info_edit_user', id=war.id) }}" method="get" style="display:inline;">
+                       <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
+                            <i class="bi bi-info-square"></i>
+                    </button>
+                 </form></td>
+        </tr>
+
+    {% endfor %}
+</table>
+
+        <h2 class="latin-heading_3">Architecture</h2>
+<table class="table" style="background-color: transparent;">
+    <thead>
+        <tr>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Type</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Name</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Location</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Type</th>
+        </tr>
+    </thead>
+    {% for building in total_list_2 %}
+        <tr>
+            <td class="latin-heading_2" style="font-size: 1rem">{% if building.old_id == -1 %}
+            Addition {% else %} Edit {% endif %}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ building.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ building.construction_completed }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ building.location }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ building.building_type }}</td>
+            <td> <form action="{{ url_for('architecture_info_edit_user', id=building.id) }}" method="get" style="display:inline;">
+                       <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
+                            <i class="bi bi-info-square"></i>
+                    </button>
+                 </form></td>
+        </tr>
+
+    {% endfor %}
+</table>
+
+
+
+</div>
+</div>
+{% endblock %}

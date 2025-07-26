@@ -1,6 +1,6 @@
 import random
 #from ensurepip import bootstrap
-
+from wtforms import form, ValidationError
 #from time import timezone
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -12,6 +12,7 @@ from itsdangerous import  URLSafeSerializer, SignatureExpired, BadSignature, URL
 from pycparser.ply.lex import TOKEN
 from app.models import User, Verification
 from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
+from flask_login import current_user, login_user, logout_user, login_required, fresh_login_required
 
 
 # from pymupdf import message
@@ -47,8 +48,13 @@ mail = Mail(app)
 signer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 TOKEN_MAX_AGE = 60*60*24
 
-app.config['UPLOAD_FOLDER'] = 'static/images/uploaded_photos'
+import os
+BASE = os.path.abspath(os.path.dirname(__file__))
+app.config['UPLOAD_FOLDER'] = os.path.join(BASE, 'static', 'images', 'uploaded_photos')
+app.config['UPLOAD_FOLDER_TEMPORARY'] = os.path.join(BASE, 'static', 'images', 'temporary')
 app.config['MAX_CONTENT_LENGTH'] = 2000*1024*1024
+
+
 
 def verification_email(user_email: str) -> bool:
     user = User.query.filter_by(email = user_email).first()
@@ -70,6 +76,37 @@ def verification_email(user_email: str) -> bool:
         return True
     else:
         return False
+
+def confirmation_email():
+    emails = db.session.query(User).filter_by(role = "Admin").all()
+    if emails:
+        html = render_template("confirmation_sent.html", user = current_user.username)
+        for email in emails:
+            msg = Message(sender="chenyingshu1234@gmail.com",
+                          subject="A new edit or addition",
+                          recipients = [email.email],
+                          html=html,)
+            mail.send(msg)
+
+
+def approval_email(user_email: str, emperor_title: str):
+        html = render_template("approval_sent.html", title = emperor_title )
+        msg = Message(sender="chenyingshu1234@gmail.com",
+                          subject="Approval",
+                          recipients = [user_email],
+                          html=html,)
+        mail.send(msg)
+
+
+
+def rejection_email(user_email: str, emperor_title: str):
+        html = render_template("rejection.sent.html", title = emperor_title )
+        msg = Message(sender="chenyingshu1234@gmail.com",
+                          subject="Rejection",
+                          recipients = [user_email],
+                          html=html,)
+        mail.send(msg)
+
 
 def deleting_expired_auto():
     with app.app_context():

@@ -62,7 +62,6 @@
     letter-spacing: 1px;
     text-transform: none;
     font-weight: bold;
-    font-size: 1.3rem;
     }
     .greek-heading_2 {
     font-family: 'GFS Didot', serif;
@@ -91,7 +90,6 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed;
     min-height:100vh;
     display: flex;
     flex-direction:column;
@@ -209,46 +207,31 @@
 {% block content %}
 <div class="background-container">
     <h1 style="text-align: center; margin-bottom: 1rem;">
-        <span class="greek-heading_2" style="display: block; font-size: 2rem;">{{m_e.in_greek}}</span>
-    <span class="latin-heading_2" style="display: block; font-size: 2rem;">{{m_e.title}}</span>
+        <span class="greek-heading_2" style="display: block; font-size: 2rem;">{{emperor_edit.in_greek}}</span>
+    <span class="latin-heading_2" style="display: block; font-size: 2rem;">{{emperor_edit.title}}</span>
     </h1>
     <div style="text-align: center; margin-bottom: 0rem;">
-        <span class="latin-heading_3"><strong>Born:</strong>{{m_e.birth}}</span>
+        <span class="latin-heading_3"><strong>Born:</strong>{{emperor_edit.birth}}</span>
     </div>
     <div style="text-align: center; margin-bottom: 0.2rem;">
-        <span class="latin-heading_3"><strong>Died:</strong>{{m_e.death}}</span>
+        <span class="latin-heading_3"><strong>Died:</strong>{{emperor_edit.death}}</span>
     </div>
      <div style="text-align: center; margin-bottom: 0rem;">
-        <span class="latin-heading_3"><strong>Reign:</strong>{{m_e.reign}}</span>
+        <span class="latin-heading_3"><strong>Reign:</strong>{{emperor_edit.reign}}</span>
     </div>
 
     <div class="container-split">
-    <div class="container-left" style="font-size: 1rem; text-align: center">{% if m_e.images %}
-            <img src="{{m_e.images[0].url}}" alt = "{{m_e.images[0].filename}}" style="max-width: 100%; height:auto;">
+    <div class="container-left" style="font-size: 1rem; text-align: center">{% if emperor_edit.temporary_images %}
+            <img src="{{emperor_edit.temporary_images[0].url}}" alt = "{{emperor_edit.temporary_images[0].filename}}" style="max-width: 100%; height:auto;">
             {% else %}
             No image
             {% endif %}</div>
         <div class="divider"></div>
 
     <div class="container-right latin-heading_new" style=" text-align: left; line-height: 1.6;">
-        {{ m_e.life.replace('\n', '<br>')| safe }}
-    </div>
-    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 15rem; margin-right: 15rem;">
-      References: <br>{{ m_e.references.replace('\n', '<br>')| safe }}
+        {{ emperor_edit.life.replace('\n', '<br>')| safe }}
     </div>
     </div>
-
-    {% if current_user.is_authenticated %}
-    <button class="btn btn-dark" onclick="document.getElementById('edit-form').style.display='block'; this.style.display ='none';">
-        Edit Emperor
-    </button>
-
-    <div id = 'edit-form' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem;">
-        <form method="post" action="{{ url_for('edit_emperor', id = m_e.id) }}" enctype="multipart/form-data" novalidate>
-                               {{ wtf.quick_form(new_form, novalidate=True, autofocus=False) }}
-            </form>
-    </div>
-        {% endif %}
 
 
 </div>

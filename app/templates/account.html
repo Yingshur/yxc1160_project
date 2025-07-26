@@ -91,6 +91,10 @@
         <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('change_email') }}">Update Email</a></li>
     </ul>
             {% if current_user.role == "Normal" %}
+    <h3 class="mt-5 latin-heading_new" style="font-size: 1.5rem;">Manage requests</h3>
+    <ul>
+        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('manage_edits_additions_users') }}">Manage edits and additions</a></li>
+    </ul>
 
     <h3 class="mt-3 latin-heading_new" style="font-size: 1.5rem;">Change to Admin role</h3>
 
