@@ -77,10 +77,10 @@ def verification_email(user_email: str) -> bool:
     else:
         return False
 
-def confirmation_email():
+def confirmation_email(id: int):
     emails = db.session.query(User).filter_by(role = "Admin").all()
     if emails:
-        html = render_template("confirmation_sent.html", user = current_user.username)
+        html = render_template("confirmation_sent.html", user = current_user.username, id = id)
         for email in emails:
             msg = Message(sender="chenyingshu1234@gmail.com",
                           subject="A new edit or addition",

@@ -114,7 +114,7 @@ class WarForm(FlaskForm):
     war_type = SelectField('Foreign or Civil War?', choices=[('Foreign War', 'Foreign War'), ('Civil War', 'Civil War')],validators=[DataRequired('Data is required')] )
     description=  TextAreaField('Description', validators=[DataRequired('Data is required')], render_kw={"rows":30, "style":"min-height: 400px;"})
     references= TextAreaField('References', validators=[DataRequired('Data is required')], render_kw={"rows":10, "style":"min-height: 400px;"})
-    image = FileField('Upload Portrait', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Images Only')])
+    image = FileField('Upload Image', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Images Only')])
     result = SelectField('Result', choices=[('Roman Victory', 'Roman Victory'), ('Enemy Victory', 'Enemy Victory'), ('Inconclusive', 'Inconclusive'),  ],validators=[DataRequired('Data is required')] )
     submit = SubmitField('Submit')
 
@@ -123,18 +123,40 @@ class WarForm(FlaskForm):
 
 
 class LiteratureForm(FlaskForm):
+    edit = HiddenField(default='-1')
     #id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
     title = StringField('Title of the Work',  validators=[DataRequired('Data is required')])
     in_greek = StringField('Title of the Work in Greek',  validators=[DataRequired('Data is required')])
     author = StringField('Name of the Author',  validators=[DataRequired('Data is required')])
-    year_completed = IntegerField('Year Completed', validators=[DataRequired('Data is required'), int_validator])
+    year_completed = StringField('Year Completed (Approximate)', validators=[DataRequired('Data is required')])
     current_location= StringField('Current location',  validators=[DataRequired('Data is required')])
     genre = SelectField('Genre', choices=[('Religious Literature', 'Religious Literature'), ('Chronicle', 'Chronicle'), ('Secular Poetry', 'Secular Poetry'), ('Secular Academic Literature', 'Secular Academic Literature'), ('Others', 'Others')],validators=[DataRequired('Data is required')] )
+    image = FileField('Upload Image', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Images Only')])
     description = TextAreaField('Description', validators=[DataRequired('Data is required')],
                                 render_kw={"rows": 30, "style": "min-height: 400px;"})
     references = TextAreaField('References', validators=[DataRequired('Data is required')],
                                render_kw={"rows": 10, "style": "min-height: 400px;"})
     submit = SubmitField('Submit')
+
+
+
+
+class ArtifactForm(FlaskForm):
+    edit = HiddenField(default='-1')
+    #id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    title = StringField('Title of the Work',  validators=[DataRequired('Data is required')])
+    in_greek = StringField('Title of the Work in Greek',  validators=[DataRequired('Data is required')])
+    #author = StringField('Name of the Author',  validators=[DataRequired('Data is required')])
+    year_completed = StringField('Year Completed (Approximate)', validators=[DataRequired('Data is required')])
+    current_location= StringField('Current location',  validators=[DataRequired('Data is required')])
+    #genre = SelectField('Genre', choices=[('Religious Literature', 'Religious Literature'), ('Chronicle', 'Chronicle'), ('Secular Poetry', 'Secular Poetry'), ('Secular Academic Literature', 'Secular Academic Literature'), ('Others', 'Others')],validators=[DataRequired('Data is required')] )
+    image = FileField('Upload Image', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Images Only')])
+    description = TextAreaField('Description', validators=[DataRequired('Data is required')],
+                                render_kw={"rows": 30, "style": "min-height: 400px;"})
+    references = TextAreaField('References', validators=[DataRequired('Data is required')],
+                               render_kw={"rows": 10, "style": "min-height: 400px;"})
+    submit = SubmitField('Submit')
+
 
 
 

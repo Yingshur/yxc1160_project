@@ -4,22 +4,6 @@
 {% block head_extra %}
 
 <style>
-
-        .image-grid-3 {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin: 1.5rem auto;
-    max-width: 90%;
-    }
-
-    .image-grid-3 img {
-    width: calc(33.3333% - 1rem);
-    height: auto;
-    object-fit: cover;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.15);
-    }
-
     .circle-button{
     display: inline-block;
     width: 210px;
@@ -124,9 +108,6 @@
     flex-direction: column;
     align-items: center;
     gap: 2rem;
-    }
-     .image-grid-3 img{
-    width:100%;
     }
 
     .coin-row{
@@ -246,17 +227,17 @@
     </div>
 
 
-    <div style="font-size: 1rem; text-align: center">{% if book.images %}
-            <img src="{{book.images[0].url}}" alt = "{{book.images[0].filename}}" style="max-width: 750px; height:auto;">
+    <div style="font-size: 1rem; text-align: center">{% if book.temporary_images %}
+            <img src="{{book.temporary_images[0].url}}" alt = "{{book.temporary_images[0].filename}}" style="max-width: 750px; height:auto;">
             {% else %}
             No image
             {% endif %}</div>
         <div class="divider"></div>
 
-    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 12rem; margin-right: 12rem; margin-bottom: 3rem;">
+    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 18rem; margin-right: 18rem; margin-bottom: 3rem;">
         {{ book.description.replace('\n', '<br>')| safe }}
     </div>
-    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 8rem; margin-right: 8rem;">
+    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 15rem; margin-right: 15rem;">
       References: <br>{{ book.references.replace('\n', '<br>')| safe }}
     </div>
 
@@ -266,50 +247,12 @@
     </button>
 
     <div id = 'edit-form' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open %} display: block; {% else %} display: none; {% endif %}; margin-bottom: 1rem;">
-        <form method="post" action="{{ url_for('edit_literature', id = book.id) }}" enctype="multipart/form-data" novalidate>
+        <form method="post" action="{{ url_for('edit_literature_users', id = book.id) }}" enctype="multipart/form-data" novalidate>
                                {{ wtf.quick_form(new_form, novalidate=True, autofocus=False) }}
             </form>
     </div>
         {% endif %}
 
- <div style="text-align: left; margin-bottom: 0rem;  margin-top: 1rem; margin-left: 10rem; ">
-        <span class="latin-heading_3" style="font-size: 2rem; ">Gallery:</span>
-    </div>
-        {% if images|length>0 %}
-    <div class="image-grid-3 latin-heading_new">
-        {% for image in images %}
-        <figure>
-        <img src="{{image.url}}" alt="{{image.filename}}"> <figcaption>
-         {{image.caption}} <br> ID number: {{image.id}}
-    </figcaption>
-       </figure>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% if current_user.is_authenticated %}
-{% if current_user.user_type == "Authorised" or current_user.role == "Admin" %}
-    <button class="btn btn-dark" onclick="document.getElementById('edit-form-1').style.display='block'; this.style.display ='none';">
-        Edit Image
-    </button>
-
-    <div id = 'edit-form-1' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open_1 %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem; ">
-        <form method="post" action="{{ url_for('edit_an_image', id = book.id) }}" enctype="multipart/form-data" novalidate>
-                               {{ wtf.quick_form(new_form_2, novalidate=True, autofocus=False) }}
-            </form>
-    </div>
-        {% endif %}
-    {% if current_user.user_type == "Authorised" or current_user.role == "Admin" %}
-    <button class="btn btn-dark" onclick="document.getElementById('edit-form-2').style.display='block'; this.style.display ='none';">
-        Add an Image
-    </button>
-
-    <div id = 'edit-form-2' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open_2 %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem;">
-        <form method="post" action="{{ url_for('add_an_image_1', id = book.id) }}" enctype="multipart/form-data" novalidate>
-                               {{ wtf.quick_form(new_form_1, novalidate=True, autofocus=False) }}
-            </form>
-    </div>
-        {% endif %}
-        {% endif %}
 
 
 

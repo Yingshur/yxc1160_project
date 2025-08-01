@@ -184,7 +184,7 @@
 
 {% block content %}
 <div class="background-container">
-<h1 class="latin-heading_3">Manage Additions</h1>
+<h1 class="latin-heading_3">Manage Additions and Edits</h1>
 <div class="col-lg-9">
         <h2 class="latin-heading_3">Emperors</h2>
 <table class="table" style="background-color: transparent;">
@@ -276,7 +276,64 @@
     {% endfor %}
 </table>
 
+         <h2 class="latin-heading_3">Literature</h2>
+<table class="table" style="background-color: transparent;">
+    <thead>
+        <tr>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Type</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem"> Name</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Genre</th>
 
+        </tr>
+    </thead>
+    {% for book in total_list_3 %}
+        <tr>
+            <td class="latin-heading_2" style="font-size: 1rem">{% if book.old_id == -1 %}
+            Addition {% else %} Edit {% endif %}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ book.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ book.year_completed }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ book.genre }}</td>
+            <td> <form action="{{ url_for('literature_info_edit_user', id=book.id) }}" method="get" style="display:inline;">
+                       <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
+                            <i class="bi bi-info-square"></i>
+                    </button>
+                 </form></td>
+        </tr>
+
+    {% endfor %}
+
+</table>
+
+
+       <h2 class="latin-heading_3">Artifact</h2>
+<table class="table" style="background-color: transparent;">
+    <thead>
+        <tr>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Type</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem"> Name</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Current Location</th>
+
+        </tr>
+    </thead>
+    {% for artifact in total_list_4 %}
+        <tr>
+            <td class="latin-heading_2" style="font-size: 1rem">{% if artifact.old_id == -1 %}
+            Addition {% else %} Edit {% endif %}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.year_completed }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.current_location }}</td>
+            <td> <form action="{{ url_for('artifact_info_edit_user', id=artifact.id) }}" method="get" style="display:inline;">
+                       <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
+                            <i class="bi bi-info-square"></i>
+                    </button>
+                 </form></td>
+        </tr>
+
+    {% endfor %}
+
+</table>
 
 </div>
 </div>

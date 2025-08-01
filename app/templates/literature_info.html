@@ -129,7 +129,7 @@
 
 
     .background-container {
-    background-image: url("{{url_for('static', filename = 'images/culture/white_tower.png')}}");
+    background-image: url("{{url_for('static', filename = 'images/culture/Madrid_Skylitzes_1.png')}}");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -255,6 +255,7 @@ padding:0 !important;
             <th class="latin-heading_2" style="font-size: 1.5rem"> Name</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Greek Name</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Author</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Genre</th>
         </tr>
     </thead>
@@ -269,6 +270,7 @@ padding:0 !important;
             <td class="greek-heading_2" style="font-size: 1rem">{{ book.in_greek }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.year_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.current_location }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ book.author }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.genre }}</td>
             <td> <form action="{{ url_for('literature_info_detail', id=book.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
@@ -279,6 +281,19 @@ padding:0 !important;
 
     {% endfor %}
 </table>
+
+
+     {% if current_user.is_authenticated %}
+    <button class="btn btn-dark" onclick="document.getElementById('admin-form').style.display='block'; this.style.display ='none';">
+        Add a Building
+    </button>
+
+    <div id = 'admin-form' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem;">
+<form method="post" action="{{ url_for('add_new_literature') }}" enctype="multipart/form-data" novalidate>
+                    {{ wtf.quick_form(new_form, novalidate=True, autofocus=False) }}
+            </form>
+    </div>
+        {% endif %}
 
 
 </div>

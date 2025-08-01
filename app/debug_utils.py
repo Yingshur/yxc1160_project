@@ -1,6 +1,23 @@
 
 from app import db
-from app.models import Emperor, Image, User, War, Architecture
+from app.models import Emperor, Image, User, War, Architecture, Literature, Artifact
+
+saint_stephens_crown_description = (
+    "\"Saint Stephen’s Crown, greatly venerated crown of Hungary, is the symbol of Hungarian nationhood, without which no sovereign was truly accepted by the Hungarian people. It is made from an 11th-century jeweled circlet of Byzantine style, augmented early in the 12th century by the addition of arches and an upper rim composed of alternate pointed and round-topped plaques of enameled gold. Small pendants hang on short chains on both sides and at the back.\n\n"
+    "The cross on the top is crooked, because the screw hole in the knob it stands on was set at an angle, suggesting that originally it was not meant to occupy the top of the crown but to go on a sloping surface—possibly the curve of the foremost arch.\n\n"
+    "The crown was given to a U.S. Army unit by a Hungarian honour guard to keep it from being seized by advancing Soviet troops after World War II. It remained in U.S. guardianship at Fort Knox until it was returned to Hungary in 1978.\""
+)
+
+
+
+
+madrid_skylitzes_description = (
+    "\"The Madrid Skylitzes (Biblioteca Nacional, vitr.26-2) is a twelfth-century illustrated manuscript of John Skylitzes’ historical chronicle, the *Synopsis Historion*. It narrates the history of the Byzantine Empire from 811 to 1057, covering the reigns of emperors from Nikephoros I to Michael VI.\n\n"
+    "What makes the Madrid Skylitzes exceptional is that it is the only surviving illustrated manuscript of a Greek chronicle. Containing 574 vivid miniatures, it provides visual insights into nearly every aspect of Byzantine life—naval expeditions, sieges, court rituals, religious ceremonies, dreams, and even rare depictions such as conjoined twins. These images enrich and complicate the relationship between text and image, narrative and illustration.\n\n"
+    "Produced in Norman Sicily, the manuscript is a product of cultural confluence. Its Greek text, copied in a Latin and Arabic-speaking context, opens up questions about the manuscript’s intended audience, its function, and the transmission of Byzantine historical memory in the multicultural environment of twelfth-century Sicily.\n\n"
+    "The manuscript has become the centerpiece of an international scholarly effort. A multimedia edition is in development, combining critical commentary on text, imagery, captions, and narrative structure. Dr. Bente Bjornholt at the University of Sussex is constructing a detailed image database, categorizing iconographic features, styles, and colors for public access. Meanwhile, the textual commentary is being led by Associate Professor Roger Scott at the University of Melbourne, in collaboration with scholars from Melbourne and Manitoba, ensuring a comprehensive scholarly resource for future study.\""
+)
+
 
 
 hagia_sophia_description = (
@@ -171,6 +188,19 @@ def reset_db():
             'caption': 'Hagia Sophia, February 2024',
             'architecture_id': 1
         }
+        ,
+        {
+            'filename': 'Madrid Skylitzes',
+            'url': '/static/images/culture/manuscript_1.jpg',
+            'caption': 'The defeat of George I of Georgia by Basil II',
+            'literature_id': 1
+        },
+        {
+            'filename': 'Holy Crown of Hungary',
+            'url': '/static/images/culture/Hungarian_Parliament_002_-_Flickr_-_granada_turnier.jpg',
+            'caption': 'Holy Crown of Hungary, crafted in Constantinople',
+            'artifact_id': 1
+        },
     ]
 
     for i in images:
@@ -197,5 +227,40 @@ def reset_db():
         building = Architecture(**building_data)
         db.session.add(building)
 
+    literature_items = [
+        {
+            'title': "Madrid Skylitzes",
+            'in_greek': "Σύνοψις Ἱστοριῶν",
+            'author': "John Skylitzes",
+            'year_completed': '12ths century',
+            'current_location': "National Library of Spain, Madrid",
+            'genre': "Chronicle",
+            'description': madrid_skylitzes_description,
+            'references': "Sussex Centre for Byzantine Cultural History. 2025. The Madrid Skylitzes Project. University of Sussex. Available at: https://www.sussex.ac.uk/byzantine/research/skylitzes [Accessed 25 July 2025]."
+        }
+    ]
+
+    for item in literature_items:
+        entry = Literature(**item)
+        db.session.add(entry)
+
+
+
+
+
+    artifact_items = [
+        {
+            'title': "Holy Crown of Hungary",
+            'in_greek': "Szent Korona",
+            'year_completed': '1070s',
+            'current_location': "Hungarian Parliament, Budapest",
+            'description': saint_stephens_crown_description,
+            'references': "Encyclopaedia Britannica. (n.d.). Saint Stephen’s Crown. [online] Available at: https://www.britannica.com/topic/Saint-Stephens-Crown [Accessed 31 Jul. 2025]."
+        }
+    ]
+
+    for item in artifact_items:
+        entry = Artifact(**item)
+        db.session.add(entry)
 
     db.session.commit()

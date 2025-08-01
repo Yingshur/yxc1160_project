@@ -3,49 +3,6 @@
 {% block head_extra %}
 
 <style>
-    .top-right-image-button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    width: 15vw;
-    }
-
-    .top-right-image-button img {
-    width: 20vw;
-    height: auto;
-    cursor: pointer;
-    transition: transform 0.5s ease-in-out;
-    border-radius: 20px;
-    }
-
-    .top-right-image-button img:hover {
-    transform: scale(1.1);
-    }
-
-    .image-button-content {
-    position: relative;
-    display: inline-block;
-    width: 100%;
-    }
-
-    .image-button-content img {
-    width: 100%;
-    height:auto;
-    border-radius: 20px;
-    display: block;
-    }
-
-    .button-label-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-shadow: 1px 1px 6px black;
-    pointer-events: none;
-    text-align: center;
-    }
-
     .circle-button{
     display: inline-block;
     width: 210px;
@@ -80,7 +37,7 @@
 
     .button-row{
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
     gap: 1rem;
@@ -90,24 +47,6 @@
     justify-content: center;
     gap: 2rem;
     }
-
-    .three-column-button{
-    flex: 0 0 33.33%;
-    max-width: 33.33%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    }
-
-    .button-row.spaced-buttons{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-    }
-
-
     .latin-heading_2 {
     font-family: 'Cinzel', serif;
     font-size: 1rem;
@@ -155,27 +94,11 @@
     display: flex;
     flex-direction:column;
     padding: 0.5rem;
-    position: relative;
     }
 
     .background-container h1 {
     margin: 20px;
     }
-    .square-button {
-    width:100%;
-    height: 100%;
-    overflow: hidden;
-    border-radius:20px;
-    border: 2px solid transparent;
-    }
-
-    .square-button img {
-    width:100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    }
-
 
 
     @media (max-width: 768px) {
@@ -191,6 +114,10 @@
     gap: 2rem;
     }
 
+    .circle-button {
+    width:160px;
+    height: 160px;
+    }
 
     .greek-heading_2,
     .latin-heading_2 {
@@ -248,30 +175,36 @@
 </style>
 {% endblock %}
 
+
+
+
+
+
+
+
 {% block content %}
 <div class="background-container">
-    <div class="button-row">
-    <div class="three-column-button">
-            <a href="{{ url_for('architecture_info') }}" class="square-button" >
-                <img src="{{ url_for('static', filename = 'images/culture/Mystras_1.jpg')}}" alt="Architecture">
-            </a>
-            <div class="button-label latin-heading_2">Architecture</div>
-        </div>
-<div class="three-column-button">
-            <a href="{{ url_for('artifact_info') }}" class="square-button">
-                <img src="{{ url_for('static', filename = 'images/culture/Monomachos_crown.JPG')}}" alt="Artifacts">
-            </a>
-            <div class="button-label latin-heading_2">Artifacts</div>
-        </div>
-        <div class="three-column-button">
-            <a href="{{ url_for('literature_info') }}" class="square-button">
-                <img src="{{ url_for('static', filename = 'images/culture/manuscript_2.jpg')}}" alt="Literature">
-            </a>
-            <div class="button-label latin-heading_2">Literature</div>
-        </div>
+<h1 class="latin-heading_3">Logbook</h1>
+<div class="col-lg-9">
+<table class="table" style="background-color: transparent;">
+    <thead>
+        <tr>
+            <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Username</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Title</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Time</th>
+        </tr>
+    </thead>
+    {% for each in logbook %}
+        <tr>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ each.original_id }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ each.username }}</td>
+            <td class="greek-heading_2" style="font-size: 1rem">{{ each.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ each.created_at }}</td>
+        </tr>
 
-
+    {% endfor %}
+</table>
 </div>
 </div>
-
 {% endblock %}

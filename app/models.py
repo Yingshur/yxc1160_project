@@ -93,6 +93,8 @@ class Image(db.Model):
     architecture: so.Mapped["Architecture"] = so.relationship(back_populates="images", foreign_keys=[architecture_id])
     literature_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("literature.id"), nullable=True)
     literature: so.Mapped["Literature"] = so.relationship(back_populates="images", foreign_keys=[literature_id])
+    artifact_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("artifact.id"), nullable=True)
+    artifact: so.Mapped["Artifact"] = so.relationship(back_populates="images", foreign_keys=[artifact_id])
 
 
 class TemporaryEmperor(db.Model):
@@ -142,6 +144,11 @@ class TemporaryImage(db.Model):
     temporary_literature: so.Mapped["TemporaryLiterature"] = so.relationship(back_populates="temporary_images",
                                                                                  foreign_keys=[
                                                                                      temporary_literature_id])
+    temporary_artifact_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("temporary_artifact.id"),
+                                                               nullable=True)
+    temporary_artifact: so.Mapped["TemporaryArtifact"] = so.relationship(back_populates="temporary_images",
+                                                                             foreign_keys=[
+                                                                                 temporary_artifact_id])
 
 
 class Invitation(db.Model):
@@ -254,6 +261,7 @@ class TemporaryArchitecture(db.Model):
 class LogBook(db.Model):
     __tablename__ = 'logbooks'
     id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    original_id: so.Mapped[int] = so.mapped_column(nullable=True)
     title: so.Mapped[str] = so.mapped_column(sa.String(256))
     username: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
     created_at: so.Mapped[str] = so.mapped_column(sa.String(256), default=lambda:datetime.now(timezone.utc).isoformat())
@@ -265,7 +273,7 @@ class Literature(db.Model):
     title: so.Mapped[str] = so.mapped_column(sa.String(256))
     in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
     author: so.Mapped[str] = so.mapped_column(sa.String(256))
-    year_completed: so.Mapped[int] = so.mapped_column()
+    year_completed: so.Mapped[str] = so.mapped_column(sa.String(256))
     current_location: so.Mapped[str] = so.mapped_column(sa.String(256))
     genre: so.Mapped[str] = so.mapped_column(sa.String(256))
     description: so.Mapped[str] = so.mapped_column(sa.Text())
@@ -282,9 +290,36 @@ class TemporaryLiterature(db.Model):
     title: so.Mapped[str] = so.mapped_column(sa.String(256))
     in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
     author: so.Mapped[str] = so.mapped_column(sa.String(256))
-    year_completed: so.Mapped[int] = so.mapped_column()
+    year_completed: so.Mapped[str] = so.mapped_column(sa.String(256))
     current_location: so.Mapped[str] = so.mapped_column(sa.String(256))
     genre: so.Mapped[str] = so.mapped_column(sa.String(256))
     description: so.Mapped[str] = so.mapped_column(sa.Text())
     references: so.Mapped[str] = so.mapped_column(sa.Text())
-    images: so.Mapped[list["Image"]] = so.relationship(back_populates="temporary_literature", cascade="all, delete-orphan")
+    temporary_images: so.Mapped[list["TemporaryImage"]] = so.relationship(back_populates="temporary_literature", cascade="all, delete-orphan")
+
+class Artifact(db.Model):
+    __tablename__ = 'artifact'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256))
+    in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
+    year_completed: so.Mapped[str] = so.mapped_column(sa.String(256))
+    current_location: so.Mapped[str] = so.mapped_column(sa.String(256))
+    description: so.Mapped[str] = so.mapped_column(sa.Text())
+    references: so.Mapped[str] = so.mapped_column(sa.Text())
+    images: so.Mapped[list["Image"]] = so.relationship(back_populates="artifact", cascade="all, delete-orphan")
+
+
+
+class TemporaryArtifact(db.Model):
+    __tablename__ = 'temporary_artifact'
+    username: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
+    status: so.Mapped[str] = so.mapped_column(sa.String(256), default="Pending")
+    old_id: so.Mapped[int] = so.mapped_column()
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256))
+    in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
+    year_completed: so.Mapped[str] = so.mapped_column(sa.String(256))
+    current_location: so.Mapped[str] = so.mapped_column(sa.String(256))
+    description: so.Mapped[str] = so.mapped_column(sa.Text())
+    references: so.Mapped[str] = so.mapped_column(sa.Text())
+    temporary_images: so.Mapped[list["TemporaryImage"]] = so.relationship(back_populates="temporary_artifact", cascade="all, delete-orphan")

@@ -1,51 +1,9 @@
+
 {% extends "base.html" %}
 {% import "bootstrap_wtf.html" as wtf %}
 {% block head_extra %}
 
 <style>
-    .top-right-image-button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    width: 15vw;
-    }
-
-    .top-right-image-button img {
-    width: 20vw;
-    height: auto;
-    cursor: pointer;
-    transition: transform 0.5s ease-in-out;
-    border-radius: 20px;
-    }
-
-    .top-right-image-button img:hover {
-    transform: scale(1.1);
-    }
-
-    .image-button-content {
-    position: relative;
-    display: inline-block;
-    width: 100%;
-    }
-
-    .image-button-content img {
-    width: 100%;
-    height:auto;
-    border-radius: 20px;
-    display: block;
-    }
-
-    .button-label-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-shadow: 1px 1px 6px black;
-    pointer-events: none;
-    text-align: center;
-    }
-
     .circle-button{
     display: inline-block;
     width: 210px;
@@ -80,7 +38,7 @@
 
     .button-row{
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
     gap: 1rem;
@@ -90,30 +48,12 @@
     justify-content: center;
     gap: 2rem;
     }
-
-    .three-column-button{
-    flex: 0 0 33.33%;
-    max-width: 33.33%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    }
-
-    .button-row.spaced-buttons{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-    }
-
-
     .latin-heading_2 {
     font-family: 'Cinzel', serif;
     font-size: 1rem;
     color: #000000;
     letter-spacing: 1px;
-    text-transform: none;
+    text-transform: uppercase;
     font-weight: bold;
     }
     .latin-heading_3 {
@@ -122,13 +62,14 @@
     letter-spacing: 1px;
     text-transform: none;
     font-weight: bold;
+    font-size: 1.3rem;
     }
     .greek-heading_2 {
     font-family: 'GFS Didot', serif;
     font-size: 1rem;
     color: #000000;
     letter-spacing: 1px;
-    text-transform: none;
+    text-transform: uppercase;
     font-weight: bold;
     }
 
@@ -150,32 +91,16 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    min-height:100vh;
     background-attachment: fixed;
+    min-height:100vh;
     display: flex;
     flex-direction:column;
     padding: 0.5rem;
-    position: relative;
     }
 
     .background-container h1 {
     margin: 20px;
     }
-    .square-button {
-    width:100%;
-    height: 100%;
-    overflow: hidden;
-    border-radius:20px;
-    border: 2px solid transparent;
-    }
-
-    .square-button img {
-    width:100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    }
-
 
 
     @media (max-width: 768px) {
@@ -191,6 +116,10 @@
     gap: 2rem;
     }
 
+    .circle-button {
+    width:160px;
+    height: 160px;
+    }
 
     .greek-heading_2,
     .latin-heading_2 {
@@ -244,34 +173,87 @@
     text-align: right;
     }
     }
+    .container-split{
+    display: flex;
+    justify-content: space-between;
+    margin: 2rem 10%;
+    border-top: 0px solid #000000;
+    border-bottom: 0px solid #000000;
+    padding-top: 2rem;
+    gap: 2rem;
+    flex-wrap: wrap;
+    }
+
+    .container-left {
+    flex:1;
+    text-align: center;
+    }
+
+    .divider {
+    width: 1.5px;
+    background-color: #000000;
+    margin: 0;
+    }
+
+    .container-right {
+    flex:1;
+    text-align: left;
+    line-height:1.5;
+    }
 
 </style>
 {% endblock %}
 
+
+
+
+
 {% block content %}
 <div class="background-container">
-    <div class="button-row">
-    <div class="three-column-button">
-            <a href="{{ url_for('architecture_info') }}" class="square-button" >
-                <img src="{{ url_for('static', filename = 'images/culture/Mystras_1.jpg')}}" alt="Architecture">
-            </a>
-            <div class="button-label latin-heading_2">Architecture</div>
-        </div>
-<div class="three-column-button">
-            <a href="{{ url_for('artifact_info') }}" class="square-button">
-                <img src="{{ url_for('static', filename = 'images/culture/Monomachos_crown.JPG')}}" alt="Artifacts">
-            </a>
-            <div class="button-label latin-heading_2">Artifacts</div>
-        </div>
-        <div class="three-column-button">
-            <a href="{{ url_for('literature_info') }}" class="square-button">
-                <img src="{{ url_for('static', filename = 'images/culture/manuscript_2.jpg')}}" alt="Literature">
-            </a>
-            <div class="button-label latin-heading_2">Literature</div>
-        </div>
+    <h1 style="text-align: center; margin-bottom: 1rem;">
+        <span class="latin-heading_3" style="display: block; font-size: 2rem;">{{artifact.title}}</span>
+        <span class="latin-heading_3" style="display: block; font-size: 2rem;">{{artifact.in_greek}}</span>
+    </h1>
+    <div style="text-align: center; margin-bottom: 0.2rem;">
+        <span class="latin-heading_3"><strong>Year Completed (Approximate):</strong>{{artifact.year_completed}}</span>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 0.2rem;">
+        <span class="latin-heading_3"><strong>Current Location:</strong>{{artifact.current_location}}</span>
+    </div>
 
 
-</div>
-</div>
+    <div style="font-size: 1rem; text-align: center">{% if artifact.temporary_images %}
+            <img src="{{artifact.temporary_images[0].url}}" alt = "{{artifact.temporary_images[0].filename}}" style="max-width: 750px; height:auto;">
+            {% else %}
+            No image
+            {% endif %}</div>
+        <div class="divider"></div>
+
+    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 12rem; margin-right: 12rem; margin-bottom: 3rem;">
+        {{ artifact.description.replace('\n', '<br>')| safe }}
+    </div>
+    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 8rem; margin-right: 8rem;">
+      References: <br>{{ artifact.references.replace('\n', '<br>')| safe }}
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <button class="btn btn-dark" onclick="document.getElementById('edit-form').style.display='block'; this.style.display ='none';">
+        Edit Artifact
+    </button>
+
+    <div id = 'edit-form' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open %} display: block; {% else %} display: none; {% endif %}; margin-bottom: 1rem;">
+        <form method="post" action="{{ url_for('edit_artifact_users', id = artifact.id) }}" enctype="multipart/form-data" novalidate>
+                               {{ wtf.quick_form(new_form, novalidate=True, autofocus=False) }}
+            </form>
+    </div>
+        {% endif %}
+
+
+
+
+    </div>
+
+
 
 {% endblock %}

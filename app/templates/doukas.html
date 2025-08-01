@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% import "bootstrap_wtf.html" as wtf %}
 {% block head_extra %}
@@ -80,7 +81,7 @@
 
     .button-row{
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
     gap: 1rem;
@@ -90,24 +91,6 @@
     justify-content: center;
     gap: 2rem;
     }
-
-    .three-column-button{
-    flex: 0 0 33.33%;
-    max-width: 33.33%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    }
-
-    .button-row.spaced-buttons{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-    }
-
-
     .latin-heading_2 {
     font-family: 'Cinzel', serif;
     font-size: 1rem;
@@ -146,7 +129,7 @@
 
 
     .background-container {
-    background-image: url("{{url_for('static', filename = 'images/parchment_color.jpg')}}");
+    background-image: url("{{url_for('static', filename = 'images/macedonians/macedonian_victory.png')}}");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -161,21 +144,6 @@
     .background-container h1 {
     margin: 20px;
     }
-    .square-button {
-    width:100%;
-    height: 100%;
-    overflow: hidden;
-    border-radius:20px;
-    border: 2px solid transparent;
-    }
-
-    .square-button img {
-    width:100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    }
-
 
 
     @media (max-width: 768px) {
@@ -191,6 +159,10 @@
     gap: 2rem;
     }
 
+    .circle-button {
+    width:160px;
+    height: 160px;
+    }
 
     .greek-heading_2,
     .latin-heading_2 {
@@ -248,30 +220,73 @@
 </style>
 {% endblock %}
 
+
 {% block content %}
 <div class="background-container">
-    <div class="button-row">
-    <div class="three-column-button">
-            <a href="{{ url_for('architecture_info') }}" class="square-button" >
-                <img src="{{ url_for('static', filename = 'images/culture/Mystras_1.jpg')}}" alt="Architecture">
-            </a>
-            <div class="button-label latin-heading_2">Architecture</div>
-        </div>
-<div class="three-column-button">
-            <a href="{{ url_for('artifact_info') }}" class="square-button">
-                <img src="{{ url_for('static', filename = 'images/culture/Monomachos_crown.JPG')}}" alt="Artifacts">
-            </a>
-            <div class="button-label latin-heading_2">Artifacts</div>
-        </div>
-        <div class="three-column-button">
-            <a href="{{ url_for('literature_info') }}" class="square-button">
-                <img src="{{ url_for('static', filename = 'images/culture/manuscript_2.jpg')}}" alt="Literature">
-            </a>
-            <div class="button-label latin-heading_2">Literature</div>
-        </div>
+    <div class="top-right-image-button">
+        <a href="{{url_for('wars_selection')}}">
+            <div class="image-button-content latin-heading_2">
+            <img src="{{url_for('static', filename='images/victory_byzantine_over_bulgar.jpg')}}" alt="Go"/>
+            <span class="button-label-text latin-heading_2" style="font-size: 3rem">Wars</span>
+            </div>
+        </a>
+    </div>
+<h1 class="latin-heading_3">{{ article_title }}</h1>
+<div class="col-lg-9">
+<table class="table" style="background-color: transparent;">
+    <thead>
+        <tr>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Portrait</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Title</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Title in Greek</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Born</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Died</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Reign</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Ascend to Throne by</th>
+        </tr>
+    </thead>
+    {% for macedonian in macedonian_lst %}
+        <tr>
+            <td class="latin-heading_2" style="font-size: 1rem">{% if macedonian.images %}
+            <img src="{{macedonian.images[0].url}}" alt = "{{macedonian.images[0].filename}}" style="max-width: 100px; height:auto;">
+            {% else %}
+            No image
+            {% endif %}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.title }}</td>
+            <td class="greek-heading_2" style="font-size: 1rem">{{ macedonian.in_greek }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.birth }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.death }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.reign }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ macedonian.ascent_to_power}}</td>
+            <td> <form action="{{ url_for('macedonian_emperors', id=macedonian.id) }}" method="get" style="display:inline;">
+                       <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
+                            <i class="bi bi-info-square"></i>
+                    </button>
+                 </form></td>
+            {% if current_user.is_authenticated and current_user.user_type == "Autocrat" %}
+            <td> <form action="{{ url_for('delete_emperors_', id=macedonian.id) }}" method="get" style="display:inline;">
+                       <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
+                            <i class="bi bi-trash-fill"></i>
+                    </button>
+                 </form> </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
 
+
+</table>
+    {% if current_user.is_authenticated %}
+    <button class="btn btn-dark" onclick="document.getElementById('admin-form').style.display='block'; this.style.display ='none';">
+        Add an Emperor
+    </button>
+
+    <div id = 'admin-form' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem;">
+<form method="post" action="{{ url_for('add_new_emperor_1') }}" enctype="multipart/form-data" novalidate>
+                    {{ wtf.quick_form(new_form, novalidate=True, autofocus=False) }}
+            </form>
+    </div>
+        {% endif %}
 
 </div>
 </div>
-
 {% endblock %}
