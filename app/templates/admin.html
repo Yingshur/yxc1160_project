@@ -103,6 +103,21 @@
                     </button>
                 </form>
             </td>
+            {% if user.role == "Normal" %}
+            <td>
+                <form action="{{ url_for('toggle_user_type') }}" method="post">
+                    {{ form.csrf_token() }}
+                    {{ form.choice(value=user.id) }}
+                    <button class="btn" type="submit">
+                        {% if user.user_type == "Authorized" %}
+                        <i class="bi bi-toggle-on"> Switch user type</i>
+                        {% else %}
+                        <i class="bi bi-toggle-off"> Switch user type</i>
+                        {% endif %}
+                    </button>
+                </form>
+            </td>
+            {% endif %}
                         {% endif %}
             {% if user.role == "Normal" %}
             <td> <form action="{{ url_for('invitation_code', id=user.id) }}" method="get" style="display:inline;">

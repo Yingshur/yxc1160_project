@@ -3,6 +3,7 @@ import random
 from wtforms import form, ValidationError
 #from time import timezone
 import os
+import pymysql
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timezone, timedelta
 from flask import Flask, url_for, render_template
@@ -47,7 +48,7 @@ app.config.update(
 mail = Mail(app)
 signer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 TOKEN_MAX_AGE = 60*60*24
-
+pymysql.install_as_MySQLdb()
 import os
 BASE = os.path.abspath(os.path.dirname(__file__))
 app.config['UPLOAD_FOLDER'] = os.path.join(BASE, 'static', 'images', 'uploaded_photos')

@@ -218,15 +218,15 @@ def approve_emperor_add(id):
                           dynasty=add_emperor.dynasty, reign_start = add_emperor.reign_start, references = add_emperor.references, ascent_to_power = add_emperor.ascent_to_power)
     user = db.session.query(User).filter_by(username = add_emperor.username).first()
     db.session.add(new_emperor)
+    db.session.commit()
     new_log_12 = LogBook(original_id=new_emperor.id, title=new_emperor.title,
                          username=current_user.username)
     db.session.add(new_log_12)
     if add_emperor.temporary_images:
         file_name = secure_filename(add_emperor.temporary_images[0].filename)
-        uuid_ = uuid.uuid4().hex[:8]
-        file_name = f"{uuid_}_{file_name}"
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", emperor_id = new_emperor.id)
         db.session.add(photo)
+        db.session.commit()
         new_log_13 = LogBook(original_id=photo.id, title=file_name,
                              username=current_user.username)
         db.session.add(new_log_13)
@@ -465,8 +465,6 @@ def approve_emperor_edit(id):
         photo = db.session.query(Image).filter_by(emperor_id=emperor_new_edit.id).order_by(Image.id.asc()).first()
         if photo:
             file_name = secure_filename(edit_emperor.temporary_images[0].filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
             photo.filename = file_name
             photo.url = f"/static/images/uploaded_photos/{file_name}"
             photo.emperor_id = emperor_new_edit.id
@@ -476,8 +474,6 @@ def approve_emperor_edit(id):
             db.session.delete(edit_emperor.temporary_images[0])
         else:
             file_name = secure_filename(edit_emperor.temporary_images[0].filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
             photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", emperor_id = emperor_new_edit.id)
             db.session.add(photo)
             new_log_15 = LogBook(original_id=photo.id, title=file_name,
@@ -670,6 +666,7 @@ def add_new_emperor():
                                               dynasty=form.dynasty.data, reign_start = form.reign_start.data, references = form.references.data, ascent_to_power = form.ascent_to_power.data)
 
             db.session.add(temporary_edit)
+            db.session.commit()
             if form.portrait.data:
                 file_name = secure_filename(form.portrait.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -678,9 +675,10 @@ def add_new_emperor():
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.portrait.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryEmperor).order_by(TemporaryEmperor.id.desc()).first()
                 photo = TemporaryImage(username=current_user.username, old_id=int(form.edit.data), filename=file_name,
                                        url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                       temporary_emperor_id=temporary_edit.id)
+                                       temporary_emperor_id=id_data.id)
                 db.session.add(photo)
                 db.session.commit()
                 confirmation_email(id=temporary_edit.id)
@@ -731,6 +729,7 @@ def add_new_emperor_1():
                                               dynasty=form.dynasty.data, reign_start = form.reign_start.data, references = form.references.data, ascent_to_power = form.ascent_to_power.data)
 
             db.session.add(temporary_edit)
+            db.session.commit()
             if form.portrait.data:
                 file_name = secure_filename(form.portrait.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -739,9 +738,10 @@ def add_new_emperor_1():
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.portrait.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryEmperor).order_by(TemporaryEmperor.id.desc()).first()
                 photo = TemporaryImage(username=current_user.username, old_id=int(form.edit.data), filename=file_name,
                                        url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                       temporary_emperor_id=temporary_edit.id)
+                                       temporary_emperor_id=id_data.id)
                 db.session.add(photo)
                 db.session.commit()
                 confirmation_email(id=temporary_edit.id)
@@ -792,6 +792,7 @@ def add_new_emperor_2():
                                               dynasty=form.dynasty.data, reign_start = form.reign_start.data, references = form.references.data, ascent_to_power = form.ascent_to_power.data)
 
             db.session.add(temporary_edit)
+            db.session.commit()
             if form.portrait.data:
                 file_name = secure_filename(form.portrait.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -800,9 +801,10 @@ def add_new_emperor_2():
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.portrait.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryEmperor).order_by(TemporaryEmperor.id.desc()).first()
                 photo = TemporaryImage(username=current_user.username, old_id=int(form.edit.data), filename=file_name,
                                        url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                       temporary_emperor_id=temporary_edit.id)
+                                       temporary_emperor_id=id_data.id)
                 db.session.add(photo)
                 db.session.commit()
                 confirmation_email(id=temporary_edit.id)
@@ -856,6 +858,7 @@ def add_new_emperor_3():
                                               dynasty=form.dynasty.data, reign_start = form.reign_start.data, references = form.references.data, ascent_to_power = form.ascent_to_power.data)
 
             db.session.add(temporary_edit)
+            db.session.commit()
             if form.portrait.data:
                 file_name = secure_filename(form.portrait.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -864,9 +867,10 @@ def add_new_emperor_3():
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.portrait.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryEmperor).order_by(TemporaryEmperor.id.desc()).first()
                 photo = TemporaryImage(username=current_user.username, old_id=int(form.edit.data), filename=file_name,
                                        url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                       temporary_emperor_id=temporary_edit.id)
+                                       temporary_emperor_id=id_data.id)
                 db.session.add(photo)
                 db.session.commit()
                 confirmation_email(id=temporary_edit.id)
@@ -911,12 +915,14 @@ def add_new_emperor_4():
                 db.session.commit()
             return redirect(url_for("palaiologos"))
         else:
-            temporary_edit = TemporaryEmperor(username=current_user.username, old_id=int(form.edit.data),
+            temporary_edit_1 = TemporaryEmperor(username=current_user.username, old_id=int(form.edit.data),
                                               title=form.title.data, in_greek=form.in_greek.data, birth=form.birth.data,
                                               death=form.death.data, reign=form.reign.data, life=form.life.data,
                                               dynasty=form.dynasty.data, reign_start = form.reign_start.data, references = form.references.data, ascent_to_power = form.ascent_to_power.data)
 
-            db.session.add(temporary_edit)
+            db.session.add(temporary_edit_1)
+            db.session.commit()
+
             if form.portrait.data:
                 file_name = secure_filename(form.portrait.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -925,12 +931,13 @@ def add_new_emperor_4():
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.portrait.data.save(new_path_for_uploading)
-                photo = TemporaryImage(username=current_user.username, old_id=int(form.edit.data), filename=file_name,
+                id_data = db.session.query(TemporaryEmperor).order_by(TemporaryEmperor.id.desc()).first()
+                photo_1 = TemporaryImage(username=current_user.username, old_id=form.edit.data, filename=file_name,
                                        url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                       temporary_emperor_id=temporary_edit.id)
-                db.session.add(photo)
+                                       temporary_emperor_id=id_data.id)
+                db.session.add(photo_1)
                 db.session.commit()
-                confirmation_email(id=temporary_edit.id)
+                confirmation_email(id=temporary_edit_1.id)
             return redirect(url_for("palaiologos"))
     return render_template('palaiologos.html', title = "Palaiologos dynasty", macedonian_lst = macedonian_lst, new_form = form, form_open = True, article_title = "Palaiologos dynasty (1259-1453)")
 
@@ -1043,7 +1050,9 @@ def edit_emperor(id):
         else:
             temporary_edit = TemporaryEmperor(username = current_user.username, old_id = int(form.edit.data), title = form.title.data, in_greek = form.in_greek.data, birth = form.birth.data, death = form.death.data, reign = form.reign.data, life = form.life.data, dynasty = form.dynasty.data, reign_start = form.reign_start.data, references = form.references.data, ascent_to_power = form.ascent_to_power.data)
             db.session.add(temporary_edit)
+            db.session.commit()
             if form.portrait.data:
+                id_data = db.session.query(TemporaryEmperor).order_by(TemporaryEmperor.id.desc()).first()
                 file_name = secure_filename(form.portrait.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
                 file_name = f"{uuid_}_{file_name}"
@@ -1053,7 +1062,7 @@ def edit_emperor(id):
                 form.portrait.data.save(new_path_for_uploading)
                 photo = TemporaryImage( username = current_user.username, old_id = int(form.edit.data),filename=file_name,
                                          url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                         temporary_emperor_id=temporary_edit.id)
+                                         temporary_emperor_id=id_data.id)
                 db.session.add(photo)
             db.session.commit()
             confirmation_email(temporary_edit.id)
@@ -1105,6 +1114,7 @@ def add_new_war_1():
                 print(path_for_uploading)
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.image.data.save(new_path_for_uploading)
+
                 new_war_image = Image(filename=file_name,
                                              url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
                                              war_id=new_war.id)
@@ -1131,6 +1141,7 @@ def add_new_war_1():
                                                   )
 
             db.session.add(temporary_war_edit)
+            db.session.commit()
             if form.image.data:
                 file_name = secure_filename(form.image.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -1139,9 +1150,10 @@ def add_new_war_1():
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.image.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryWar).order_by(TemporaryWar.id.desc()).first()
                 photo = TemporaryImage(username=current_user.username, old_id=int(form.edit.data), filename=file_name,
                                        url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                       temporary_war_id= temporary_war_edit.id)
+                                       temporary_war_id= id_data.id)
                 db.session.add(photo)
                 db.session.commit()
                 confirmation_email(id = temporary_war_edit.id)
@@ -1221,6 +1233,7 @@ def add_new_war_2():
                                                   )
 
             db.session.add(temporary_war_edit)
+            db.session.commit()
             if form.image.data:
                 file_name = secure_filename(form.image.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -1229,9 +1242,10 @@ def add_new_war_2():
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.image.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryWar).order_by(TemporaryWar.id.desc()).first()
                 photo = TemporaryImage(username=current_user.username, old_id=int(form.edit.data), filename=file_name,
                                        url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                       temporary_war_id= temporary_war_edit.id)
+                                       temporary_war_id= id_data.id)
                 db.session.add(photo)
                 db.session.commit()
                 confirmation_email(id = temporary_war_edit.id)
@@ -1331,7 +1345,7 @@ def edit_war(id):
                                                   war_type=form.war_type.data, description=form.description.data,
                                                   result=form.result.data)
             db.session.add(temporary_edit)
-            db.session.flush()
+            db.session.commit()
             if form.image.data:
                 file_name = secure_filename(form.image.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -1340,9 +1354,10 @@ def edit_war(id):
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.image.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryWar).order_by(TemporaryWar.id.desc()).first()
                 photo = TemporaryImage( username = current_user.username, old_id = int(form.edit.data),filename=file_name,
                                          url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                         temporary_war_id=temporary_edit.id)
+                                         temporary_war_id=id_data.id)
                 db.session.add(photo)
             db.session.commit()
             confirmation_email(id=temporary_edit.id)
@@ -1456,8 +1471,6 @@ def approve_war_edit(id):
         photo = db.session.query(Image).filter_by(war_id=new_war.id).order_by(Image.id.asc()).first()
         if photo:
             file_name = secure_filename(war_first.temporary_images[0].filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
             photo.filename = file_name
             photo.url = f"/static/images/uploaded_photos/{file_name}"
             photo.war_id = new_war.id
@@ -1467,8 +1480,6 @@ def approve_war_edit(id):
             db.session.add(new_log_9)
         else:
             file_name = secure_filename(war_first.temporary_images[0].filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
             photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", war_id = new_war.id)
             db.session.add(photo)
             db.session.delete(war_first.temporary_images[0])
@@ -1495,8 +1506,6 @@ def approve_war_add(id):
     db.session.add(new_log_10)
     if add_war.temporary_images:
         file_name = secure_filename(add_war.temporary_images[0].filename)
-        uuid_ = uuid.uuid4().hex[:8]
-        file_name = f"{uuid_}_{file_name}"
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", war_id = new_war.id)
         db.session.add(photo)
         db.session.delete(add_war.temporary_images[0])
@@ -1698,7 +1707,9 @@ def add_new_architecture():
                                                                 )
 
             db.session.add(temporary_architecture_edit)
+            db.session.commit()
             if form.image.data:
+                id_data = db.session.query(TemporaryArchitecture).order_by(TemporaryArchitecture.id.desc()).first()
                 file_name = secure_filename(form.image.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
                 file_name = f"{uuid_}_{file_name}"
@@ -1708,7 +1719,7 @@ def add_new_architecture():
                 form.image.data.save(new_path_for_uploading)
                 photo = TemporaryImage(username=current_user.username, old_id=int(form.edit.data), filename=file_name,
                                        url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                       temporary_architecture_id= temporary_architecture_edit.id)
+                                       temporary_architecture_id= id_data.id)
                 db.session.add(photo)
                 db.session.commit()
                 confirmation_email(id = temporary_architecture_edit.id)
@@ -1790,7 +1801,7 @@ def edit_architecture(id):
                                                                 description=form.description.data,
                                                                 building_type=form.building_type.data)
             db.session.add(temporary_edit)
-            db.session.flush()
+            db.session.commit()
             if form.image.data:
                 file_name = secure_filename(form.image.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -1799,9 +1810,10 @@ def edit_architecture(id):
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.image.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryArchitecture).order_by(TemporaryArchitecture.id.desc()).first()
                 photo = TemporaryImage( username = current_user.username, old_id = int(form.edit.data),filename=file_name,
                                          url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                         temporary_architecture_id=temporary_edit.id)
+                                         temporary_architecture_id=id_data.id)
                 db.session.add(photo)
             db.session.commit()
             confirmation_email(id = temporary_edit.id)
@@ -1899,8 +1911,6 @@ def approve_architecture_edit(id):
         if photo:
             file_name = secure_filename(architecture_first.temporary_images[0].filename)
             uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
-            photo.filename = file_name
             photo.url = f"/static/images/uploaded_photos/{file_name}"
             photo.architecture_id = new_architecture.id
             new_log_21 = LogBook(original_id=photo.id, title=file_name,
@@ -1909,8 +1919,6 @@ def approve_architecture_edit(id):
             db.session.delete(architecture_first.temporary_images[0])
         else:
             file_name = secure_filename(architecture_first.temporary_images[0].filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
             photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", architecture_id = new_architecture.id)
             db.session.add(photo)
             new_log_21 = LogBook(original_id=photo.id, title=file_name,
@@ -1935,8 +1943,6 @@ def approve_architecture_add(id):
     db.session.add(new_log_22)
     if add_architecture.temporary_images:
         file_name = secure_filename(add_architecture.temporary_images[0].filename)
-        uuid_ = uuid.uuid4().hex[:8]
-        file_name = f"{uuid_}_{file_name}"
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", architecture_id = new_architecture.id)
         db.session.add(photo)
         new_log_23 = LogBook(original_id=photo.id, title=file_name,
@@ -2177,6 +2183,7 @@ def add_new_literature():
                                                                 )
 
             db.session.add(temporary_literature_edit)
+            db.session.commit()
             if form.image.data:
                 file_name = secure_filename(form.image.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -2185,9 +2192,10 @@ def add_new_literature():
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.image.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryLiterature).order_by(TemporaryLiterature.id.desc()).first()
                 photo = TemporaryImage(username=current_user.username, old_id=int(form.edit.data), filename=file_name,
                                        url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                       temporary_literature_id= temporary_literature_edit.id)
+                                       temporary_literature_id= id_data.id)
                 db.session.add(photo)
                 db.session.commit()
                 confirmation_email(temporary_literature_edit.id)
@@ -2259,7 +2267,7 @@ def edit_literature(id):
                                                  description=form.description.data
                                                  )
             db.session.add(temporary_edit)
-            db.session.flush()
+            db.session.commit()
             if form.image.data:
                 file_name = secure_filename(form.image.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -2268,9 +2276,10 @@ def edit_literature(id):
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.image.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryLiterature).order_by(TemporaryLiterature.id.desc()).first()
                 photo = TemporaryImage( username = current_user.username, old_id = int(form.edit.data),filename=file_name,
                                          url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                         temporary_literature_id=temporary_edit.id)
+                                         temporary_literature_id=id_data.id)
                 db.session.add(photo)
             db.session.commit()
             confirmation_email(temporary_edit.id)
@@ -2354,8 +2363,6 @@ def approve_literature_edit(id):
         photo = db.session.query(Image).filter_by(literature_id=new_literature.id).order_by(Image.id.asc()).first()
         if photo:
             file_name = secure_filename(literature_first.temporary_images[0].filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
             photo.filename = file_name
             photo.url = f"/static/images/uploaded_photos/{file_name}"
             photo.literature_id = new_literature.id
@@ -2365,8 +2372,6 @@ def approve_literature_edit(id):
             db.session.delete(literature_first.temporary_images[0])
         else:
             file_name = secure_filename(literature_first.temporary_images[0].filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
             photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", literature_id = new_literature.id)
             db.session.add(photo)
             new_log_31 = LogBook(original_id=photo.id, title=file_name,
@@ -2393,8 +2398,6 @@ def approve_literature_add(id):
     db.session.add(new_log_32)
     if add_literature.temporary_images:
         file_name = secure_filename(add_literature.temporary_images[0].filename)
-        uuid_ = uuid.uuid4().hex[:8]
-        file_name = f"{uuid_}_{file_name}"
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", literature_id = new_literature.id)
         db.session.add(photo)
         new_log_33 = LogBook(original_id=photo.id, title=file_name,
@@ -2531,6 +2534,19 @@ def artifact_info_detail(id):
 
 
 
+@app.route('/toggle_user_type', methods=['POST'])
+def toggle_user_type():
+    form = ChooseForm()
+    if form.validate_on_submit():
+        u = db.session.get(User, int(form.choice.data))
+        if u.user_type == "user":
+            u.user_type = "Authorized"
+        elif u.user_type == "Authorized":
+            u.user_type = "user"
+        db.session.commit()
+    return redirect(url_for('admin'))
+
+
 
 
 
@@ -2580,6 +2596,7 @@ def add_new_artifact():
                                                                 )
 
             db.session.add(temporary_artifact_edit)
+            db.session.commit()
             if form.image.data:
                 file_name = secure_filename(form.image.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -2588,9 +2605,10 @@ def add_new_artifact():
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.image.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryArtifact).order_by(TemporaryArtifact.id.desc()).first()
                 photo = TemporaryImage(username=current_user.username, old_id=int(form.edit.data), filename=file_name,
                                        url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                       temporary_artifact_id= temporary_artifact_edit.id)
+                                       temporary_artifact_id= id_data.id)
                 db.session.add(photo)
                 db.session.commit()
                 confirmation_email(temporary_artifact_edit.id)
@@ -2661,7 +2679,7 @@ def edit_artifact(id):
                                                  description=form.description.data
                                                  )
             db.session.add(temporary_edit)
-            db.session.flush()
+            db.session.commit()
             if form.image.data:
                 file_name = secure_filename(form.image.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -2670,9 +2688,10 @@ def edit_artifact(id):
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.image.data.save(new_path_for_uploading)
+                id_data = db.session.query(TemporaryArtifact).order_by(TemporaryArtifact.id.desc()).first()
                 photo = TemporaryImage( username = current_user.username, old_id = int(form.edit.data),filename=file_name,
                                          url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
-                                         temporary_artifact_id=temporary_edit.id)
+                                         temporary_artifact_id=id_data.id)
                 db.session.add(photo)
             db.session.commit()
             confirmation_email(temporary_edit.id)
