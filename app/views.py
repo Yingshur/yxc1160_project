@@ -2616,8 +2616,6 @@ def add_new_artifact():
 
 
 
-
-
 @app.route('/edit_artifact/<int:id>', methods = ['POST', 'GET'])
 def edit_artifact(id):
     artifact_first = db.session.get(Artifact, id)
