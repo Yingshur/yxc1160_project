@@ -2548,12 +2548,6 @@ def toggle_user_type():
 
 
 
-
-
-
-
-
-
 @app.route("/add_new_artifact", methods = ['POST', 'GET'])
 def add_new_artifact():
     form = ArtifactForm()
