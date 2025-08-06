@@ -2,13 +2,101 @@
 from app import db
 from app.models import Emperor, Image, User, War, Architecture, Literature, Artifact
 
+
+
+andronicus_ii_bio = (
+    "\"An intellectual and theologian rather than a statesman or soldier, Andronicus weakened Byzantium by reducing its land forces to a few thousand cavalry and infantry and eliminating the navy altogether, "
+    "relying solely on a Genoese mercenary fleet. His lack of military initiative enabled the Ottoman Turks to gain control of nearly all of Anatolia by 1300, and his employment of Catalan mercenaries in 1304 ended disastrously, "
+    "because the Catalans proved more inclined to pillage Byzantine cities than to fight the Turks. In the war between the Italian city-states of Venice and Genoa, Andronicus unwisely took sides, favouring Genoa, and suffered the wrath of the greatly superior Venetian navy.\n\n"
+    "Internally, Andronicus’s reign was marked by a steady disintegration of centralized authority and increasing economic difficulties, although he did sponsor a revival of Byzantine art and culture and championed the independence of the Eastern Orthodox church. "
+    "During his reign the great monastery complex at Mount Athos in Greece enjoyed its golden age.\n\n"
+    "In 1328 Andronicus, after quarreling with his grandson—who would become Andronicus III—and excluding him from the succession, was deposed by him and entered a monastery.\""
+)
+
+
 saint_stephens_crown_description = (
     "\"Saint Stephen’s Crown, greatly venerated crown of Hungary, is the symbol of Hungarian nationhood, without which no sovereign was truly accepted by the Hungarian people. It is made from an 11th-century jeweled circlet of Byzantine style, augmented early in the 12th century by the addition of arches and an upper rim composed of alternate pointed and round-topped plaques of enameled gold. Small pendants hang on short chains on both sides and at the back.\n\n"
     "The cross on the top is crooked, because the screw hole in the knob it stands on was set at an angle, suggesting that originally it was not meant to occupy the top of the crown but to go on a sloping surface—possibly the curve of the foremost arch.\n\n"
     "The crown was given to a U.S. Army unit by a Hungarian honour guard to keep it from being seized by advancing Soviet troops after World War II. It remained in U.S. guardianship at Fort Knox until it was returned to Hungary in 1978.\""
 )
 
+isaac_ii_bio_detailed = (
+    "\"In 1189 the Byzantine ruler was confronted with the Third Crusade, which, led by the Holy Roman emperor Frederick I Barbarossa, was passing through Byzantine territory. "
+    "Isaac tried to protect himself by concluding a treaty with Saladin, the sultan of Egypt, but he was soon forced to assist Frederick. Isaac concluded the Treaty of Adrianople with Frederick in February 1190, and in the following month Frederick’s forces were transported across the Hellespont to Asia Minor.\n\n"
+    "Free to turn his attention to the Balkans, Isaac restored Byzantine prestige by defeating Stefan Nemanja of Serbia (1190). With Hungarian help, he planned an expedition against the Bulgarians, assembling a Byzantine army for this purpose near the city of Cypsela in the spring of 1195. "
+    "On April 8, however, he was suddenly overthrown by his brother, who imprisoned and blinded him and assumed the throne as Emperor Alexius III.\n\n"
+    "In 1201 Isaac’s son Alexius made his way to Germany, where he succeeded in bringing about the diversion of the Fourth Crusade to Constantinople in order to restore his father to power. "
+    "In July 1203 the Crusaders entered the city, and on August 1 Isaac, after eight years’ imprisonment, was crowned co-emperor with Alexius, who assumed the title Alexius IV. "
+    "Friction between the Crusaders and the townspeople of Constantinople, however, led to a revolution in January 1204. The co-emperors were dethroned, Alexius IV was assassinated on February 8, 1204, and Isaac died several days later.\""
+)
 
+
+michael_viii_bio_detailed = (
+    "\"A scion of several former imperial families (Ducas, Angelus, Comnenus), Michael passed a rather uneventful boyhood, seemingly marked primarily by fantasies of himself recovering Constantinople from the Latins; he spent much of his youth living in the imperial palaces at Nicaea and Nicomedia.\"\n\n"
+    "\"His remarkable resourcefulness and talent for intrigue were revealed early. At the age of 21 he was charged by the emperor John III Vatatzes of Nicaea with treasonous conduct against the state, a charge from which he extricated himself by the force of his wit. Later, on the death of the emperor Theodore II Lascaris in 1258, Michael was chosen regent for Theodore’s six-year-old son, John Lascaris. Gradually usurping more and more authority, Michael seized the throne and early in 1259 was crowned emperor after shunting aside and blinding the rightful heir, his charge, John. Faced with rebellion by Lascarid supporters in Asia Minor, Michael succeeded, in the eyes of many Greeks, in legitimating his rule by retaking Constantinople from the Latins. Whether as the result of Michael’s carefully planned ruse or of accident or both, the great city fell to his general in July 1261. Although the Greeks generally were exultant, a few realized that the centre of gravity had shifted from Asia Minor to Europe. In the long run this concern with Europe was to prove fateful, for it led to the neglect of the frontiers in the East and, with that neglect, eventually to the conquest and settlement of all of Asia Minor by the Turks.\"\n\n"
+    "\"From the first, Michael’s hold on the throne was precarious, surrounded as it was on all sides by Latins desirous of restoring Latin rule. Especially active was Baldwin II of Courtenay, the last Latin emperor of Constantinople. In his maneuvers to recover his throne from Michael, Baldwin finally entered into a diplomatic and matrimonial alliance with a man who was the West’s ablest diplomat—in his machinations almost the equal of Michael himself—Charles of Anjou, brother of St. Louis of France. At papal invitation, Charles advanced into southern Italy, expelled the last representatives of the imperial house of Hohenstaufen, Manfred and Conradin, and then from Palermo and Naples almost at once fixed his gaze across the Balkans onto Constantinople. To quote a chronicler, 'he aspired to the monarchy of the world, hoping thereby to recreate the great empire of Julius Caesar by joining East and West.'\"\n\n"
+    "\"In exchange for the papal promise to restrain Charles from attacking Constantinople, Michael promised to bring about religious union of the Greek church with Rome. That promise provoked the violent opposition of most of Michael’s own people, who opposed union on doctrinal grounds. Specifically, they objected to such parts of the Latin liturgy as the Filioque (statement of belief in the procession of the Holy Spirit from the Son and the Father) and the use of the azyme (unleavened bread). Perhaps more important, most of them refused to accept papal ecclesiastical supremacy, which they felt, however obscurely, would lead to restoration of Latin political domination and possibly even cultural assimilation to the Latins.\"\n\n"
+    "\"Despite all the obstacles, union was nevertheless finally pronounced at the Second Council of Lyon in 1274. The Orthodox East was coerced into accepting union. Immediately after Michael’s death (1282), however, the Greek church declared the union invalid. The Greeks objected to the council on the grounds that not all the Eastern patriarchs or their representatives had been present, that no discussion of problems separating the two churches had taken place, and that no subsequent council had declared that of Lyon ecumenical. Nevertheless, for political reasons, Michael had struggled to maintain the union. But, when Charles of Anjou finally managed to enthrone his own candidate, Martin IV, as pope in 1281, Martin at once excommunicated Michael and at the same time pronounced Charles’s projected expedition against Byzantium a 'Holy Crusade' against the 'schismatic' Greeks. Included in the vast network of alliances erected by Charles to conquer the Greek East were not only Sicily, parts of Italy, Greek Lascarid dissidents, various Slavs of the Balkans, Baldwin, France, and Venice but also the papacy. Venice’s aim in particular was to recover the broad trading privileges it had exercised in the days of the Latin empire and to oust its arch foe, the Genoese, from the lucrative Greek markets.\"\n\n"
+    "\"The diplomatic duel between Charles and Michael was intensified, with Charles striving unceasingly to prepare his troops and navy. He even launched an attack across the Adriatic on Berat (in modern Albania) under the French general Sully but was repulsed by Michael. What Michael had on his side—the result of his consummate diplomatic ability—was (for a time) the papal alliance, a secret agreement with the Hohenstaufen supporters in Sicily, the support of Genoa, and, most important, a secret alliance with the son-in-law of Manfred, King Peter III of Aragon. The denouement to this remarkable contest was the outbreak on March 30/31, 1282, of the Sicilian Vespers, the massacre of the French signaling the revolt against Charles. Byzantium was saved from a second occupation by the Latins.\"\n\n"
+    "\"At his death, which occurred soon afterward, Michael thus left an intact empire to his son Andronicus II. But it cannot be denied that his policy of using ecclesiastical union to stave off Charles’s attack on his capital and the deep opposition that policy provoked among the Byzantine population established a fateful precedent for later Byzantine history. Moreover, by focusing his attention too exclusively on Europe, his policy helped lead to Ottoman occupation of all of Asia Minor and ultimately to the capture of Constantinople itself. Nevertheless, Michael’s positive accomplishments cannot be overlooked. He gave Byzantium two centuries more of life, began rebuilding the capital, and reestablished the University of Constantinople. His sponsorship of a general revival of learning led to the important Byzantine 'Renaissance' in the 14th and 15th centuries.\""
+)
+
+
+constantine_x_bio = (
+    "\"Constantine’s accession was a triumph for the civil aristocracy and was unfortunate in that he proved an incapable emperor. "
+    "He reduced the army and neglected the frontier defenses at a time when the Seljuq Turks were pressing into the eastern provinces; "
+    "consequently, the sultan Alp Arslan overran Armenia (1064–65) and attacked Caesarea (1067). In 1064 the Hungarians occupied Belgrade, "
+    "and the Pechenegs (Patzinaks) and Uzes (Kumans) crossed the Danube River and ravaged the Balkan provinces, penetrating into Greece. "
+    "In Italy, the Normans were rapidly conquering the last remnants of the Byzantine possessions.\""
+)
+
+alexios_i_bio = (
+    "\"The third son of John Comnenus and a nephew of Isaac I (emperor 1057–59), Alexius came from a distinguished Byzantine landed family "
+    "and was one of the military magnates who had long urged more effective defense measures, particularly against the Turks’ encroaching on "
+    "Byzantine provinces in eastern and central Anatolia. From 1068 to 1081 he gave able military service during the short reigns of Romanus IV, "
+    "Michael VII, and Nicephorus III. Then, with the support of his brother Isaac and his mother, the formidable Anna Dalassena, and with that "
+    "of the powerful Ducas family, to which his wife, Irene, belonged, he seized the Byzantine throne from Nicephorus III.\n\n"
+    "Alexius was crowned on April 4, 1081. After more than 50 years of ineffective or short-lived rulers, Alexius, in the words of Anna Comnena, "
+    "his daughter and biographer, found the empire 'at its last gasp,' but his military ability and diplomatic gifts enabled him to retrieve the "
+    "situation. He drove back the south Italian Normans, headed by Robert Guiscard, who were invading western Greece (1081–82). This victory was "
+    "achieved with Venetian naval help, bought at the cost of granting Venice extensive trading privileges in the Byzantine Empire. In 1091 he "
+    "defeated the Pechenegs, Turkic nomads who had been continually surging over the Danube River into the Balkans. Alexius halted the further "
+    "encroachment of the Seljuq Turks, who had already established the sultanate of Rūm (or Konya) in central Anatolia. He made agreements with "
+    "Sulaymān ibn Qutalmïsh of Konya (1081) and subsequently with his son Qïlïch Arslan (1093), as well as with other Muslim rulers on Byzantium’s "
+    "eastern border.\n\n"
+    "At home, Alexius’s policy of strengthening the central authority and building up professional military and naval forces resulted in increased "
+    "Byzantine strength in western and southern Anatolia and eastern Mediterranean waters. But he was unable or unwilling to limit the considerable "
+    "powers of the landed magnates who had threatened the unity of the empire in the past. Indeed, he strengthened their position by further concessions, "
+    "and he had to reward services, military and otherwise, by granting fiscal rights over specified areas. This method, which was to be increasingly "
+    "employed by his successors, inevitably weakened central revenues and imperial authority. He repressed heresy and maintained the traditional imperial "
+    "role of protecting the Eastern Orthodox church, but he did not hesitate to seize ecclesiastical treasure when in financial need. He was subsequently "
+    "called to account for this by the church.\n\n"
+    "To later generations Alexius appeared as the ruler who pulled the empire together at a crucial time, thus enabling it to survive until 1204, and in "
+    "part until 1453, but modern scholars tend to regard him, together with his successors John II (reigned 1118–43) and Manuel I (reigned 1143–80), as having "
+    "effected only stopgap measures. Judgments of Alexius must be tempered by allowing for the extent to which he was handicapped by the inherited internal "
+    "weaknesses of the Byzantine state and, even more, by the series of crises precipitated by the western European Crusaders from 1097 onward. The Crusading "
+    "movement, motivated partly by a desire to recapture the holy city of Jerusalem, partly by the hope of acquiring new territory, increasingly encroached on "
+    "Byzantine preserves and frustrated Alexius’s foreign policy, which was primarily directed toward the reestablishment of imperial authority in Anatolia. "
+    "His relations with Muslim powers were disrupted on occasion, and former valued Byzantine possessions, such as Antioch, passed into the hands of arrogant "
+    "Western princelings, who even introduced Latin Christianity in place of Greek. Thus, it was during Alexius’s reign that the last phase of the clash between "
+    "the Latin West and the Greek East was inaugurated. He did regain some control over western Anatolia; he also advanced into the southeast Taurus region, "
+    "securing much of the fertile coastal plain around Adana and Tarsus, as well as penetrating farther south along the Syrian coast. But neither Alexius nor "
+    "succeeding Comnenian emperors were able to establish permanent control over the Latin Crusader principalities. Nor was the Byzantine Empire immune from "
+    "further Norman attacks on its western islands and provinces—as in 1107–08, when Alexius successfully repulsed Bohemond I of Antioch’s assault on Avlona in "
+    "western Greece. Continual Latin (particularly Norman) attacks, constant thrusts from Muslim principalities, the rising power of Hungary and the Balkan "
+    "principalities—all conspired to surround Byzantium with potentially hostile forces. Even Alexius’s diplomacy, whatever its apparent success, could not "
+    "avert the continual erosion that ultimately led to the Ottoman conquest.\""
+)
+
+john_ii_komnenos_bio = (
+    "\"A son of Emperor Alexius I Comnenus and Irene Ducas, John kept an austere court and spent most of his reign with his troops. "
+    "He canceled Venetian trading privileges granted by his father but was forced to restore them after the Venetians launched a fleet against him. "
+    "He thwarted Pecheneg, Hungarian, and Serbian threats during the 1120s, and in 1130 he allied himself with the German emperor Lothar II (III) against the Norman king Roger II of Sicily.\n\n"
+    "In the later part of his reign John focused his activities on the East. In 1135 he defeated the Danishmend emirate of Melitene. "
+    "Two years later he reconquered all of Cilicia from the kingdom of Lower Armenia and later forced Raymond of Poitiers, prince of Antioch, to recognize Byzantine suzerainty. "
+    "Though John and Raymond formed an alliance against the Turkish Atabegs of Syria, their campaigns were not particularly successful. "
+    "In 1143 John returned to press his claims to Antioch. He died following a hunting accident after naming his fourth son, Manuel I, to succeed him.\""
+)
 
 
 madrid_skylitzes_description = (
@@ -122,8 +210,82 @@ def reset_db():
             'ascent_to_power': 'Hereditary succession',
             'references': 'The Editors of Encyclopædia Britannica (1998). Alexander | Byzantine Empire, Eastern Roman Empire, Reformer. [online] Encyclopedia Britannica. Available at: https://www.britannica.com/biography/Alexander-Byzantine-emperor [Accessed 2 Jun. 2025].'
 
+    },
+        {
+            'title': 'Constantine X Doukas',
+            'in_greek': 'Κωνσταντῖνος Ι΄ Δούκας',
+            'birth': 'c. 1006, Constantinople',
+            'death': '23 May 1067, Constantinople',
+            'reign': '1059–1067',
+            'life': constantine_x_bio,
+            'dynasty': 'Doukas',
+            'reign_start': 1059,
+            'ascent_to_power': 'Appointment',
+            'references': 'Encyclopaedia Britannica (n.d.). Constantine X Ducas | Byzantine emperor. [online] Available at: https://www.britannica.com/biography/Constantine-X-Ducas [Accessed 4 Aug. 2025].'
+        }
+        , {
+        'title': 'Alexios I Komnenos',
+        'in_greek': 'Ἀλέξιος Αʹ Κομνηνός',
+        'birth': 'c. 1057, Constantinople',
+        'death': '15 August 1118, Constantinople',
+        'reign': '1081–1118',
+        'life': alexios_i_bio,
+        'dynasty': 'Komnenos',
+        'reign_start': 1081,
+        'ascent_to_power': 'Coup d\'état',
+        'references': 'The Editors of Encyclopædia Britannica (n.d.). Alexius I Comnenus | Byzantine emperor. [online] Available at: https://www.britannica.com/biography/Alexius-I-Comnenus [Accessed 4 Aug. 2025].'
+    },
+        {
+            'title': 'Michael VIII Palaiologus',
+            'in_greek': 'Μιχαὴλ ΗʹΠαλαιολόγος',
+            'birth': '1224 or 1225, Empire of Nicaea',
+            'death': '11 December 1282, Thrace',
+            'reign': '1259–1282',
+            'life': michael_viii_bio_detailed,
+            'dynasty': 'Palaiologos',
+            'reign_start': 1259,
+            'ascent_to_power': 'Coup d\'état',
+            'references': 'The Editors of Encyclopædia Britannica (n.d.). MichaelVIII Palaiologus | Byzantine emperor. [online] Available at: https://www.britannica.com/biography/Michael‑VIII‑Palaeologus [Accessed 4 Aug.2025].'
+        },
+        {
+            'title': 'Isaac II Angelos',
+            'in_greek': 'Ἰσαάκιος Βʹ Ἄγγελος',
+            'birth': 'September 1156, Constantinople',
+            'death': 'January 1204, Constantinople',
+            'reign': '1185–1195, 1203–1204',
+            'life': isaac_ii_bio_detailed,
+            'dynasty': 'Angelos',
+            'reign_start': 1185,
+            'ascent_to_power': 'Civil War',
+            'references': 'Encyclopædia Britannica (n.d.) Isaac II Angelus | Byzantine emperor. Available at: https://www.britannica.com/biography/Isaac-II-Angelus (Accessed: 5 August 2025).'
+        },
+       {
+        'title': 'John II Komnenos',
+        'in_greek': 'Ἰωάννης Βʹ Κομνηνός',
+        'birth': '13 September 1087, Constantinople',
+        'death': '8 April 1143, Cilicia',
+        'reign': '1118–1143',
+        'life': john_ii_komnenos_bio,
+        'dynasty': 'Komnenos',
+        'reign_start': 1118,
+        'ascent_to_power': 'Hereditary Succession',
+    'references': 'The Editors of Encyclopædia Britannica (n.d.) John II Comnenus | Byzantine emperor. Available at: https://www.britannica.com/biography/John-II-Comnenus (Accessed: 5 August 2025).'
+    },
+        {
+        'title': 'Andronikos II Palaiologos',
+        'in_greek': 'Ἀνδρόνικος Δούκας Ἄγγελος Κομνηνὸς Παλαιολόγος',
+        'birth': '25 March 1259 (Nicaea / Constantinople)',
+        'death': '13 February 1332, Constantinople',
+        'reign': '1282–1328',
+        'life': andronicus_ii_bio,
+        'dynasty': 'Palaiologos',
+        'reign_start': 1282,
+        'ascent_to_power': 'Hereditary Succession',
+        'references': 'The Editors of Encyclopædia Britannica (n.d.) Andronikos II Palaiologus | Byzantine emperor. Available at: https://www.britannica.com/biography/Andronicus‑II‑Palaeologus (Accessed: 5 August 2025).'
     }
     ]
+
+
 
     for e in emperors:
         emperor = Emperor(**e)
@@ -175,6 +337,42 @@ def reset_db():
             'url': '/static/images/macedonians/Alexandros.jpg',
             'caption': 'Mosaic Portrait in Hagia Sophia',
             'emperor_id': 3
+        },
+        {
+            'filename': 'Constantine X Doukas',
+            'url': '/static/images/Constantine_X_full_portrait.jpg',
+            'caption': 'Portrait of Constantine X Doukas',
+            'emperor_id': 4
+        },
+        {
+            'filename': 'Alexios I Komnenos',
+            'url': '/static/images/Alexios_I_Komnenos.jpg',
+            'caption': 'Portrait of Alexios I Komnenos',
+            'emperor_id': 5
+        },
+        {
+            'filename': 'Michael VIII Palaiologos',
+            'url': '/static/images/Miniature_of_Michael_VIII.png',
+            'caption': 'Portrait of Michael VIII Palaiologos',
+            'emperor_id': 6
+        },
+        {
+            'filename': 'Isaac II Angelos',
+            'url': '/static/images/144_-_Isaac_II_Angelos_(Mutinensis_-_color).png',
+            'caption': 'Portrait of Isaac II Angelos',
+            'emperor_id': 7
+        },
+        {
+            'filename': 'John II Komnenos',
+            'url': '/static/images/Jean_II_Comnene.jpg',
+            'caption': 'Portrait of John II Komnenos',
+            'emperor_id': 8
+        },
+        {
+            'filename': 'Andronikos II',
+            'url': '/static/images/Miniature_of_Andronikos_II.png',
+            'caption': 'Portrait of Andronikos II',
+            'emperor_id': 9
         },
         {
             'filename': 'Battle of Kleidon',

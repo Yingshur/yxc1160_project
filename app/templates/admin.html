@@ -83,58 +83,74 @@
             <th class="latin-heading_3">Email</th>
             <th class="latin-heading_3">Role</th>
             <th class="latin-heading_3">User type</th>
-            <th class="latin-heading_3"></th>
+            <th class="latin-heading_3">Delete user</th>
+            <th class="latin-heading_3">Grant/remove authorisation</th>
+            <th class="latin-heading_3">Promote user</th>
         </tr>
     </thead>
     {% for user in user_lst %}
-        <tr>
-            <td class="latin-heading_3">{{ user.id }}</td>
-            <td class="latin-heading_3">{{ user.username }}</td>
-            <td class="latin-heading_3">{{ user.email }}</td>
-            <td class="latin-heading_3">{{ user.role }}</td>
-            <td class="latin-heading_3">{{user.user_type}}</td>
-            <td>
-                            {% if current_user.user_type == "Autocrat" and user.user_type != "Autocrat" %}
-                <form action="{{ url_for('delete_user') }}" method="post">
-                    {{ form.csrf_token() }}
-                    {{ form.choice(value=user.id) }}
-                    <button class="btn" type="submit">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </form>
-            </td>
-            {% if user.role == "Normal" %}
-            <td>
-                <form action="{{ url_for('toggle_user_type') }}" method="post">
-                    {{ form.csrf_token() }}
-                    {{ form.choice(value=user.id) }}
-                    <button class="btn" type="submit">
-                        {% if user.user_type == "Authorized" %}
-                        <i class="bi bi-toggle-on"> Switch user type</i>
-                        {% else %}
-                        <i class="bi bi-toggle-off"> Switch user type</i>
-                        {% endif %}
-                    </button>
-                </form>
-            </td>
-            {% endif %}
-                        {% endif %}
-            {% if user.role == "Normal" %}
-            <td> <form action="{{ url_for('invitation_code', id=user.id) }}" method="get" style="display:inline;">
-                       <button type="submit" class="btn" title="Info">
-                            <i class="bi bi-arrow-up-circle-fill"></i>
-                    </button>
-                 </form></td>
-            {% endif %}
-            {% if user.role == "Admin" and user.id != current_user.id and current_user.user_type == "Autocrat"%}
-            <td> <form action="{{ url_for('de_admin', id=user.id) }}" method="get" style="display:inline;">
-                       <button type="submit" class="btn" title="Info">
-                            <i class="bi bi-arrow-down-circle-fill"></i>
-                    </button>
-                 </form></td>
-            {% endif %}
-        </tr>
-    {% endfor %}
+<tr>
+    <td class="latin-heading_3">{{ user.id }}</td>
+    <td class="latin-heading_3">{{ user.username }}</td>
+    <td class="latin-heading_3">{{ user.email }}</td>
+    <td class="latin-heading_3">{{ user.role }}</td>
+    <td class="latin-heading_3">{{ user.user_type }}</td>
+
+    <td>
+        {% if current_user.user_type == "Autocrat" and user.user_type != "Autocrat" %}
+        <form action="{{ url_for('delete_user') }}" method="post">
+            {{ form.csrf_token() }}
+            {{ form.choice(value=user.id) }}
+            <button class="btn" type="submit"><i class="bi bi-trash"></i></button>
+        </form>
+        {% elif current_user.user_type != "Autocrat" and user.role == "Normal" %}
+        <form action="{{ url_for('delete_user') }}" method="post">
+            {{ form.csrf_token() }}
+            {{ form.choice(value=user.id) }}
+            <button class="btn" type="submit"><i class="bi bi-trash"></i></button>
+        </form>
+        {% endif %}
+    </td>
+
+    <td>
+        {% if user.role == "Normal" %}
+        <form action="{{ url_for('toggle_user_type') }}" method="post">
+            {{ form.csrf_token() }}
+            {{ form.choice(value=user.id) }}
+            <button class="btn" type="submit">
+                {% if user.user_type == "Authorised" %}
+                <i class="bi bi-toggle-on"> Remove Authorisation</i>
+                {% else %}
+                <i class="bi bi-toggle-off"> Grant Authorisation</i>
+                {% endif %}
+            </button>
+        </form>
+        {% endif %}
+    </td>
+
+    <td>
+        {% if user.role == "Normal" %}
+        <form action="{{ url_for('invitation_code', id=user.id) }}" method="get" style="display:inline;">
+            <button type="submit" class="btn" title="invitation code">
+                <i class="bi bi-arrow-up-circle-fill"></i>
+            </button>
+        </form>
+        {% endif %}
+    </td>
+
+    <td>
+        {% if user.role == "Admin" and user.id != current_user.id and current_user.user_type == "Autocrat" %}
+        <form action="{{ url_for('de_admin', id=user.id) }}" method="get" style="display:inline;">
+            <button type="submit" class="btn" title="demote">
+                <i class="bi bi-arrow-down-circle-fill"></i>
+            </button>
+        </form>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+
+
 </table>
     <h3 class="mt-5 latin-heading_new" style="font-size: 1.5rem;">Manage account</h3>
     <ul>

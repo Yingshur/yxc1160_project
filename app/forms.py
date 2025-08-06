@@ -53,7 +53,9 @@ class AllEmperorForm(FlaskForm):
 
 
 
-
+class DeleteForm(FlaskForm):
+    number = IntegerField('Code for deletion', validators=[DataRequired('Data is required')])
+    submit = SubmitField('Submit')
 
 
 

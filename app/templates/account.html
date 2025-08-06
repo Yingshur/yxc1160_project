@@ -61,7 +61,6 @@
 
 {% block flash_messages %}{% endblock %}
 
-
 {% block content %}
 
 <div class="background-container">
@@ -109,7 +108,16 @@
         <tr><td class="latin-heading_new" style="font-size: 1.1rem;">{{ (invitation.code if invitation and invitation.code else "&mdash;") | safe}}</td></tr>
     </table>
 </div>
+                {% endif %}
+
+<a href="{{url_for('account_deletion_code')}}" class="btn btn-dark" style="background-color: transparent;">Deletion Code</a>
+
+<h3 class="mt-3 latin-heading_new" style="font-size: 1.5rem; background-color: transparent;">Delete Account</h3>
+
+<div class="latin-heading_new" style="font-size: 1.2rem; background-color: transparent;">
+        {{ wtf.quick_form(delete_form, action=url_for('account_deletion'), method="post", id="", novalidate=True, autofocus=False) }}
+    </div>
         </div>
-            {% endif %}
 
 {% endblock %}
+

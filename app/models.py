@@ -22,6 +22,8 @@ class User(UserMixin, db.Model):
     role: so.Mapped[str] = so.mapped_column(sa.String(10), default="Normal", nullable=True)
     user_type: Mapped[str] = so.mapped_column(sa.String(64), default="user")
     invitations: so.Mapped[list['Invitation']] = relationship(back_populates='user', cascade='all, delete-orphan')
+    deletions: so.Mapped[list['Deletion']] = relationship(back_populates='user', cascade='all, delete-orphan')
+
     #__mapper_args__ = {
         #"polymorphic_identity": "user",
         #"polymorphic_on": user_type
@@ -149,6 +151,8 @@ class TemporaryImage(db.Model):
     temporary_artifact: so.Mapped["TemporaryArtifact"] = so.relationship(back_populates="temporary_images",
                                                                              foreign_keys=[
                                                                                  temporary_artifact_id])
+
+
 
 
 class Invitation(db.Model):
@@ -323,3 +327,12 @@ class TemporaryArtifact(db.Model):
     description: so.Mapped[str] = so.mapped_column(sa.Text())
     references: so.Mapped[str] = so.mapped_column(sa.Text())
     temporary_images: so.Mapped[list["TemporaryImage"]] = so.relationship(back_populates="temporary_artifact", cascade="all, delete-orphan")
+
+
+
+class Deletion(db.Model):
+    __tablename__ = 'deletions'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    code: so.Mapped[int] = so.mapped_column()
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("users.id"), index=True)
+    user: so.Mapped["User"] = so.relationship(back_populates="deletions")
