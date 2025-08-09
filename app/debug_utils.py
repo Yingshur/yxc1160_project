@@ -2,6 +2,11 @@
 from app import db
 from app.models import Emperor, Image, User, War, Architecture, Literature, Artifact
 
+peritheorion_description = (
+    "\"In late spring of 1345, Umur arrived again at Thrace with a force of reputedly 20,000 men. He and Kantakouzenos then proceeded to subdue Momchil. The two armies met outside Peritheorion on 7 July. The right flank was commanded by Umur, and the left flank by Byzantine noble John Asen, brother of Empress Irene Asanina and son of Andronikos Asen. Momchil tried to avoid the far larger enemy force by retreating within the walls of Peritheorion, but its citizens shut the gates against him.\n\n"
+    "The ensuing battle was a rout, as the far more numerous Turks crushed Momchil's army and killed him in the process. After his death, Kantakouzenos' forces regained the Merope region. However, the role played by the Turks in this battle presaged late events, as the Ottoman conquest of the Balkans would begin barely a few years later.\n\n"
+    "Momchil's colorful career and his perceived role as a defender against the Turks secured him an important place in the epic folklore of the region. This battle remains a critical event in the Byzantine Civil War of 1341–1347, significantly altering the course of the conflict."
+)
 
 
 andronicus_ii_bio = (
@@ -302,7 +307,7 @@ def reset_db():
             'dynasty': "Macedonian",
             'war_name': "Byzantine–Bulgarian Wars",
             'war_type': "Foreign War",
-            'result': "Roman Victory",
+            'result': "Roman/Reigning Emperor Victory",
             'roman_commanders': "Basil II, Niketas Xiphias, Theophylaktos Botaneiates",
             'enemy_commanders': "Tsar Samuel of Bulgaria",
             'roman_strength': "Unknown; likely imperial field army with support from Philippoupolis",
@@ -311,6 +316,26 @@ def reset_db():
             'enemy_loss': "Heavy; most of 15,000 captured and allegedly blinded",
             'description': kleidion_description,
             'references': 'Haldon, J., 2008. The Byzantine Wars. The History Press.'
+        },
+        {
+            'title': "Battle of Peritheorion",
+            'start_year': 1345,
+            'dates': "7 July 1345",
+            'location': "Peritheorion, near Xanthi, Greece",
+            'latitude': 41.103349,
+            'longitude': 25.090807,
+            'dynasty': "Palaiologan",
+            'war_name': "Byzantine Civil War of 1341–1347",
+            'war_type': "Civil War",
+            'result': "Roman/Reigning Emperor Victory",
+            'roman_commanders': "John VI Kantakouzenos, Umur Bey",
+            'enemy_commanders': "Momchil",
+            'roman_strength': "Over 20,000",
+            'enemy_strength': "5,000 infantry, 300 cavalry",
+            'roman_loss': "Unknown",
+            'enemy_loss': "Heavy; Momchil killed in action",
+            'description': peritheorion_description,
+            'references': 'Fine, John V. A. Jr. (1994) [1987]. The Late Medieval Balkans: A Critical Survey from the Late Twelfth Century to the Ottoman Conquest. Ann Arbor, Michigan: University of Michigan Press. ISBN 978-0-472-10079-8. OCLC 749133662.'
         }
     ]
     for war_data in wars:
@@ -379,6 +404,12 @@ def reset_db():
             'url': '/static/images/wars/Basil_win.jpg',
             'caption': 'Basil II defeats the Bulgarian Tsar',
             'war_id': 1
+        },
+        {
+            'filename':'Fortifications at Peritheorion',
+            'url': '/static/images/wars/20120519_north_view_Anastasioupolis_Perithorio_Amaksades_Rhodope_West_Thrace_Greece.jpg',
+            'caption': 'Fortifications at Peritheorion, West Thrace, Greece',
+            'war_id': 2
         },
         {
             'filename': 'Hagia Sophia',

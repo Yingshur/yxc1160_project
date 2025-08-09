@@ -1,4 +1,5 @@
 from os import write
+from flask import abort
 from itertools import cycle
 import uuid
 from functools import wraps
@@ -12,7 +13,7 @@ from markupsafe import Markup
 from pandas import date_range
 from sqlalchemy.testing import force_drop_names
 from werkzeug.utils import secure_filename
-from app import signer, TOKEN_MAX_AGE, verification_email, confirmation_email, approval_email, rejection_email
+from app import signer, TOKEN_MAX_AGE, verification_email, confirmation_email, approval_email, rejection_email, new_confirmation_email
 from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
 #from unicodedata import category
 #from urllib3.connection import port_by_scheme
@@ -47,6 +48,7 @@ def admin_only(func):
 
 
 @app.route("/logbook", methods=["GET", "POST"])
+@login_required
 def logbook():
     logbook = db.session.query(LogBook).all()
     return render_template('logbook.html', title = "Logbook", logbook =logbook)
@@ -197,6 +199,7 @@ def manage_additions():
 
 
 @app.route("/admin/manage_additions/add_info_emperor/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def add_info_emperor(id):
     emperor_add = db.session.get(TemporaryEmperor, id)
     return render_template("add_info_emperor.html", emperor_add = emperor_add, title = "Preview")
@@ -204,6 +207,7 @@ def add_info_emperor(id):
 
 
 @app.route("/admin/manage_additions/add_info_war/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def add_info_war(id):
     war_add = db.session.get(TemporaryWar, id)
     return render_template("edit_add_info_war.html", war = war_add, title = "Preview")
@@ -310,6 +314,7 @@ def user_editing(id):
 
 
 @app.route('/edit_emperor_users/<int:id>', methods = ['POST', 'GET'])
+@login_required
 def edit_emperor_users(id):
     emperor_first_users = db.session.get(TemporaryEmperor, id)
     form = AllEmperorForm()
@@ -381,18 +386,21 @@ def manage_edits():
     return render_template('manage_edits.html', title = "Manage edits", edit_list = edit_list, edit_list_1 = edit_list_1, edit_list_2 = edit_list_2, edit_list_3 = edit_list_3, edit_list_4 = edit_list_4)
 
 @app.route("/admin/manage_edits/edit_info_emperor/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def edit_info_emperor(id):
     emperor_edit = db.session.get(TemporaryEmperor, id)
     return render_template("edit_info_emperor.html", emperor_edit = emperor_edit, title = "Preview")
 
 
 @app.route("/admin/manage_edits/edit_info_war/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def edit_info_war(id):
     war_edit = db.session.get(TemporaryWar, id)
     return render_template("edit_add_info_war.html", war = war_edit, title = "Preview")
 
 
 @app.route("/admin/manage_edits/edit_info_architecture/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def edit_info_architecture(id):
     architecture_edit = db.session.get(TemporaryArchitecture, id)
     return render_template("edit_add_info_architecture.html", building = architecture_edit, title = "Preview")
@@ -400,6 +408,7 @@ def edit_info_architecture(id):
 
 
 @app.route("/admin/manage_additions/add_info_architecture/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def add_info_architecture(id):
     architecture_add = db.session.get(TemporaryArchitecture, id)
     return render_template("edit_add_info_architecture.html", building = architecture_add, title = "Preview")
@@ -409,6 +418,7 @@ def add_info_architecture(id):
 
 
 @app.route("/admin/manage_additions/edit_info_literature/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def edit_info_literature(id):
     literature_edit = db.session.get(TemporaryLiterature, id)
     return render_template("edit_add_info_literature.html", book = literature_edit , title = "Preview")
@@ -416,6 +426,7 @@ def edit_info_literature(id):
 
 
 @app.route("/admin/manage_additions/add_info_literature/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def add_info_literature(id):
     literature_add = db.session.get(TemporaryLiterature, id)
     return render_template("edit_add_info_literature.html", book = literature_add, title = "Preview")
@@ -426,6 +437,7 @@ def add_info_literature(id):
 
 
 @app.route("/admin/manage_additions/edit_info_artifact/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def edit_info_artifact(id):
     artifact_edit = db.session.get(TemporaryArtifact, id)
     return render_template("edit_add_info_artifact.html", artifact = artifact_edit , title = "Preview")
@@ -608,7 +620,7 @@ def register_emails_():
     return render_template('register_form.html', title = "Register", form = form)
 
 
-@app.route("/change_to_admin", methods = ['POST'])
+@app.route("/account/change_to_admin", methods = ['POST'])
 def change_to_admin():
     form = AdminCodeForm()
     u = db.session.get(User, current_user.id)
@@ -631,6 +643,7 @@ def change_to_admin():
     return render_template("account.html", new_form = form, title = "Account")
 
 @app.route("/add_new_emperor", methods = ['POST'])
+@login_required
 def add_new_emperor():
     form = AllEmperorForm()
     macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
@@ -692,6 +705,7 @@ def add_new_emperor():
 
 
 @app.route("/add_new_emperor_1", methods = ['POST'])
+@login_required
 def add_new_emperor_1():
     form = AllEmperorForm()
     macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Doukas').all()
@@ -754,6 +768,7 @@ def add_new_emperor_1():
 
 
 @app.route("/add_new_emperor_2", methods = ['POST'])
+@login_required
 def add_new_emperor_2():
     form = AllEmperorForm()
     macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Komnenos').all()
@@ -847,6 +862,7 @@ def account_deletion():
 
 
 @app.route("/add_new_emperor_3", methods = ['POST'])
+@login_required
 def add_new_emperor_3():
     form = AllEmperorForm()
     macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Angelos').all()
@@ -910,6 +926,7 @@ def add_new_emperor_3():
 
 
 @app.route("/add_new_emperor_4", methods = ['POST'])
+@login_required
 def add_new_emperor_4():
     form = AllEmperorForm()
     macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Palaiologos').all()
@@ -1025,6 +1042,7 @@ def invitation_code(id):
 
 
 @app.route('/edit_emperor/<int:id>', methods = ['POST', 'GET'])
+@login_required
 def edit_emperor(id):
     emperor_first = db.session.get(Emperor, id)
     form = AllEmperorForm()
@@ -1101,6 +1119,7 @@ def edit_emperor(id):
 
 
 @app.route("/add_new_war_1", methods = ['POST', 'GET'])
+@login_required
 def add_new_war_1():
     form = WarForm()
     foreign_wars_lst = db.session.query(War).filter(and_(War.war_type == "Foreign War")).all()
@@ -1194,6 +1213,7 @@ def add_new_war_1():
 
 
 @app.route("/add_new_war_2", methods = ['POST', 'GET'])
+@login_required
 def add_new_war_2():
     form = WarForm()
     foreign_wars_lst = db.session.query(War).filter(and_(War.war_type == "Civil War")).all()
@@ -1290,6 +1310,7 @@ def add_new_war_2():
 
 
 @app.route('/edit_war/<int:id>', methods = ['POST', 'GET'])
+@login_required
 def edit_war(id):
     war_first = db.session.get(War, id)
     form = WarForm()
@@ -1399,6 +1420,7 @@ def edit_war(id):
 
 
 @app.route('/edit_wars_users/<int:id>', methods = ['POST', 'GET'])
+@login_required
 def edit_wars_users(id):
     war_first = db.session.get(TemporaryWar, id)
     form = WarForm()
@@ -1492,7 +1514,7 @@ def approve_war_edit(id):
     new_war.references = war_first.references
     new_war.result = war_first.result
     user = db.session.query(User).filter_by(username = war_first.username).first()
-    new_log_8 = LogBook(original_id=new_war.id, title=new_war.title,
+    new_log_8 = LogBook(original_id=id, title=new_war.title,
                         username=current_user.username)
     db.session.add(new_log_8)
     if war_first.temporary_images:
@@ -1503,9 +1525,9 @@ def approve_war_edit(id):
             photo.url = f"/static/images/uploaded_photos/{file_name}"
             photo.war_id = new_war.id
             db.session.delete(war_first.temporary_images[0])
-            new_log_9 = LogBook(original_id=photo.id, title=file_name,
+            new_log_900 = LogBook(original_id=photo.id, title=file_name,
                                 username=current_user.username)
-            db.session.add(new_log_9)
+            db.session.add(new_log_900)
         else:
             file_name = secure_filename(war_first.temporary_images[0].filename)
             photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", war_id = new_war.id)
@@ -1529,17 +1551,17 @@ def approve_war_add(id):
                           dynasty = add_war.dynasty, war_name = add_war.war_name, war_type = add_war.war_type, description = add_war.description, result = add_war.result)
     user = db.session.query(User).filter_by(username = add_war.username).first()
     db.session.add(new_war)
-    new_log_10 = LogBook(original_id=new_war.id, title=new_war.title,
+    new_log_1000 = LogBook(original_id=new_war.id, title=new_war.title,
                         username=current_user.username)
-    db.session.add(new_log_10)
+    db.session.add(new_log_1000)
     if add_war.temporary_images:
         file_name = secure_filename(add_war.temporary_images[0].filename)
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", war_id = new_war.id)
         db.session.add(photo)
         db.session.delete(add_war.temporary_images[0])
-        new_log_11 = LogBook(original_id=photo.id, title=file_name,
+        new_log_1100 = LogBook(original_id=photo.id, title=file_name,
                             username=current_user.username)
-        db.session.add(new_log_11)
+        db.session.add(new_log_1100)
     approval_email(user_email=user.email, emperor_title=new_war.title)
     db.session.delete(add_war)
     db.session.commit()
@@ -1669,6 +1691,7 @@ def architecture_info_detail(id):
 
 
 @app.route("/add_new_architecture", methods = ['POST', 'GET'])
+@login_required
 def add_new_architecture():
     form = ArchitectureForm()
     buildings_lst = db.session.query(Architecture).all()
@@ -1752,7 +1775,7 @@ def add_new_architecture():
                 db.session.commit()
                 confirmation_email(id = temporary_architecture_edit.id)
             return redirect(url_for("architecture_info"))
-    return render_template('architecture_info.html', title = "Architecture", buildings_lst = buildings_lst , building_html =Markup(building_html), form_open = True, new_form = form )
+    return render_template('architecture_info.html', title = "Architecture", buildings_lst = buildings_lst , architecture_html =Markup(building_html), form_open = True, new_form = form )
 
 
 
@@ -1760,6 +1783,7 @@ def add_new_architecture():
 
 
 @app.route('/edit_architecture/<int:id>', methods = ['POST', 'GET'])
+@login_required
 def edit_architecture(id):
     architecture_first = db.session.get(Architecture, id)
     form = ArchitectureForm()
@@ -1794,7 +1818,7 @@ def edit_architecture(id):
             architecture_new_edit.current_status = form.current_status.data
             architecture_new_edit.building_type = form.building_type.data
             architecture_new_edit.architectural_style = form.architectural_style.data
-            new_log_18 = LogBook(original_id=architecture_new_edit.id, title=architecture_new_edit.title,
+            new_log_18 = LogBook(original_id=id, title=architecture_new_edit.title,
                                  username=current_user.username)
             db.session.add(new_log_18)
             if form.image.data:
@@ -1812,9 +1836,9 @@ def edit_architecture(id):
                     db.session.add(photo)
                 photo.filename = file_name
                 photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
-                new_log_19 = LogBook(original_id=photo.id, title=file_name,
+                new_log_10000 = LogBook(original_id=photo.id, title=file_name,
                                      username=current_user.username)
-                db.session.add(new_log_19)
+                db.session.add(new_log_10000)
             db.session.commit()
             return redirect(url_for('architecture_info_detail', id=architecture_new_edit.id))
         else:
@@ -1856,6 +1880,7 @@ def edit_architecture(id):
 
 
 @app.route('/edit_architecture_users/<int:id>', methods = ['POST', 'GET'])
+@login_required
 def edit_architecture_users(id):
     architecture_first = db.session.get(TemporaryArchitecture, id)
     form = ArchitectureForm()
@@ -1932,7 +1957,7 @@ def approve_architecture_edit(id):
     new_architecture.description = architecture_first.description
     new_architecture.references = architecture_first.references
     user = db.session.query(User).filter_by(username = architecture_first.username).first()
-    new_log_20 = LogBook(original_id=new_architecture.id, title=new_architecture.title,
+    new_log_20 = LogBook(original_id=id, title=new_architecture.title,
                          username=current_user.username)
     db.session.add(new_log_20)
     if architecture_first.temporary_images:
@@ -1942,9 +1967,9 @@ def approve_architecture_edit(id):
             uuid_ = uuid.uuid4().hex[:8]
             photo.url = f"/static/images/uploaded_photos/{file_name}"
             photo.architecture_id = new_architecture.id
-            new_log_21 = LogBook(original_id=photo.id, title=file_name,
+            new_log_2100 = LogBook(original_id=photo.id, title=file_name,
                                  username=current_user.username)
-            db.session.add(new_log_21)
+            db.session.add(new_log_2100)
             db.session.delete(architecture_first.temporary_images[0])
         else:
             file_name = secure_filename(architecture_first.temporary_images[0].filename)
@@ -1967,16 +1992,16 @@ def approve_architecture_add(id):
                                             current_status = add_architecture.current_status, longitude = add_architecture.longitude, latitude = add_architecture.latitude, description = add_architecture.description, building_type = add_architecture.building_type)
     user = db.session.query(User).filter_by(username = add_architecture.username).first()
     db.session.add(new_architecture)
-    new_log_22 = LogBook(original_id=new_architecture.id, title=new_architecture.title,
+    new_log_2200 = LogBook(original_id=new_architecture.id, title=new_architecture.title,
                          username=current_user.username)
-    db.session.add(new_log_22)
+    db.session.add(new_log_2200)
     if add_architecture.temporary_images:
         file_name = secure_filename(add_architecture.temporary_images[0].filename)
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", architecture_id = new_architecture.id)
         db.session.add(photo)
-        new_log_23 = LogBook(original_id=photo.id, title=file_name,
+        new_log_2300 = LogBook(original_id=photo.id, title=file_name,
                              username=current_user.username)
-        db.session.add(new_log_23)
+        db.session.add(new_log_2300)
         db.session.delete(add_architecture.temporary_images[0])
     approval_email(user_email=user.email, emperor_title=add_architecture.title)
     db.session.delete(add_architecture)
@@ -2029,6 +2054,7 @@ def admin_delete_architecture_2(id):
     return redirect(url_for('manage_additions'))
 
 @app.route("/edit_an_image/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def edit_an_image(id):
     form = ImageEditForm()
     form_1 = ArchitectureForm()
@@ -2045,6 +2071,7 @@ def edit_an_image(id):
             photo = db.session.query(Image).filter_by(id=form.id_number.data).first()
             if photo:
                 if photo.architecture_id:
+                    new_confirmation_email(id =photo.id, category="architecture")
                     photo.filename = file_name
                     photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
                     photo.caption = form.caption.data
@@ -2056,6 +2083,7 @@ def edit_an_image(id):
                     flash("Successfully edited", "success")
                     return redirect(url_for('architecture_info_detail', id=id))
                 elif photo.literature_id:
+                    new_confirmation_email(id=photo.id, category="literature")
                     photo.filename = file_name
                     photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
                     photo.caption = form.caption.data
@@ -2067,6 +2095,7 @@ def edit_an_image(id):
                     flash("Successfully edited", "success")
                     return redirect(url_for('literature_info_detail', id=id))
                 elif photo.artifact_id:
+                    new_confirmation_email(id=photo.id, category="artifact")
                     photo.filename = file_name
                     photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
                     photo.caption = form.caption.data
@@ -2086,6 +2115,7 @@ def edit_an_image(id):
 
 
 @app.route('/add_an_image/<int:id>', methods = ['GET', 'POST'])
+@login_required
 def add_an_image(id):
     form = ImageUploadForm()
     form_1 = ArchitectureForm()
@@ -2105,6 +2135,7 @@ def add_an_image(id):
                                  username=current_user.username)
             db.session.add(new_log_25)
             db.session.commit()
+            new_confirmation_email(id=photo.id, category="architecture")
             flash("Successfully uploaded", "success")
             return redirect(url_for('architecture_info_detail', id=id))
     flash("Invalid details, please resubmit the form", "warning")
@@ -2170,6 +2201,7 @@ def literature_info_detail(id):
 
 
 @app.route("/add_new_literature", methods = ['POST', 'GET'])
+@login_required
 def add_new_literature():
     form = LiteratureForm()
     literature_lst = db.session.query(Literature).all()
@@ -2237,6 +2269,7 @@ def add_new_literature():
 
 
 @app.route('/edit_literature/<int:id>', methods = ['POST', 'GET'])
+@login_required
 def edit_literature(id):
     literature_first = db.session.get(Literature, id)
     form = LiteratureForm()
@@ -2322,6 +2355,7 @@ def edit_literature(id):
 
 
 @app.route('/edit_literature_users/<int:id>', methods = ['POST', 'GET'])
+@login_required
 def edit_literature_users(id):
     literature_first = db.session.get(TemporaryLiterature, id)
     form = LiteratureForm()
@@ -2387,7 +2421,7 @@ def approve_literature_edit(id):
     new_literature.description = literature_first.description
     new_literature.references = literature_first.references
     user = db.session.query(User).filter_by(username = literature_first.username).first()
-    new_log_30 = LogBook(original_id=new_literature.id, title=new_literature.title,
+    new_log_30 = LogBook(original_id=id, title=new_literature.title,
                          username=current_user.username)
     db.session.add(new_log_30)
     if literature_first.temporary_images:
@@ -2397,9 +2431,9 @@ def approve_literature_edit(id):
             photo.filename = file_name
             photo.url = f"/static/images/uploaded_photos/{file_name}"
             photo.literature_id = new_literature.id
-            new_log_31 = LogBook(original_id=photo.id, title=file_name,
+            new_log_3100 = LogBook(original_id=photo.id, title=file_name,
                                  username=current_user.username)
-            db.session.add(new_log_31)
+            db.session.add(new_log_3100)
             db.session.delete(literature_first.temporary_images[0])
         else:
             file_name = secure_filename(literature_first.temporary_images[0].filename)
@@ -2424,16 +2458,16 @@ def approve_literature_add(id):
                                 description = add_literature.description, author = add_literature.author)
     user = db.session.query(User).filter_by(username = add_literature.username).first()
     db.session.add(new_literature)
-    new_log_32 = LogBook(original_id=new_literature.id, title=new_literature.title,
+    new_log_3200 = LogBook(original_id=new_literature.id, title=new_literature.title,
                          username=current_user.username)
-    db.session.add(new_log_32)
+    db.session.add(new_log_3200)
     if add_literature.temporary_images:
         file_name = secure_filename(add_literature.temporary_images[0].filename)
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", literature_id = new_literature.id)
         db.session.add(photo)
-        new_log_33 = LogBook(original_id=photo.id, title=file_name,
+        new_log_3300 = LogBook(original_id=photo.id, title=file_name,
                              username=current_user.username)
-        db.session.add(new_log_33)
+        db.session.add(new_log_3300)
         db.session.delete(add_literature.temporary_images[0])
     approval_email(user_email=user.email, emperor_title=add_literature.title)
     db.session.delete(add_literature)
@@ -2508,6 +2542,7 @@ def literature_info_edit_user(id):
 
 
 @app.route('/add_an_image_1/<int:id>', methods = ['GET', 'POST'])
+@login_required
 def add_an_image_1(id):
     form = ImageUploadForm()
     form_1 = LiteratureForm()
@@ -2527,6 +2562,7 @@ def add_an_image_1(id):
                                  username=current_user.username)
             db.session.add(new_log_34)
             db.session.commit()
+            new_confirmation_email(id=photo.id, category="literature")
             flash("Successfully uploaded", "success")
             return redirect(url_for('literature_info_detail', id=id))
     flash("Invalid details, please resubmit the form", "warning")
@@ -2580,6 +2616,7 @@ def toggle_user_type():
 
 
 @app.route("/add_new_artifact", methods = ['POST', 'GET'])
+@login_required
 def add_new_artifact():
     form = ArtifactForm()
     artifact_lst = db.session.query(Artifact).all()
@@ -2648,6 +2685,7 @@ def add_new_artifact():
 
 
 @app.route('/edit_artifact/<int:id>', methods = ['POST', 'GET'])
+@login_required
 def edit_artifact(id):
     artifact_first = db.session.get(Artifact, id)
     form = ArtifactForm()
@@ -2729,6 +2767,7 @@ def edit_artifact(id):
 
 
 @app.route('/edit_artifact_users/<int:id>', methods = ['POST', 'GET'])
+@login_required
 def edit_artifact_users(id):
     artifact_first = db.session.get(TemporaryArtifact, id)
     form = ArtifactForm()
@@ -2789,7 +2828,7 @@ def approve_artifact_edit(id):
     new_artifact.description = artifact_first.description
     new_artifact.references = artifact_first.references
     user = db.session.query(User).filter_by(username = artifact_first.username).first()
-    new_log_39 = LogBook(original_id=new_artifact.id, title=new_artifact.title,
+    new_log_39 = LogBook(original_id=id, title=new_artifact.title,
                          username=current_user.username)
     db.session.add(new_log_39)
     if artifact_first.temporary_images:
@@ -2802,9 +2841,9 @@ def approve_artifact_edit(id):
             photo.url = f"/static/images/uploaded_photos/{file_name}"
             photo.artifact_id = new_artifact.id
             db.session.delete(artifact_first.temporary_images[0])
-            new_log_40 = LogBook(original_id=photo.id, title=file_name,
+            new_log_4000 = LogBook(original_id=photo.id, title=file_name,
                                  username=current_user.username)
-            db.session.add(new_log_40)
+            db.session.add(new_log_4000)
         else:
             file_name = secure_filename(artifact_first.temporary_images[0].filename)
             uuid_ = uuid.uuid4().hex[:8]
@@ -2828,17 +2867,17 @@ def approve_artifact_add(id):
                                 description = add_artifact.description)
     user = db.session.query(User).filter_by(username = add_artifact.username).first()
     db.session.add(new_artifact)
-    new_log_41 = LogBook(original_id=new_artifact.id, title=new_artifact.title,
+    new_log_4100 = LogBook(original_id=new_artifact.id, title=new_artifact.title,
                          username=current_user.username)
-    db.session.add(new_log_41)
+    db.session.add(new_log_4100)
     if add_artifact.temporary_images:
         file_name = secure_filename(add_artifact.temporary_images[0].filename)
         uuid_ = uuid.uuid4().hex[:8]
         file_name = f"{uuid_}_{file_name}"
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", artifact_id = new_artifact.id)
-        new_log_42 = LogBook(original_id=photo.id, title=file_name,
+        new_log_4200 = LogBook(original_id=photo.id, title=file_name,
                              username=current_user.username)
-        db.session.add(new_log_42)
+        db.session.add(new_log_4200)
         db.session.add(photo)
         db.session.delete(add_artifact.temporary_images[0])
     approval_email(user_email=user.email, emperor_title=add_artifact.title)
@@ -2916,6 +2955,7 @@ def artifact_info_edit_user(id):
 
 
 @app.route('/add_an_image_2/<int:id>', methods = ['GET', 'POST'])
+@login_required
 def add_an_image_2(id):
     form = ImageUploadForm()
     form_1 = ArtifactForm()
@@ -2935,6 +2975,7 @@ def add_an_image_2(id):
                                  username=current_user.username)
             db.session.add(new_log_43)
             db.session.commit()
+            new_confirmation_email(id=photo.id, category="artifact")
             flash("Successfully uploaded", "success")
             return redirect(url_for('artifact_info_detail', id=id))
     flash("Invalid details, please resubmit the form", "warning")
@@ -2952,15 +2993,18 @@ def add_an_image_2(id):
 
 
 
-@app.route('/de_admin/<int:id>', methods=['POST', 'GET'])
+@app.route('/admin/de_admin/<int:id>', methods=['POST', 'GET'])
 def de_admin(id):
-    form = ChooseForm()
-    q = db.select(User)
-    user_lst = db.session.scalars(q)
-    user = db.session.get(User, id)
-    user.role = "Normal"
-    flash("User role has now been changed to normal", "success")
-    db.session.commit()
+    if current_user.usertype == "Autocrat":
+        form = ChooseForm()
+        q = db.select(User)
+        user_lst = db.session.scalars(q)
+        user = db.session.get(User, id)
+        user.role = "Normal"
+        flash("User role has now been changed to normal", "success")
+        db.session.commit()
+    else:
+        abort(403)
     return render_template("admin.html", title = "Admin", user_lst = user_lst, form = form)
 
 

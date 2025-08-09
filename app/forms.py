@@ -63,7 +63,7 @@ class ArchitectureForm(FlaskForm):
     edit = HiddenField(default='-1')
     in_greek = StringField('Name of the Building in Native Language', validators=[DataRequired('Data is required')])
     title = StringField('Name of the building', validators=[DataRequired('Data is required')])
-    construction_completed = IntegerField('Year Completed', validators=[DataRequired('Data is required'), int_validator])
+    construction_completed = StringField('Year Completed', validators=[DataRequired('Data is required')])
     architectural_style = StringField('Architectural Style', validators=[DataRequired('Data is required')])
     current_status = SelectField('Current use', choices=[('Retains original role', 'Retains original role'), ('Converted into a secular building', 'Converted into a secular building'), ('Converted into a Mosque', 'Converted into a Mosque'), ('Ruined', 'Ruined')], validators=[DataRequired('Data is required')])
     location = StringField('Location of the building', validators=[DataRequired('Data is required)')])
@@ -117,7 +117,7 @@ class WarForm(FlaskForm):
     description=  TextAreaField('Description', validators=[DataRequired('Data is required')], render_kw={"rows":30, "style":"min-height: 400px;"})
     references= TextAreaField('References', validators=[DataRequired('Data is required')], render_kw={"rows":10, "style":"min-height: 400px;"})
     image = FileField('Upload Image', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Images Only')])
-    result = SelectField('Result', choices=[('Roman Victory', 'Roman Victory'), ('Enemy Victory', 'Enemy Victory'), ('Inconclusive', 'Inconclusive'),  ],validators=[DataRequired('Data is required')] )
+    result = SelectField('Result', choices=[('Roman/Reigning Emperor Victory', 'Roman/Reigning Emperor Victory'), ('Enemy/Rebel Victory', 'Enemy/Rebel Victory'), ('Inconclusive', 'Inconclusive'),  ],validators=[DataRequired('Data is required')] )
     submit = SubmitField('Submit')
 
 

@@ -185,6 +185,7 @@
 {% block content %}
 <div class="background-container">
 <h1 class="latin-heading_3">Manage Additions</h1>
+    <h6 class="latin-heading_3">Administrator! Please beware that the deletion "bin" button is only used for removing offensive or otherwise harmful materials.</h6>
 <div class="col-lg-9">
         <h2 class="latin-heading_3">Emperors</h2>
 <table class="table" style="background-color: transparent;">
@@ -245,7 +246,7 @@
     {% for war in add_list_1 %}
         <tr>
                 <td class="latin-heading_2" style="font-size: 1rem">{{ war.id }}</td>
-            <td class="greek-heading_2" style="font-size: 1rem">{{ war.status }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ war.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ war.title }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ war.war_name }}</td>
             <td> <form action="{{ url_for('add_info_war', id=war.id) }}" method="get" style="display:inline;">
@@ -278,6 +279,7 @@
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Name</th>
+            <td class="latin-heading_2" style="font-size: 1.5rem">Status</td>
             <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Location</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Type</th>
@@ -287,6 +289,7 @@
         <tr>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.id }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ building.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.construction_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.location }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.building_type }}</td>
@@ -320,6 +323,7 @@
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
             <th class="latin-heading_2" style="font-size: 1.5rem"> Name</th>
+            <td class="latin-heading_2" style="font-size: 1.5rem">Status</td>
             <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Genre</th>
 
@@ -329,6 +333,7 @@
         <tr>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.id }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ book.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.year_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.genre }}</td>
             <td> <form action="{{ url_for('add_info_literature', id=book.id) }}" method="get" style="display:inline;">
@@ -365,6 +370,7 @@
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
             <th class="latin-heading_2" style="font-size: 1.5rem"> Name</th>
+            <td class="latin-heading_2" style="font-size: 1.5rem">Status</td>
             <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Current Location</th>
 
@@ -374,6 +380,7 @@
         <tr>
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.id }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.year_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.current_location }}</td>
             <td> <form action="{{ url_for('add_info_artifact', id=artifact.id) }}" method="get" style="display:inline;">
@@ -401,7 +408,6 @@
 
     {% endfor %}
 </table>
-
 
 
 </div>

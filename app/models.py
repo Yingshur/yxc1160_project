@@ -24,6 +24,11 @@ class User(UserMixin, db.Model):
     invitations: so.Mapped[list['Invitation']] = relationship(back_populates='user', cascade='all, delete-orphan')
     deletions: so.Mapped[list['Deletion']] = relationship(back_populates='user', cascade='all, delete-orphan')
 
+    def is_admin(self):
+        return self.role == 'Admin'
+    def is_autocrat(self):
+        return self.user_type == 'Autocrat'
+
     #__mapper_args__ = {
         #"polymorphic_identity": "user",
         #"polymorphic_on": user_type
@@ -227,7 +232,7 @@ class Architecture(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
     title: so.Mapped[str] = so.mapped_column(sa.String(256))
     in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
-    construction_completed: so.Mapped[int] = so.mapped_column()
+    construction_completed: so.Mapped[str] = so.mapped_column(sa.String(256))
     architectural_style: so.Mapped[str] = so.mapped_column(sa.String(256))
     current_status: so.Mapped[str] = so.mapped_column(sa.String(256))
     location: so.Mapped[str] = so.mapped_column(sa.String(256))
@@ -249,7 +254,7 @@ class TemporaryArchitecture(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
     title: so.Mapped[str] = so.mapped_column(sa.String(256))
     in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
-    construction_completed: so.Mapped[int] = so.mapped_column()
+    construction_completed: so.Mapped[str] = so.mapped_column(sa.String(256))
     architectural_style: so.Mapped[str] = so.mapped_column(sa.String(256))
     current_status:so.Mapped[str] = so.mapped_column(sa.String(256))
     location: so.Mapped[str] = so.mapped_column(sa.String(256))

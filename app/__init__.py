@@ -90,6 +90,19 @@ def confirmation_email(id: int):
             mail.send(msg)
 
 
+def new_confirmation_email(id: int, category: str):
+    emails = db.session.query(User).filter_by(role = "Admin").all()
+    if emails:
+        html = render_template("confirmation_sent.html", user = current_user.username, id = id, category =category)
+        for email in emails:
+            msg = Message(sender="chenyingshu1234@gmail.com",
+                          subject="A new image edit or addition",
+                          recipients = [email.email],
+                          html=html,)
+            mail.send(msg)
+
+
+
 def approval_email(user_email: str, emperor_title: str):
         html = render_template("approval_sent.html", title = emperor_title )
         msg = Message(sender="chenyingshu1234@gmail.com",

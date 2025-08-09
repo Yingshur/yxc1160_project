@@ -253,6 +253,7 @@
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">Type</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Name</th>
+            <td class="latin-heading_2" style="font-size: 1rem">Status</td>
             <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Location</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Type</th>
@@ -263,6 +264,7 @@
             <td class="latin-heading_2" style="font-size: 1rem">{% if building.old_id == -1 %}
             Addition {% else %} Edit {% endif %}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ building.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.construction_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.location }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.building_type }}</td>
@@ -282,6 +284,7 @@
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">Type</th>
             <th class="latin-heading_2" style="font-size: 1.5rem"> Name</th>
+            <td class="latin-heading_2" style="font-size: 1rem">Status</td>
             <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Genre</th>
 
@@ -292,6 +295,7 @@
             <td class="latin-heading_2" style="font-size: 1rem">{% if book.old_id == -1 %}
             Addition {% else %} Edit {% endif %}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ book.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.year_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.genre }}</td>
             <td> <form action="{{ url_for('literature_info_edit_user', id=book.id) }}" method="get" style="display:inline;">
@@ -312,6 +316,7 @@
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">Type</th>
             <th class="latin-heading_2" style="font-size: 1.5rem"> Name</th>
+            <td class="latin-heading_2" style="font-size: 1rem">Status</td>
             <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Current Location</th>
 
@@ -322,6 +327,7 @@
             <td class="latin-heading_2" style="font-size: 1rem">{% if artifact.old_id == -1 %}
             Addition {% else %} Edit {% endif %}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.year_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.current_location }}</td>
             <td> <form action="{{ url_for('artifact_info_edit_user', id=artifact.id) }}" method="get" style="display:inline;">
