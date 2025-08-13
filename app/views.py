@@ -6,12 +6,8 @@ from functools import wraps
 import os
 from random import randint
 
-from dominate.svg import title
 from folium.plugins import MarkerCluster
 from markupsafe import Markup
-#from dominate.svg import title
-from pandas import date_range
-from sqlalchemy.testing import force_drop_names
 from werkzeug.utils import secure_filename
 from app import signer, TOKEN_MAX_AGE, verification_email, confirmation_email, approval_email, rejection_email, new_confirmation_email
 from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify

@@ -1,0 +1,35 @@
+# Core web app
+Flask
+Jinja2
+Werkzeug
+itsdangerous
+MarkupSafe
+python-dotenv          # loads .env / .flaskenv
+
+# Auth & forms
+Flask-Login
+Flask-WTF
+WTForms
+email-validator        # needed for WTForms Email()
+
+# UI
+Flask-Bootstrap        # you’re using bootstrap_wtf.html macros
+
+# Mail
+Flask-Mail
+
+# Database / ORM
+SQLAlchemy
+PyMySQL                # MySQL/MariaDB driver
+
+# Mapping
+folium
+
+# Scheduling/background jobs
+APScheduler
+
+# Parser (you import from pycparser.ply.lex)
+pycparser
+
+# Deployment (Linux/macOS). On Windows, use 'waitress' instead.
+gunicorn
