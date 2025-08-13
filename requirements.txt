@@ -5,7 +5,7 @@ Werkzeug
 itsdangerous
 MarkupSafe
 python-dotenv          # loads .env / .flaskenv
-
+flask_sqlalchemy
 # Auth & forms
 Flask-Login
 Flask-WTF
