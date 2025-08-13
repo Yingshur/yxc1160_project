@@ -612,7 +612,7 @@ def register_emails_():
         email_data = form.email.data.strip().lower()
         success = verification_email(email_data)
         if success:
-            flash("Check your inbox for the verification code.", "success")
+            flash("Check your inbox for the verification code, the code is valid for ten minutes.", "success")
             return redirect(url_for('register_verify'))
         else:
             flash("This email is already registered", "warning")
@@ -652,9 +652,11 @@ def add_new_emperor():
             new_emperor = Emperor(title=form.title.data, in_greek=form.in_greek.data, birth=form.birth.data,
                                   death=form.death.data, reign=form.reign.data, life=form.life.data,
                                   dynasty=form.dynasty.data, reign_start = form.reign_start.data, references = form.references.data, ascent_to_power = form.ascent_to_power.data)
-            new_log = LogBook(original_id=new_emperor.id, title=new_emperor.title, username=current_user.username)
+            db.session.commit()
+            id_data = db.session.query(Image).first()
+            new_log_300000 = LogBook(original_id=new_emperor.id, title=new_emperor.title, username=current_user.username)
             db.session.add(new_emperor)
-            db.session.add(new_log)
+            db.session.add(new_log_300000)
             db.session.commit()
             # print(form.portrait.data.filename)
             if form.portrait.data:
@@ -670,8 +672,10 @@ def add_new_emperor():
                                              url=url_for('static', filename=f"images/uploaded_photos/{file_name}"),
                                              emperor_id=new_emperor.id)
                 db.session.add(new_emperor_portrait)
-                new_log_1 = LogBook(original_id = new_emperor_portrait.id, title = file_name, username = current_user.username)
-                db.session.add(new_log_1)
+                db.session.commit()
+                id_data = db.session.query(Image).filter(Image.emperor_id.isnot(None)).order_by(Image.id.desc()).first()
+                new_log_1000000 = LogBook(original_id = new_emperor_portrait.id, title = file_name, username = current_user.username)
+                db.session.add(new_log_1000000)
                 db.session.commit()
             return redirect(url_for("macedonians"))
         else:
@@ -1111,7 +1115,7 @@ def edit_emperor(id):
                                          temporary_emperor_id=id_data.id)
                 db.session.add(photo)
             db.session.commit()
-            confirmation_email(temporary_edit.id)
+            confirmation_email(id)
             return redirect(url_for('macedonian_emperors', id=emperor_first.id))
     return render_template("macedonian_emperors.html", id=emperor_first.id, form_open = True, m_e = emperor_first, new_form = form, title = "Dynasties")
 
@@ -1409,7 +1413,7 @@ def edit_war(id):
                                          temporary_war_id=id_data.id)
                 db.session.add(photo)
             db.session.commit()
-            confirmation_email(id=temporary_edit.id)
+            confirmation_email(id=id)
             return redirect(url_for('war_info_foreign_1', id=war_first.id))
     war_first = db.session.get(War, id)
     return render_template("war_info.html", id=war_first.id, form_open = True, war = war_first, new_form = form, title = "Battle information")
@@ -1869,7 +1873,7 @@ def edit_architecture(id):
                                          temporary_architecture_id=id_data.id)
                 db.session.add(photo)
             db.session.commit()
-            confirmation_email(id = temporary_edit.id)
+            confirmation_email(id = id)
             return redirect(url_for('architecture_info_detail', id=temporary_edit.id))
     return render_template("architecture_info_detail.html", id=architecture_first.id, form_open = True, building = architecture_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2,title = "Architecture information", form_open_1 = False, form_open_2 = False, images = images)
     #return render_template("war_info.html", war = war, title = "Battle information")
@@ -2076,9 +2080,10 @@ def edit_an_image(id):
                     photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
                     photo.caption = form.caption.data
                     db.session.add(photo)
-                    new_log_24 = LogBook(original_id=photo.id, title=file_name,
+                    db.session.commit()
+                    new_log_24000 = LogBook(original_id=form.id_number.data, title=file_name,
                                          username=current_user.username)
-                    db.session.add(new_log_24)
+                    db.session.add(new_log_24000)
                     db.session.commit()
                     flash("Successfully edited", "success")
                     return redirect(url_for('architecture_info_detail', id=id))
@@ -2088,9 +2093,10 @@ def edit_an_image(id):
                     photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
                     photo.caption = form.caption.data
                     db.session.add(photo)
-                    new_log_24 = LogBook(original_id=photo.id, title=file_name,
+                    db.session.commit()
+                    new_log_24000 = LogBook(original_id=form.id_number.data, title=file_name,
                                          username=current_user.username)
-                    db.session.add(new_log_24)
+                    db.session.add(new_log_24000)
                     db.session.commit()
                     flash("Successfully edited", "success")
                     return redirect(url_for('literature_info_detail', id=id))
@@ -2100,9 +2106,10 @@ def edit_an_image(id):
                     photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
                     photo.caption = form.caption.data
                     db.session.add(photo)
-                    new_log_24 = LogBook(original_id=photo.id, title=file_name,
+                    db.session.commit()
+                    new_log_24000 = LogBook(original_id=form.id_number.data, title=file_name,
                                          username=current_user.username)
-                    db.session.add(new_log_24)
+                    db.session.add(new_log_24000)
                     db.session.commit()
                     flash("Successfully edited", "success")
                     return redirect(url_for('artifact_info_detail', id=id))
@@ -2131,9 +2138,11 @@ def add_an_image(id):
             form.image.data.save(new_path_for_uploading)
             photo = Image(filename = file_name, url = url_for('static', filename=f"images/uploaded_photos/{file_name}"), caption = form.caption.data, architecture_id = id)
             db.session.add(photo)
-            new_log_25 = LogBook(original_id=photo.id, title=file_name,
+            db.session.commit()
+            id_data = db.session.query(Image).filter_by(architecture_id = id).order_by(Image.id.desc()).first()
+            new_log_25000 = LogBook(original_id=id_data.id, title=file_name,
                                  username=current_user.username)
-            db.session.add(new_log_25)
+            db.session.add(new_log_25000)
             db.session.commit()
             new_confirmation_email(id=photo.id, category="architecture")
             flash("Successfully uploaded", "success")
@@ -2308,8 +2317,7 @@ def edit_literature(id):
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.image.data.save(new_path_for_uploading)
-                photo = db.session.query(Image).filter_by(literature_id=literature_new_edit.id).order_by(
-                    Image.id.asc()).first()
+                photo = db.session.query(Image).filter_by(literature_id=literature_new_edit.id).order_by(Image.id.asc()).first()
                 if not photo:
                     photo = Image(literature_id=literature_new_edit.id)
                     db.session.add(photo)
@@ -2346,7 +2354,7 @@ def edit_literature(id):
                                          temporary_literature_id=id_data.id)
                 db.session.add(photo)
             db.session.commit()
-            confirmation_email(temporary_edit.id)
+            confirmation_email(id)
             return redirect(url_for('literature_info_detail', id=literature_first.id))
     return render_template("literature_info_detail.html", id=literature_first.id, form_open = True, form_1 = False, form_2 = False,book = literature_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2,title = "Literature information", images = images)
     #return render_template("war_info.html", war = war, title = "Battle information")
@@ -2558,7 +2566,9 @@ def add_an_image_1(id):
             form.image.data.save(new_path_for_uploading)
             photo = Image(filename = file_name, url = url_for('static', filename=f"images/uploaded_photos/{file_name}"), caption = form.caption.data, literature_id = id)
             db.session.add(photo)
-            new_log_34 = LogBook(original_id=photo.id, title=file_name,
+            db.session.commit()
+            id_data = db.session.query(Image).filter_by(literature_id = id).order_by(Image.id.desc()).first()
+            new_log_34 = LogBook(original_id=id_data.id, title=file_name,
                                  username=current_user.username)
             db.session.add(new_log_34)
             db.session.commit()
@@ -2719,8 +2729,7 @@ def edit_artifact(id):
                 new_path_for_uploading = path_for_uploading.replace('\\', '/')
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 form.image.data.save(new_path_for_uploading)
-                photo = db.session.query(Image).filter_by(artifact_id=artifact_new_edit.id).order_by(
-                    Image.id.asc()).first()
+                photo = db.session.query(Image).filter_by(artifact_id=artifact_new_edit.id).order_by(Image.id.asc()).first()
                 if not photo:
                     photo = Image(artifact_id=artifact_new_edit.id)
                     db.session.add(photo)
@@ -2756,7 +2765,7 @@ def edit_artifact(id):
                                          temporary_artifact_id=id_data.id)
                 db.session.add(photo)
             db.session.commit()
-            confirmation_email(temporary_edit.id)
+            confirmation_email(id)
             return redirect(url_for('artifact_info_detail', id=artifact_first.id))
     return render_template("artifact_info_detail.html", id=artifact_first.id, form_open = True, form_1 = False, form_2 = False,artifact = artifact_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2,title = "Artifact information", images = images)
     #return render_template("war_info.html", war = war, title = "Battle information")
@@ -2971,7 +2980,9 @@ def add_an_image_2(id):
             form.image.data.save(new_path_for_uploading)
             photo = Image(filename = file_name, url = url_for('static', filename=f"images/uploaded_photos/{file_name}"), caption = form.caption.data, artifact_id = id)
             db.session.add(photo)
-            new_log_43 = LogBook(original_id=photo.id, title=file_name,
+            db.session.commit()
+            id_data = db.session.query(Image).filter_by(architecture_id = id).order_by(Image.id.desc()).first()
+            new_log_43 = LogBook(original_id=id_data.id, title=file_name,
                                  username=current_user.username)
             db.session.add(new_log_43)
             db.session.commit()

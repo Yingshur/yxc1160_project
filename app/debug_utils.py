@@ -200,7 +200,7 @@ def reset_db():
             'dynasty': "Macedonian",
             'reign_start': 886,
             'ascent_to_power': 'Hereditary succession',
-            'references': 'The Editors of Encyclopædia Britannica (n.d.). Leo IV | Byzantine emperor. [online] Encyclopedia Britannica. Available at: https://www.britannica.com/biography/Leo-IV.'
+            'references': 'Encyclopaedia Britannica. (2025). Leo VI (Byzantine emperor). Encyclopaedia Britannica. Available at: URL (Accessed 11 August 2025).'
 
         },
         {
