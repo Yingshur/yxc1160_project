@@ -1,35 +1,19 @@
-# Core web app
 Flask
 Jinja2
 Werkzeug
 itsdangerous
 MarkupSafe
-python-dotenv          # loads .env / .flaskenv
+python-dotenv
 flask_sqlalchemy
-# Auth & forms
 Flask-Login
 Flask-WTF
 WTForms
-email-validator        # needed for WTForms Email()
-
-# UI
-Flask-Bootstrap        # you’re using bootstrap_wtf.html macros
-
-# Mail
+email-validator
+Flask-Bootstrap
 Flask-Mail
-
-# Database / ORM
 SQLAlchemy
-PyMySQL                # MySQL/MariaDB driver
-
-# Mapping
+PyMySQL
 folium
-
-# Scheduling/background jobs
 APScheduler
-
-# Parser (you import from pycparser.ply.lex)
 pycparser
-
-# Deployment (Linux/macOS). On Windows, use 'waitress' instead.
 gunicorn
