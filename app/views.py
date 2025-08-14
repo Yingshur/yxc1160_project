@@ -35,7 +35,7 @@ def admin_only(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if current_user.role != "Admin":
-            return redirect(url_for('home'))
+            return abort(403)
         return func(*args, **kwargs)
     return wrapper
 
@@ -185,6 +185,7 @@ def civil_wars():
 
 
 @app.route("/admin/manage_additions", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def manage_additions():
     add_list = db.session.query(TemporaryEmperor).filter(TemporaryEmperor.old_id == -1).all()
@@ -196,6 +197,7 @@ def manage_additions():
 
 
 @app.route("/admin/manage_additions/add_info_emperor/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def add_info_emperor(id):
     emperor_add = db.session.get(TemporaryEmperor, id)
@@ -204,6 +206,7 @@ def add_info_emperor(id):
 
 
 @app.route("/admin/manage_additions/add_info_war/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def add_info_war(id):
     war_add = db.session.get(TemporaryWar, id)
@@ -213,6 +216,7 @@ def add_info_war(id):
 
 
 @app.route("/approve_emperor_add/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 def approve_emperor_add(id):
     add_emperor = db.session.get(TemporaryEmperor, id)
     new_emperor = Emperor(title=add_emperor.title, in_greek=add_emperor.in_greek, birth=add_emperor.birth,
@@ -252,6 +256,7 @@ def reject_emperor_add(id):
 
 
 @app.route("/admin/manage_edits_additions_users", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def manage_edits_additions_users():
     total_list = db.session.query(TemporaryEmperor).all()
@@ -264,6 +269,7 @@ def manage_edits_additions_users():
 
 
 @app.route("/admin/manage_edits_additions_users/war_info_edit_user/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def war_info_edit_user(id):
     war_first = db.session.get(TemporaryWar, id)
@@ -294,6 +300,7 @@ def war_info_edit_user(id):
 
 
 @app.route("/admin/manage_edits_additions_users/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def user_editing(id):
     emperors_edit_additions = db.session.get(TemporaryEmperor, id)
@@ -376,6 +383,7 @@ def edit_emperor_users(id):
 
 
 @app.route("/admin/manage_edits", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def manage_edits():
     edit_list = db.session.query(TemporaryEmperor).filter(TemporaryEmperor.old_id != -1).all()
@@ -386,6 +394,7 @@ def manage_edits():
     return render_template('manage_edits.html', title = "Manage edits", edit_list = edit_list, edit_list_1 = edit_list_1, edit_list_2 = edit_list_2, edit_list_3 = edit_list_3, edit_list_4 = edit_list_4)
 
 @app.route("/admin/manage_edits/edit_info_emperor/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def edit_info_emperor(id):
     emperor_edit = db.session.get(TemporaryEmperor, id)
@@ -393,6 +402,7 @@ def edit_info_emperor(id):
 
 
 @app.route("/admin/manage_edits/edit_info_war/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def edit_info_war(id):
     war_edit = db.session.get(TemporaryWar, id)
@@ -400,6 +410,7 @@ def edit_info_war(id):
 
 
 @app.route("/admin/manage_edits/edit_info_architecture/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def edit_info_architecture(id):
     architecture_edit = db.session.get(TemporaryArchitecture, id)
@@ -408,6 +419,7 @@ def edit_info_architecture(id):
 
 
 @app.route("/admin/manage_additions/add_info_architecture/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def add_info_architecture(id):
     architecture_add = db.session.get(TemporaryArchitecture, id)
@@ -418,6 +430,7 @@ def add_info_architecture(id):
 
 
 @app.route("/admin/manage_additions/edit_info_literature/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def edit_info_literature(id):
     literature_edit = db.session.get(TemporaryLiterature, id)
@@ -426,6 +439,7 @@ def edit_info_literature(id):
 
 
 @app.route("/admin/manage_additions/add_info_literature/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def add_info_literature(id):
     literature_add = db.session.get(TemporaryLiterature, id)
@@ -437,6 +451,7 @@ def add_info_literature(id):
 
 
 @app.route("/admin/manage_additions/edit_info_artifact/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def edit_info_artifact(id):
     artifact_edit = db.session.get(TemporaryArtifact, id)
@@ -445,6 +460,7 @@ def edit_info_artifact(id):
 
 
 @app.route("/admin/manage_additions/add_info_artifact/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 @login_required
 def add_info_artifact(id):
     artifact_add = db.session.get(TemporaryArtifact, id)
@@ -458,6 +474,7 @@ def add_info_artifact(id):
 
 
 @app.route("/approve_emperor_edit/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 def approve_emperor_edit(id):
     edit_emperor = db.session.get(TemporaryEmperor, id)
     emperor_new_edit = db.session.get(Emperor, int(edit_emperor.old_id))
@@ -1497,6 +1514,7 @@ def edit_wars_users(id):
 
 
 @app.route("/approve_war_edit/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 def approve_war_edit(id):
     war_first = db.session.get(TemporaryWar, id)
     new_war = db.session.get(War, int(war_first.old_id))
@@ -1547,6 +1565,7 @@ def approve_war_edit(id):
     return redirect(url_for('manage_edits'))
 
 @app.route("/approve_war_add/<int:id>", methods=['GET', 'POST'])
+@admin_only
 def approve_war_add(id):
     add_war = db.session.get(TemporaryWar, id)
     new_war = War(title=add_war.title, start_year=add_war.start_year, dates=add_war.dates,
@@ -1947,6 +1966,7 @@ def edit_architecture_users(id):
 
 
 @app.route("/approve_architecture_edit/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 def approve_architecture_edit(id):
     architecture_first = db.session.get(TemporaryArchitecture, id)
     new_architecture = db.session.get(Architecture, int(architecture_first.old_id))
@@ -1991,6 +2011,7 @@ def approve_architecture_edit(id):
 
 
 @app.route("/approve_architecture_add/<int:id>", methods=['GET', 'POST'])
+@admin_only
 def approve_architecture_add(id):
     add_architecture = db.session.get(TemporaryArchitecture, id)
     new_architecture = Architecture(title=add_architecture.title, location = add_architecture.location, references= add_architecture.references, in_greek = add_architecture.in_greek, construction_completed = add_architecture.construction_completed, architectural_style = add_architecture.architectural_style,
@@ -2155,6 +2176,7 @@ def add_an_image(id):
 
 @app.route("/admin/manage_edits_additions_users/architecture_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
+@admin_only
 def architecture_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
     form = ArchitectureForm()
@@ -2419,6 +2441,7 @@ def edit_literature_users(id):
 
 
 @app.route("/approve_literature_edit/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 def approve_literature_edit(id):
     literature_first = db.session.get(TemporaryLiterature, id)
     new_literature = db.session.get(Literature, int(literature_first.old_id))
@@ -2462,6 +2485,7 @@ def approve_literature_edit(id):
 
 
 @app.route("/approve_literature_add/<int:id>", methods=['GET', 'POST'])
+@admin_only
 def approve_literature_add(id):
     add_literature = db.session.get(TemporaryLiterature, id)
     new_literature = Literature(title=add_literature.title, current_location = add_literature.current_location, references= add_literature.references, in_greek = add_literature.in_greek, year_completed = add_literature.year_completed, genre = add_literature.genre,
@@ -2533,6 +2557,7 @@ def admin_delete_literature_2(id):
 
 @app.route("/admin/manage_edits_additions_users/literature_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
+@admin_only
 def literature_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
     form = LiteratureForm()
@@ -2830,6 +2855,7 @@ def edit_artifact_users(id):
 
 
 @app.route("/approve_artifact_edit/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 def approve_artifact_edit(id):
     artifact_first = db.session.get(TemporaryArtifact, id)
     new_artifact = db.session.get(Artifact, int(artifact_first.old_id))
@@ -2873,6 +2899,7 @@ def approve_artifact_edit(id):
 
 
 @app.route("/approve_artifact_add/<int:id>", methods=['GET', 'POST'])
+@admin_only
 def approve_artifact_add(id):
     add_artifact = db.session.get(TemporaryArtifact, id)
     new_artifact = Artifact(title=add_artifact.title, current_location = add_artifact.current_location, references= add_artifact.references, in_greek = add_artifact.in_greek, year_completed = add_artifact.year_completed,
@@ -2947,6 +2974,7 @@ def admin_delete_artifact_2(id):
 
 @app.route("/admin/manage_edits_additions_users/artifact_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
+@admin_only
 def artifact_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
     form = ArtifactForm()
@@ -3009,6 +3037,7 @@ def add_an_image_2(id):
 
 
 @app.route('/admin/de_admin/<int:id>', methods=['POST', 'GET'])
+@admin_only
 @login_required
 def de_admin(id):
     if current_user.usertype == "Autocrat":
