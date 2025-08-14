@@ -201,6 +201,18 @@
     line-height:1.5;
     }
 
+    .desktop-margins_3{
+    text-align: left;
+    margin-left: 15rem;
+    }
+
+    @media (max-width: 800px) {
+    .desktop-margins_3{
+    margin-left: 0rem;
+    text-align:left;
+    }
+    }
+
 </style>
 {% endblock %}
 
@@ -233,7 +245,7 @@
     <div class="container-right latin-heading_new" style=" text-align: left; line-height: 1.6;">
         {{ m_e.life.replace('\n', '<br>')| safe }}
     </div>
-    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 15rem; margin-right: 15rem;">
+    <div class="latin-heading_new desktop-margins_3" style=" text-align: left; line-height: 1.6">
       References: <br>{{ m_e.references.replace('\n', '<br>')| safe }}
     </div>
     </div>

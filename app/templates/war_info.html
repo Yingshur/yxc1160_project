@@ -200,6 +200,28 @@
     text-align: left;
     line-height:1.5;
     }
+    .desktop-margins_1{
+    margin-left: 15rem;
+    margin-right: 15rem;
+    }
+
+    @media (max-width: 800px) {
+    .desktop-margins_1{
+    margin-left: 2rem;
+    margin-right: 2rem;
+    }
+    }
+    .desktop-margins_2{
+    text-align: left;
+    margin-left: 18rem;
+    }
+
+    @media (max-width: 1200px) {
+    .desktop-margins_2{
+    margin-left: 0rem;
+    text-align:left;
+    }
+    }
 
 </style>
 {% endblock %}
@@ -220,22 +242,22 @@
     <div style="text-align: center; margin-bottom: 0.2rem;">
         <span class="latin-heading_3"><strong>Location:</strong>{{war.location}}</span>
     </div>
-    <div style="text-align: left; margin-bottom: 0rem; margin-left: 20rem; ">
+    <div style="margin-bottom: 0rem;" class="desktop-margins_2">
         <span class="latin-heading_3" style="font-size: 1rem;" ><strong>Roman Commanders:</strong>{{war.roman_commanders}}</span>
     </div>
-    <div style="text-align: left; margin-bottom: 0rem; margin-left: 20rem; ">
+    <div style="margin-bottom: 0rem;" class="desktop-margins_2">
         <span class="latin-heading_3" style="font-size: 1rem;"><strong>Enemy Commanders:</strong>{{war.enemy_commanders}}</span>
     </div>
-     <div style="text-align: left; margin-bottom: 0rem; margin-left: 20rem; ">
+    <div style="margin-bottom: 0rem;" class="desktop-margins_2">
         <span class="latin-heading_3" style="font-size: 1rem;"><strong>Roman Military Strength:</strong>{{war.roman_strength}}</span>
     </div>
-    <div style="text-align: left; margin-bottom: 0rem; margin-left: 20rem; ">
+    <div style="margin-bottom: 0rem;" class="desktop-margins_2">
         <span class="latin-heading_3" style="font-size: 1rem;"><strong>Enemy Military Strength:</strong>{{war.enemy_strength}}</span>
     </div>
-    <div style="text-align: left; margin-bottom: 0rem; margin-left: 20rem; ">
+    <div style="margin-bottom: 0rem;" class="desktop-margins_2">
         <span class="latin-heading_3" style="font-size: 1rem;"><strong>Roman losses and casualties:</strong>{{war.roman_loss}}</span>
     </div>
-    <div style="text-align: left; margin-bottom: 0rem; margin-left: 20rem;">
+    <div style="margin-bottom: 0rem;" class="desktop-margins_2">
         <span class="latin-heading_3" style="font-size: 1rem;"><strong>Enemy losses and casualties:</strong>{{war.enemy_loss}}</span>
     </div>
     <div style="text-align: center; margin-bottom: 0rem;">
@@ -244,16 +266,16 @@
 
 
     <div style="font-size: 1rem; text-align: center">{% if war.images %}
-            <img src="{{war.images[0].url}}" alt = "{{war.images[0].filename}}" style="max-width: 750px; height:auto;">
+            <img src="{{war.images[0].url}}" alt = "{{war.images[0].filename}}" style="max-width: 50vw;  height:auto;">
             {% else %}
             No image
             {% endif %}</div>
         <div class="divider"></div>
 
-    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 18rem; margin-right: 18rem; margin-bottom: 3rem;">
+    <div class="latin-heading_new desktop-margins_1" style=" text-align: left; line-height: 1.6; margin-bottom: 3rem;">
         {{ war.description.replace('\n', '<br>')| safe }}
     </div>
-    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 15rem; margin-right: 15rem;">
+    <div class="latin-heading_new desktop-margins_1" style=" text-align: left; line-height: 1.6; ">
       References: <br>{{ war.references.replace('\n', '<br>')| safe }}
     </div>
 {% if current_user.is_authenticated %}

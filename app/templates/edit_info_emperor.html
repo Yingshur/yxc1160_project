@@ -90,6 +90,7 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    background-attachment: fixed;
     min-height:100vh;
     display: flex;
     flex-direction:column;
@@ -199,6 +200,18 @@
     line-height:1.5;
     }
 
+    .desktop-margins_3{
+    text-align: left;
+    margin-left: 15rem;
+    }
+
+    @media (max-width: 800px) {
+    .desktop-margins_3{
+    margin-left: 0rem;
+    text-align:left;
+    }
+    }
+
 </style>
 {% endblock %}
 
@@ -230,6 +243,9 @@
 
     <div class="container-right latin-heading_new" style=" text-align: left; line-height: 1.6;">
         {{ emperor_edit.life.replace('\n', '<br>')| safe }}
+    </div>
+        <div class="latin-heading_new desktop-margins_3" style=" text-align: left; line-height: 1.6">
+      References: <br>{{ emperor_edit.references.replace('\n', '<br>')| safe }}
     </div>
     </div>
 

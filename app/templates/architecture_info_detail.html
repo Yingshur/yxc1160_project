@@ -272,7 +272,7 @@
 
     </div>
 
-    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 15rem; margin-right: 15rem;">
+    <div class="latin-heading_new desktop-margins" style=" text-align: left; line-height: 1.6;">
       References: <br>{{ building.references.replace('\n', '<br>')| safe }}
     </div>
     {% if current_user.is_authenticated %}
@@ -288,7 +288,7 @@
         {% endif %}
 
 
- <div style="text-align: left; margin-bottom: 0rem;  margin-top: 1rem; margin-left: 4.5rem; ">
+ <div style="text-align: left; margin-bottom: 0rem;  margin-top: 1rem; " class="desktop-margins">
         <span class="latin-heading_3" style="font-size: 2rem; ">Gallery:</span>
     </div>
         {% if images|length>0 %}

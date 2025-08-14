@@ -232,8 +232,20 @@
 
 
 
+{% block flash_messages %}{% endblock %}
 {% block content %}
 <div class="background-container">
+    <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
     <h1 style="text-align: center; margin-bottom: 1rem;">
         <span class="latin-heading_3" style="display: block; font-size: 2rem;">{{artifact.title}}</span>
         <span class="latin-heading_3" style="display: block; font-size: 2rem;">{{artifact.in_greek}}</span>
@@ -248,16 +260,16 @@
 
 
     <div style="font-size: 1rem; text-align: center">{% if artifact.images %}
-            <img src="{{artifact.images[0].url}}" alt = "{{artifact.images[0].filename}}" style="max-width: 750px; height:auto;">
+            <img src="{{artifact.images[0].url}}" alt = "{{artifact.images[0].filename}}" style="max-width: 50vw; height:auto;">
             {% else %}
             No image
             {% endif %}</div>
         <div class="divider"></div>
 
-    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 12rem; margin-right: 12rem; margin-bottom: 3rem;">
+    <div class="latin-heading_new desktop-margins" style=" text-align: left; line-height: 1.6; margin-bottom: 3rem;">
         {{ artifact.description.replace('\n', '<br>')| safe }}
     </div>
-    <div class="latin-heading_new" style=" text-align: left; line-height: 1.6; margin-left: 8rem; margin-right: 8rem;">
+    <div class="latin-heading_new desktop-margins" style=" text-align: left; line-height: 1.6;">
       References: <br>{{ artifact.references.replace('\n', '<br>')| safe }}
     </div>
 
@@ -276,7 +288,7 @@
 
 
 
- <div style="text-align: left; margin-bottom: 0rem;  margin-top: 1rem; margin-left: 10rem; ">
+ <div style="text-align: left; margin-bottom: 0rem;  margin-top: 1rem; " class="desktop-margins">
         <span class="latin-heading_3" style="font-size: 2rem; ">Gallery:</span>
     </div>
         {% if images|length>0 %}
