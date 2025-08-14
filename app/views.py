@@ -256,7 +256,6 @@ def reject_emperor_add(id):
 
 
 @app.route("/admin/manage_edits_additions_users", methods = ['GET', 'POST'])
-@admin_only
 @login_required
 def manage_edits_additions_users():
     total_list = db.session.query(TemporaryEmperor).all()
