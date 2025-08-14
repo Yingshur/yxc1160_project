@@ -185,6 +185,7 @@ def civil_wars():
 
 
 @app.route("/admin/manage_additions", methods = ['GET', 'POST'])
+@login_required
 def manage_additions():
     add_list = db.session.query(TemporaryEmperor).filter(TemporaryEmperor.old_id == -1).all()
     add_list_1 =  db.session.query(TemporaryWar).filter(TemporaryWar.old_id == -1).all()
@@ -250,8 +251,8 @@ def reject_emperor_add(id):
 
 
 
-
 @app.route("/admin/manage_edits_additions_users", methods = ['GET', 'POST'])
+@login_required
 def manage_edits_additions_users():
     total_list = db.session.query(TemporaryEmperor).all()
     total_list_1 = db.session.query(TemporaryWar).all()
@@ -263,6 +264,7 @@ def manage_edits_additions_users():
 
 
 @app.route("/admin/manage_edits_additions_users/war_info_edit_user/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def war_info_edit_user(id):
     war_first = db.session.get(TemporaryWar, id)
     form = WarForm()
@@ -292,6 +294,7 @@ def war_info_edit_user(id):
 
 
 @app.route("/admin/manage_edits_additions_users/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def user_editing(id):
     emperors_edit_additions = db.session.get(TemporaryEmperor, id)
     form = AllEmperorForm()
@@ -373,6 +376,7 @@ def edit_emperor_users(id):
 
 
 @app.route("/admin/manage_edits", methods = ['GET', 'POST'])
+@login_required
 def manage_edits():
     edit_list = db.session.query(TemporaryEmperor).filter(TemporaryEmperor.old_id != -1).all()
     edit_list_1 = db.session.query(TemporaryWar).filter(TemporaryWar.old_id !=-1).all()
@@ -441,6 +445,7 @@ def edit_info_artifact(id):
 
 
 @app.route("/admin/manage_additions/add_info_artifact/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def add_info_artifact(id):
     artifact_add = db.session.get(TemporaryArtifact, id)
     return render_template("edit_add_info_artifact.html", artifact = artifact_add, title = "Preview")
@@ -2149,6 +2154,7 @@ def add_an_image(id):
 
 
 @app.route("/admin/manage_edits_additions_users/architecture_info_edit_user/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def architecture_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
     form = ArchitectureForm()
@@ -2526,6 +2532,7 @@ def admin_delete_literature_2(id):
 
 
 @app.route("/admin/manage_edits_additions_users/literature_info_edit_user/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def literature_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
     form = LiteratureForm()
@@ -2939,6 +2946,7 @@ def admin_delete_artifact_2(id):
 
 
 @app.route("/admin/manage_edits_additions_users/artifact_info_edit_user/<int:id>", methods = ['GET', 'POST'])
+@login_required
 def artifact_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
     form = ArtifactForm()
@@ -3001,6 +3009,7 @@ def add_an_image_2(id):
 
 
 @app.route('/admin/de_admin/<int:id>', methods=['POST', 'GET'])
+@login_required
 def de_admin(id):
     if current_user.usertype == "Autocrat":
         form = ChooseForm()
