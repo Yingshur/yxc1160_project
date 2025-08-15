@@ -242,8 +242,9 @@
            <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">status</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Title</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">War</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Battle Name</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">War Name</th>
+               <th class="latin-heading_2" style="font-size: 1.5rem">Result</th>
         </tr>
     </thead>
     {% for war in add_list_1 %}
@@ -252,6 +253,7 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ war.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ war.title }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ war.war_name }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ war.result }}</td>
             <td> <form action="{{ url_for('add_info_war', id=war.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
