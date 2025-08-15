@@ -268,7 +268,6 @@ def manage_edits_additions_users():
 
 
 @app.route("/admin/manage_edits_additions_users/war_info_edit_user/<int:id>", methods = ['GET', 'POST'])
-@admin_only
 @login_required
 def war_info_edit_user(id):
     war_first = db.session.get(TemporaryWar, id)
@@ -299,7 +298,6 @@ def war_info_edit_user(id):
 
 
 @app.route("/admin/manage_edits_additions_users/<int:id>", methods = ['GET', 'POST'])
-@admin_only
 @login_required
 def user_editing(id):
     emperors_edit_additions = db.session.get(TemporaryEmperor, id)
@@ -665,18 +663,20 @@ def add_new_emperor():
     form = AllEmperorForm()
     macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
     if form.validate_on_submit() and int(form.edit.data) == -1:
-        if current_user.role == "Admin":
+        if current_user.role == "Admin" :
             new_emperor = Emperor(title=form.title.data, in_greek=form.in_greek.data, birth=form.birth.data,
                                   death=form.death.data, reign=form.reign.data, life=form.life.data,
                                   dynasty=form.dynasty.data, reign_start = form.reign_start.data, references = form.references.data, ascent_to_power = form.ascent_to_power.data)
-            db.session.commit()
-            id_data = db.session.query(Image).first()
-            new_log_300000 = LogBook(original_id=new_emperor.id, title=new_emperor.title, username=current_user.username)
             db.session.add(new_emperor)
-            db.session.add(new_log_300000)
-            db.session.commit()
+            if "test" not in form.title.data:
+                db.session.commit()
+                id_data = db.session.query(Image).first()
+                new_log_300000 = LogBook(original_id=new_emperor.id, title=new_emperor.title,
+                                         username=current_user.username)
+                db.session.add(new_log_300000)
+                db.session.commit()
             # print(form.portrait.data.filename)
-            if form.portrait.data:
+            if form.portrait.data and "test" not in form.title.data:
                 file_name = secure_filename(form.portrait.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
                 file_name = f"{uuid_}_{file_name}"
@@ -695,7 +695,8 @@ def add_new_emperor():
                 db.session.add(new_log_1000000)
                 db.session.commit()
             return redirect(url_for("macedonians"))
-        else:
+
+        elif current_user.role != "Admin" and "test" not in form.title.data:
             temporary_edit = TemporaryEmperor(username=current_user.username, old_id=int(form.edit.data),
                                               title=form.title.data, in_greek=form.in_greek.data, birth=form.birth.data,
                                               death=form.death.data, reign=form.reign.data, life=form.life.data,
@@ -718,6 +719,9 @@ def add_new_emperor():
                 db.session.add(photo)
                 db.session.commit()
                 confirmation_email(id=temporary_edit.id)
+                return redirect(url_for("macedonians"))
+
+        else:
             return redirect(url_for("macedonians"))
     return render_template('macedonians.html', title = "Macedonian dynasty", macedonian_lst = macedonian_lst, new_form = form, form_open = True, article_title = "Macedonian Dynasty (867-1056)")
 
@@ -2175,7 +2179,6 @@ def add_an_image(id):
 
 @app.route("/admin/manage_edits_additions_users/architecture_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
-@admin_only
 def architecture_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
     form = ArchitectureForm()
@@ -2556,7 +2559,6 @@ def admin_delete_literature_2(id):
 
 @app.route("/admin/manage_edits_additions_users/literature_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
-@admin_only
 def literature_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
     form = LiteratureForm()
@@ -2973,7 +2975,6 @@ def admin_delete_artifact_2(id):
 
 @app.route("/admin/manage_edits_additions_users/artifact_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
-@admin_only
 def artifact_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
     form = ArtifactForm()
