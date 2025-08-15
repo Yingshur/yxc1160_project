@@ -183,7 +183,13 @@
     gap: 2rem;
     flex-wrap: wrap;
     }
-
+    .image-left-wrap {
+    float: left;
+    width: 600px;
+    height: auto;
+    margin: 0 1.5rem 1rem 0;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.15);
+}
     .container-left {
     flex:1;
     text-align: center;
@@ -201,6 +207,15 @@
     line-height:1.5;
     }
 
+    .text-wrap-container {
+    max-width: 80%;
+    margin: 2rem auto;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #000;
+    text-align: justify;
+    }
+
     .desktop-margins_3{
     text-align: left;
     margin-left: 15rem;
@@ -211,13 +226,16 @@
     margin-left: 0rem;
     text-align:left;
     }
-    @media (max-width: 800px){
-    .container-split{
-    flex-direction: column;
     }
-    .container-left, .container-right{
-    text-align: center;}
+
+@media (max-width: 800px) {
+    .image-left-wrap {
+        float: none;
+        display: block;
+        margin: 1rem auto;
+        width: 90%;
     }
+}
 
 </style>
 {% endblock %}
@@ -240,20 +258,17 @@
         <span class="latin-heading_3"><strong>Reign:</strong>{{m_e.reign}}</span>
     </div>
 
-    <div class="container-split">
-    <div class="container-left" style="font-size: 1rem; text-align: center">{% if m_e.images %}
-            <img src="{{m_e.images[0].url}}" alt = "{{m_e.images[0].filename}}" style="max-width: 100%; height:auto;">
+        <div class="text-wrap-container latin-heading_new" >{% if m_e.images %}
+            <img src="{{m_e.images[0].url}}" alt = "{{m_e.images[0].filename}}"  class="image-left-wrap">
             {% else %}
             No image
-            {% endif %}</div>
-        <div class="divider"></div>
+            {% endif %}
+    <p>        {{ m_e.life.replace('\n', '<br>')| safe }}</p>
 
-    <div class="container-right latin-heading_new" style=" text-align: left; line-height: 1.6;">
-        {{ m_e.life.replace('\n', '<br>')| safe }}
     </div>
-    <div class="latin-heading_new desktop-margins_3" style=" text-align: left; line-height: 1.6">
+
+    <div class="latin-heading_new desktop-margins" style=" text-align: left; line-height: 1.6;">
       References: <br>{{ m_e.references.replace('\n', '<br>')| safe }}
-    </div>
     </div>
 
     {% if current_user.is_authenticated %}
