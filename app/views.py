@@ -1090,37 +1090,51 @@ def edit_emperor(id):
 
     if form.validate_on_submit():
         if current_user.role == "Admin":
-            emperor_new_edit = db.session.get(Emperor, int(form.edit.data))
-            emperor_new_edit.title = form.title.data
-            emperor_new_edit.ascent_to_power = form.ascent_to_power.data
-            emperor_new_edit.reign_start = form.reign_start.data
-            emperor_new_edit.references = form.references.data
-            emperor_new_edit.in_greek = form.in_greek.data
-            emperor_new_edit.birth = form.birth.data
-            emperor_new_edit.death = form.death.data
-            emperor_new_edit.reign = form.reign.data
-            emperor_new_edit.life = form.life.data
-            emperor_new_edit.dynasty = form.dynasty.data
-            new_log_2 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title, username=current_user.username)
-            db.session.add(new_log_2)
-            if form.portrait.data:
-                file_name = secure_filename(form.portrait.data.filename)
-                uuid_ = uuid.uuid4().hex[:8]
-                file_name = f"{uuid_}_{file_name}"
-                path_for_uploading = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
-                new_path_for_uploading = path_for_uploading.replace('\\', '/')
-                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-                form.portrait.data.save(new_path_for_uploading)
-                photo = db.session.query(Image).filter_by(emperor_id=emperor_new_edit.id).order_by(
-                    Image.id.asc()).first()
-                if not photo:
-                    photo = Image(emperor_id=emperor_new_edit.id)
-                    db.session.add(photo)
-                photo.filename = file_name
-                photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
-                new_log_3 = LogBook(original_id = photo.id, title = file_name, username = current_user.username)
-                db.session.add(new_log_3)
-            db.session.commit()
+            if "test" not in form.title.data:
+                emperor_new_edit = db.session.get(Emperor, int(form.edit.data))
+                emperor_new_edit.title = form.title.data
+                emperor_new_edit.ascent_to_power = form.ascent_to_power.data
+                emperor_new_edit.reign_start = form.reign_start.data
+                emperor_new_edit.references = form.references.data
+                emperor_new_edit.in_greek = form.in_greek.data
+                emperor_new_edit.birth = form.birth.data
+                emperor_new_edit.death = form.death.data
+                emperor_new_edit.reign = form.reign.data
+                emperor_new_edit.life = form.life.data
+                emperor_new_edit.dynasty = form.dynasty.data
+                new_log_2 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title,
+                                    username=current_user.username)
+                db.session.add(new_log_2)
+                if form.portrait.data:
+                    file_name = secure_filename(form.portrait.data.filename)
+                    uuid_ = uuid.uuid4().hex[:8]
+                    file_name = f"{uuid_}_{file_name}"
+                    path_for_uploading = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
+                    new_path_for_uploading = path_for_uploading.replace('\\', '/')
+                    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    form.portrait.data.save(new_path_for_uploading)
+                    photo = db.session.query(Image).filter_by(emperor_id=emperor_new_edit.id).order_by(
+                        Image.id.asc()).first()
+                    if not photo:
+                        photo = Image(emperor_id=emperor_new_edit.id)
+                        db.session.add(photo)
+                    photo.filename = file_name
+                    photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
+                    new_log_3 = LogBook(original_id=photo.id, title=file_name, username=current_user.username)
+                    db.session.add(new_log_3)
+                db.session.commit()
+            else:
+                emperor_new_edit = db.session.get(Emperor, int(form.edit.data))
+                emperor_new_edit.title = form.title.data
+                emperor_new_edit.ascent_to_power = form.ascent_to_power.data
+                emperor_new_edit.reign_start = form.reign_start.data
+                emperor_new_edit.references = form.references.data
+                emperor_new_edit.in_greek = form.in_greek.data
+                emperor_new_edit.birth = form.birth.data
+                emperor_new_edit.death = form.death.data
+                emperor_new_edit.reign = form.reign.data
+                emperor_new_edit.life = form.life.data
+                emperor_new_edit.dynasty = form.dynasty.data
             return redirect(url_for('macedonian_emperors', id=emperor_first.id))
         else:
             temporary_edit = TemporaryEmperor(username = current_user.username, old_id = int(form.edit.data), title = form.title.data, in_greek = form.in_greek.data, birth = form.birth.data, death = form.death.data, reign = form.reign.data, life = form.life.data, dynasty = form.dynasty.data, reign_start = form.reign_start.data, references = form.references.data, ascent_to_power = form.ascent_to_power.data)

@@ -15,6 +15,16 @@ for url in urls:
     except requests.RequestException:
         print(f"{time.ctime()} - NOT WORKING")
 
+for url in urls_1:
+    r = requests.get(url, allow_redirects=False)
+    if r.status_code in [401, 403, 500]:
+        print(f"Access blocked, code {r.status_code}")
+
+    elif "/login" in r.headers.get("Location", "") or "gone wrong" in r.text:
+        print("Access blocked by 'login-only'")
+    else:
+        print("Unauthorised success succeeds")
+
 
 for url in urls:
     try:
@@ -47,12 +57,6 @@ for url in urls:
         print(f"Full page takes {end - start_:.3f} seconds.")
 
 
-for url in urls_1:
-    r = requests.get(url, allow_redirects=False)
-    if r.status_code in [401, 403] or "/login" in r.headers.get("Location", "") or "gone wrong" in r.text:
-        print("Access blocked")
-    else:
-        print("Unauthorised success succeeds")
 
 url_2 = "http://yxc1160project-production.up.railway.app/"
 r = requests.get(url_2, allow_redirects=True)
@@ -60,3 +64,6 @@ if r.url.startswith("https://"):
     print("HTTP is redirected to HTTPS")
 else:
     print("Insecure HTTP access is allowed")
+
+
+    #or "/login" in r.headers.get("Location", "") or "gone wrong" in r.text

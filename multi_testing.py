@@ -45,8 +45,32 @@ class Testing(HttpUser):
             if response.status_code != 200 and response.status_code != 302:
                 if "gone wrong" in response.text:
                     response.failure("Not working")
-                else:
+            else:
                     response.success()
+    @task
+    def edit_test(self):
+        title = f"{uuid.uuid4()}_test"
+
+        payload = {
+            'title': title,
+            'in_greek': '',
+            'birth': 'test',
+            'death': 'test',
+            'reign': 'test',
+            'life': "test",
+            'dynasty': "test",
+            'reign_start': 1,
+            'ascent_to_power': 'test',
+            'references': 'test',
+            'edit': 1
+        }
+        with self.client.post(f"/edit_emperor/{1}", data=payload, catch_response=True) as response:
+            if response.status_code != 200 and response.status_code != 302:
+                if "gone wrong" in response.text:
+                    response.failure("Not working")
+            else:
+                    response.success()
+
 
 
 
