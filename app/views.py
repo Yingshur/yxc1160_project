@@ -675,6 +675,10 @@ def add_new_emperor():
                                          username=current_user.username)
                 db.session.add(new_log_300000)
                 db.session.commit()
+            else:
+                db.session.commit()
+                db.session.delete(new_emperor)
+                db.session.commit()
             # print(form.portrait.data.filename)
             if form.portrait.data and "test" not in form.title.data:
                 file_name = secure_filename(form.portrait.data.filename)
