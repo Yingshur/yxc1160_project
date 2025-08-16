@@ -3068,7 +3068,9 @@ def de_admin(id):
         db.session.commit()
     else:
         abort(403)
-    return render_template("admin.html", title = "Admin", user_lst = user_lst, form = form)
+    return redirect(url_for('admin'))
+    #return render_template("admin.html", title = "Admin", user_lst = user_lst, form = form)
+
 
 
 
