@@ -220,9 +220,22 @@
 </style>
 {% endblock %}
 
+{% block flash_messages %}{% endblock %}
+
 
 {% block content %}
 <div class="background-container">
+    <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
     <div class="top-right-image-button">
         <a href="{{url_for('wars_selection')}}">
             <div class="image-button-content latin-heading_2">

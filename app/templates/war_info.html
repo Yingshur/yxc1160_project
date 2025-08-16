@@ -226,10 +226,22 @@
 </style>
 {% endblock %}
 
+{% block flash_messages %}{% endblock %}
 
 
 {% block content %}
 <div class="background-container">
+    <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
     <h1 style="text-align: center; margin-bottom: 1rem;">
         <span class="latin-heading_3" style="display: block; font-size: 2rem;">{{war.title}}</span>
     </h1>

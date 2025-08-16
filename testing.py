@@ -15,6 +15,18 @@ for url in urls:
     except requests.RequestException:
         print(f"{time.ctime()} - NOT WORKING")
 
+
+
+url_2 = "http://yxc1160project-production.up.railway.app/"
+r = requests.get(url_2, allow_redirects=True)
+if r.url.startswith("https://"):
+    print("HTTP is redirected to HTTPS")
+else:
+    print("Insecure HTTP access is allowed")
+
+
+
+
 for url in urls_1:
     r = requests.get(url, allow_redirects=False)
     if r.status_code in [401, 403, 500]:
@@ -37,15 +49,6 @@ for url in urls:
         print(f"ERROR: {e}")
 
 
-with app.app_context():
-    start_ = time.time()
-    rows = db.session.query(Emperor).all()
-    rows_1 = db.session.query(Image).all()
-    rows_2 = db.session.query(War).all()
-    rows_3 = db.session.query(Architecture).all()
-    rows_4 = db.session.query(Literature).all()
-    rows_5 = db.session.query(Artifact).all()
-    print(f"Data table took {time.time() - start_:.3f} seconds for {len(rows)} rows.")
 
 for url in urls:
     with sync_playwright() as p:
@@ -58,12 +61,12 @@ for url in urls:
 
 
 
-url_2 = "http://yxc1160project-production.up.railway.app/"
-r = requests.get(url_2, allow_redirects=True)
-if r.url.startswith("https://"):
-    print("HTTP is redirected to HTTPS")
-else:
-    print("Insecure HTTP access is allowed")
-
-
-    #or "/login" in r.headers.get("Location", "") or "gone wrong" in r.text
+#with app.app_context():
+    #start_ = time.time()
+    #rows = db.session.query(Emperor).all()
+    #rows_1 = db.session.query(Image).all()
+    #rows_2 = db.session.query(War).all()
+    #rows_3 = db.session.query(Architecture).all()
+    #rows_4 = db.session.query(Literature).all()
+    #rows_5 = db.session.query(Artifact).all()
+    #print(f"Data table took {time.time() - start_:.3f} seconds for {len(rows)} rows.")

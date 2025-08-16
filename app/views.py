@@ -3058,7 +3058,7 @@ def add_an_image_2(id):
 @admin_only
 @login_required
 def de_admin(id):
-    if current_user.usertype == "Autocrat":
+    if current_user.user_type == "Autocrat":
         form = ChooseForm()
         q = db.select(User)
         user_lst = db.session.scalars(q)
