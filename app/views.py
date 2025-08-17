@@ -3172,7 +3172,7 @@ def register_verify():
                 db.session.add(new_user)
                 db.session.commit()
                 login_user(user=new_user)
-                return redirect(url_for('register_emails_'))
+                return redirect(url_for('home'))
             else:
                 flash("Verification code is not correct!", 'danger')
                 return redirect(url_for('register_verify'))
