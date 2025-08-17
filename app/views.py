@@ -524,6 +524,7 @@ def reject_emperor_edit(id):
 
 
 @app.route("/admin_delete_emperor/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 def admin_delete_emperor(id):
     delete_emperor_temporary = db.session.get(TemporaryEmperor, id)
     if delete_emperor_temporary.temporary_images:
@@ -534,6 +535,7 @@ def admin_delete_emperor(id):
     return redirect(url_for('manage_edits'))
 
 @app.route("/delete_emperors_/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 def delete_emperors_(id):
     delete_emperors_ = db.session.get(Emperor, id)
     if delete_emperors_.images:
@@ -541,9 +543,62 @@ def delete_emperors_(id):
         db.session.delete(delete_images_)
     db.session.delete(delete_emperors_)
     db.session.commit()
-    return redirect(url_for("macedonians"))
+    return redirect(request.referrer)
 
 
+@app.route("/delete_wars_/<int:id>", methods = ['GET', 'POST'])
+@admin_only
+def delete_wars_(id):
+    delete_wars_ = db.session.get(War, id)
+    if delete_wars_.images:
+        delete_images_ = delete_wars_.images[0]
+        db.session.delete(delete_images_)
+    if delete_wars_.war_type == "Civil War":
+        db.session.delete(delete_wars_)
+        db.session.commit()
+        return redirect(url_for("civil_wars"))
+    elif delete_wars_.war_type == "Foreign War":
+        db.session.delete(delete_wars_)
+        db.session.commit()
+        return redirect(url_for("foreign_wars_1"))
+    return redirect(request.referrer)
+
+@app.route("/delete_architecture_/<int:id>", methods = ['GET', 'POST'])
+@admin_only
+def delete_architecture_(id):
+    delete_architecture_ = db.session.get(Architecture, id)
+    if delete_architecture_.images:
+        delete_images_ = delete_architecture_.images
+        for image in delete_images_:
+            db.session.delete(image)
+    db.session.delete(delete_architecture_)
+    db.session.commit()
+    return redirect(url_for('architecture_info'))
+
+@app.route("/delete_literature_/<int:id>", methods = ['GET', 'POST'])
+@admin_only
+def delete_literature_(id):
+    delete_literature_ = db.session.get(Literature, id)
+    if delete_literature_.images:
+        delete_images_ = delete_literature_.images
+        for image in delete_images_:
+            db.session.delete(image)
+    db.session.delete(delete_literature_)
+    db.session.commit()
+    return redirect(url_for('literature_info'))
+
+
+@app.route("/delete_artifacts_/<int:id>", methods = ['GET', 'POST'])
+@admin_only
+def delete_artifacts_(id):
+    delete_artifacts_ = db.session.get(Artifact, id)
+    if delete_artifacts_.images:
+        delete_images_ = delete_artifacts_.images
+        for image in delete_images_:
+            db.session.delete(image)
+    db.session.delete(delete_artifacts_)
+    db.session.commit()
+    return redirect(url_for('artifact_info'))
 
 
 
