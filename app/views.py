@@ -67,34 +67,9 @@ def to_csv_function_1(user_name):
         db.session.commit()
 
 
-def first_version(user_name):
-    #dir_old_version = os.path.join(os.getcwd(), "old_versions")
-    #os.makedirs(r"C:\Users\verit\PycharmProjects\yxc1160 project\old_versions", exist_ok=True)
-    unique_number = uuid.uuid4().hex
-    time_ = datetime.now().strftime('%Y%m%d_%H%M%S')
-    dir_first_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "first_version"))
-    os.makedirs(dir_first_versions, exist_ok=True)
-    with (app.app_context()):
-        for name_of_table, table in db.metadata.tables.items():
-            if name_of_table in (Emperor.__tablename__, Image.__tablename__, Artifact.__tablename__, Literature.__tablename__, Architecture.__tablename__, War.__tablename__):
-                rows_ = db.session.execute(table.select()).all()
-                columns = [column_.name for column_ in table.columns]
-                file_name = os.path.join(dir_first_versions,
-                                         f"{name_of_table}_{unique_number}.csv")
-                with open(file_name, "w", newline="", encoding="utf-8-sig") as csv_file:
-                    writer = csv.writer(csv_file)
-                    writer.writerow(columns)
-                    for row in rows_:
-                        writer.writerow(row)
-        first_version = Version(username=user_name, created_at=time_, unique=unique_number)
-        db.session.add(first_version)
-        db.session.commit()
-
 def to_csv(username):
     threading.Thread(target=to_csv_function_1, args=(username,)).start()
 
-def to_csv_first(username):
-    threading.Thread(target=first_version, args=(username,)).start()
 
 def admin_only(func):
     @wraps(func)
@@ -123,9 +98,6 @@ def versions_():
 def version_control_(id):
     csv_list = []
     version = db.session.get(Version, id)
-    versions = db.session.query(Version).order_by(Version.id.desc()).all()
-    first_version_ = versions[-1]
-    version___ = versions[0]
     unique_number_ = version.unique
     with db.engine.begin() as context:
         context.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
@@ -142,10 +114,7 @@ def version_control_(id):
         Artifact.__table__.create(context, checkfirst=True)
         Image.__table__.create(context, checkfirst=True)
         context.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
-    if version___.id == first_version_.id:
-        dir_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "first_version"))
-    else:
-        dir_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "old_versions"))
+    dir_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "old_versions"))
     os.makedirs(dir_versions, exist_ok=True)
     for path_of_file in glob.glob(
             os.path.join(dir_versions, "*.csv")):
@@ -192,12 +161,9 @@ def version_control_(id):
                         db.session.add(entry)
     #db.session.delete(version)
     current_version = db.session.query(CurrentVersion).first()
-    if current_version and version.id != first_version_.id:
+    if current_version:
         current_version.username = version.username
         current_version.time_version = version.created_at
-    if id == first_version_.id:
-        current_version.username = first_version_.username
-        current_version.time_version = "-"
     db.session.commit()
     return redirect(url_for("versions_"))
 
@@ -3180,11 +3146,6 @@ def login():
                 current_version = CurrentVersion(username=current_user.username, time_version="-")
                 db.session.add(current_version)
                 db.session.commit()
-            version_check = db.session.query(Version).first()
-            if version_check is not None:
-                pass
-            else:
-                to_csv_first(current_user.username)
         next_page = request.args.get('next')
         if not next_page or urlsplit(next_page).netloc != '':
             next_page = url_for('home')
