@@ -24,10 +24,10 @@ class User(UserMixin, db.Model):
     deletions: so.Mapped[list['Deletion']] = relationship(back_populates='user', cascade='all, delete-orphan')
     active_session: so.Mapped[str] = so.mapped_column(sa.String(64), nullable=True)
 
-    def is_admin(self):
-        return self.role == 'Admin'
-    def is_autocrat(self):
-        return self.user_type == 'Autocrat'
+    #def is_admin(self):
+        #return self.role == 'Admin'
+    #def is_autocrat(self):
+        #return self.user_type == 'Autocrat'
 
     #__mapper_args__ = {
         #"polymorphic_identity": "user",
