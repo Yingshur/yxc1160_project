@@ -17,3 +17,4 @@ folium
 APScheduler
 pycparser
 gunicorn
+boto3
