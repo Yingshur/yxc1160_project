@@ -22,6 +22,7 @@ class User(UserMixin, db.Model):
     user_type: Mapped[str] = so.mapped_column(sa.String(64), default="user")
     invitations: so.Mapped[list['Invitation']] = relationship(back_populates='user', cascade='all, delete-orphan')
     deletions: so.Mapped[list['Deletion']] = relationship(back_populates='user', cascade='all, delete-orphan')
+    active_session: so.Mapped[str] = so.mapped_column(sa.String(64), nullable=True)
 
     def is_admin(self):
         return self.role == 'Admin'
@@ -269,6 +270,28 @@ class LogBook(db.Model):
     title: so.Mapped[str] = so.mapped_column(sa.String(256))
     username: so.Mapped[str] = so.mapped_column(sa.String(256), nullable=True)
     created_at: so.Mapped[str] = so.mapped_column(sa.String(256), default=lambda:datetime.now(timezone.utc).isoformat())
+
+
+class Version(db.Model):
+    __tablename__ = 'versions'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    username: so.Mapped[str] = so.mapped_column(sa.String(256))
+    unique: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    created_at: so.Mapped[str] = so.mapped_column(sa.String(256))
+
+class CurrentVersion(db.Model):
+    __tablename__ = 'current_versions'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    username: so.Mapped[str] = so.mapped_column(sa.String(256))
+    time_version: so.Mapped[str] = so.mapped_column(sa.String(256))
+
+
+
+
+
+
+
+
 
 
 class Literature(db.Model):

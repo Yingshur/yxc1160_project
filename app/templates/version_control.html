@@ -184,7 +184,32 @@
 
 {% block content %}
 <div class="background-container">
-<h1 class="latin-heading_3">Logbook</h1>
+    <h1 class="latin-heading_3">Current Version</h1>
+    <div class="col-lg-9">
+                    <div class="table-responsive">
+    <table class="table" style="background-color: transparent;">
+    <thead>
+        <tr>
+            <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Username</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Most recent Edit/Addition</th>
+        </tr>
+    </thead>
+    {% for version in current_versions %}
+        <tr>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ version.id }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ version.username }}</td>
+            <td class="greek-heading_2" style="font-size: 1rem">{{ version.time_version }}</td>
+        </tr>
+
+    {% endfor %}
+</table>
+                    </div>
+    </div>
+    <div style="text-align: left; width: 100%; ">
+    <a href="{{url_for('version_control_', id = versions[-1].id)}}" class="btn btn-dark" style="background-color: transparent; display: inline-block; width: auto;"> Original Version </a>
+<h1 class="latin-heading_3">Version Control</h1>
+        </div>
 <div class="col-lg-9">
                     <div class="table-responsive">
 <table class="table" style="background-color: transparent;">
@@ -192,20 +217,26 @@
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Username</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Title</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Time</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Version before this Edit/Addition</th>
         </tr>
     </thead>
-    {% for each in logbook %}
+    {% for version in versions %}
+    {% if version.id != versions[-1].id %}
         <tr>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ each.original_id }}</td>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ each.username }}</td>
-            <td class="greek-heading_2" style="font-size: 1rem">{{ each.title }}</td>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ each.created_at }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ version.id }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ version.username }}</td>
+            <td class="greek-heading_2" style="font-size: 1rem">{{ version.created_at }}</td>
+            <td> <form action="{{ url_for('version_control_', id=version.id) }}" method="get" style="display:inline;">
+                       <button type="submit" class="btn" title="Info" style="font-size: 1rem;">
+                            <i class="bi bi-file-earmark-text-fill"></i>
+                    </button>
+                 </form></td>
         </tr>
-
+{% endif %}
     {% endfor %}
 </table>
+
 </div>
 </div>
 </div>

@@ -1,13 +1,19 @@
+import glob
+import time
 from os import write
 from flask import abort
 from itertools import cycle
 import uuid
 from functools import wraps
 import os
+import csv
+import pymysql
 from random import randint
-
+from sqlalchemy import text
+import threading
 from folium.plugins import MarkerCluster
 from markupsafe import Markup
+from pymysql.converters import escape_string
 from werkzeug.utils import secure_filename
 from app import signer, TOKEN_MAX_AGE, verification_email, confirmation_email, approval_email, rejection_email, new_confirmation_email
 from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
@@ -16,7 +22,7 @@ from flask import render_template, redirect, url_for, flash, request, send_file,
 import folium
 from app import app
 from app.models import User, Emperor, \
-    Verification, Invitation, Image, TemporaryEmperor, TemporaryImage, War, TemporaryWar, Architecture, TemporaryArchitecture, Literature, TemporaryLiterature, Artifact, TemporaryArtifact, LogBook, Deletion
+    Verification, Invitation, Image, TemporaryEmperor, TemporaryImage, War, TemporaryWar, Architecture, TemporaryArchitecture, Literature, TemporaryLiterature, Artifact, TemporaryArtifact, LogBook, Deletion, Version, CurrentVersion
 from app.forms import ChooseForm, LoginForm, ChangePasswordForm, ChangeEmailForm, RegisterForm, RegisterEmail, \
     AdminCodeForm, InvitationCodeForm, AllEmperorForm, WarForm, ArchitectureForm, ImageEditForm, ImageUploadForm, LiteratureForm, ArtifactForm, DeleteForm
 from flask_login import current_user, login_user, logout_user, login_required, fresh_login_required
@@ -26,11 +32,69 @@ from urllib.parse import urlsplit
 from sqlalchemy import or_, and_
 import csv
 import io
-import datetime
 import random
 import json
 from sqlalchemy.exc import IntegrityError
 #import google.generativeai as genai
+from datetime import datetime
+
+def to_csv_function_1(user_name):
+    #dir_old_version = os.path.join(os.getcwd(), "old_versions")
+    #os.makedirs(r"C:\Users\verit\PycharmProjects\yxc1160 project\old_versions", exist_ok=True)
+    unique_number = uuid.uuid4().hex
+    time_ = datetime.now().strftime('%Y%m%d_%H%M%S')
+    dir_old_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "old_versions"))
+    os.makedirs(dir_old_versions, exist_ok=True)
+    with (app.app_context()):
+        for name_of_table, table in db.metadata.tables.items():
+            if name_of_table in (Emperor.__tablename__, Image.__tablename__, Artifact.__tablename__, Literature.__tablename__, Architecture.__tablename__, War.__tablename__):
+                rows_ = db.session.execute(table.select()).all()
+                columns = [column_.name for column_ in table.columns]
+                file_name = os.path.join(dir_old_versions,
+                                         f"{name_of_table}_{unique_number}.csv")
+                with open(file_name, "w", newline="", encoding="utf-8-sig") as csv_file:
+                    writer = csv.writer(csv_file)
+                    writer.writerow(columns)
+                    for row in rows_:
+                        writer.writerow(row)
+        old_version = Version(username=user_name, created_at=time_, unique=unique_number)
+        db.session.add(old_version)
+        current_version = db.session.query(CurrentVersion).first()
+        if current_version:
+            current_version.username = user_name
+            current_version.time_version = time_
+        db.session.commit()
+
+
+def first_version(user_name):
+    #dir_old_version = os.path.join(os.getcwd(), "old_versions")
+    #os.makedirs(r"C:\Users\verit\PycharmProjects\yxc1160 project\old_versions", exist_ok=True)
+    unique_number = uuid.uuid4().hex
+    time_ = datetime.now().strftime('%Y%m%d_%H%M%S')
+    dir_first_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "first_version"))
+    os.makedirs(dir_first_versions, exist_ok=True)
+    with (app.app_context()):
+        for name_of_table, table in db.metadata.tables.items():
+            if name_of_table in (Emperor.__tablename__, Image.__tablename__, Artifact.__tablename__, Literature.__tablename__, Architecture.__tablename__, War.__tablename__):
+                rows_ = db.session.execute(table.select()).all()
+                columns = [column_.name for column_ in table.columns]
+                file_name = os.path.join(dir_first_versions,
+                                         f"{name_of_table}_{unique_number}.csv")
+                with open(file_name, "w", newline="", encoding="utf-8-sig") as csv_file:
+                    writer = csv.writer(csv_file)
+                    writer.writerow(columns)
+                    for row in rows_:
+                        writer.writerow(row)
+        first_version = Version(username=user_name, created_at=time_, unique=unique_number)
+        db.session.add(first_version)
+        db.session.commit()
+
+def to_csv(username):
+    threading.Thread(target=to_csv_function_1, args=(username,)).start()
+
+def to_csv_first(username):
+    threading.Thread(target=first_version, args=(username,)).start()
+
 def admin_only(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -42,13 +106,109 @@ def admin_only(func):
 
 
 
+@app.route('/versions_', methods = ["GET", "POST"])
+@login_required
+@admin_only
+def versions_():
+    versions = db.session.query(Version).order_by(Version.id.desc()).all()
+    current_versions = db.session.query(CurrentVersion).all()
+    return render_template("version_control.html", title = "Version control", versions = versions, current_versions = current_versions)
+
+
+
+@app.route('/versions_control_/<int:id>', methods = ["GET", "POST"])
+@login_required
+@admin_only
+def version_control_(id):
+    csv_list = []
+    version = db.session.get(Version, id)
+    versions = db.session.query(Version).order_by(Version.id.desc()).all()
+    first_version_ = versions[-1]
+    version___ = versions[0]
+    unique_number_ = version.unique
+    with db.engine.begin() as context:
+        context.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
+        Image.__table__.drop(context, checkfirst=True)
+        Architecture.__table__.drop(context, checkfirst=True)
+        Emperor.__table__.drop(context, checkfirst=True)
+        War.__table__.drop(context, checkfirst=True)
+        Literature.__table__.drop(context, checkfirst=True)
+        Artifact.__table__.drop(context, checkfirst=True)
+        Architecture.__table__.create(context, checkfirst=True)
+        Emperor.__table__.create(context, checkfirst=True)
+        War.__table__.create(context, checkfirst=True)
+        Literature.__table__.create(context, checkfirst=True)
+        Artifact.__table__.create(context, checkfirst=True)
+        Image.__table__.create(context, checkfirst=True)
+        context.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
+    if version___.id == first_version_.id:
+        dir_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "first_version"))
+    else:
+        dir_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "old_versions"))
+    os.makedirs(dir_versions, exist_ok=True)
+    for path_of_file in glob.glob(
+            os.path.join(dir_versions, "*.csv")):
+        name_of_table_full = os.path.splitext(os.path.basename(path_of_file))[0]
+        actual_table_name = name_of_table_full[:-33]
+        if name_of_table_full[-32:] == unique_number_:
+            csv_list.append(name_of_table_full)
+            with open(path_of_file, "r", encoding="utf-8-sig") as csv_file:
+                dictionary_reader = csv.DictReader(csv_file)
+                table_dictionary = [dict(row) for row in dictionary_reader]
+                for item in table_dictionary:
+                    for a, b in item.items():
+                        if b in ("", ',', None, ''):
+                            item[a] = None
+                if actual_table_name == Architecture.__tablename__:
+                    for building_data in table_dictionary:
+                        building_data.pop("id", None)
+                        building = Architecture(**building_data)
+                        db.session.add(building)
+                elif actual_table_name == Artifact.__tablename__:
+                    for item in table_dictionary:
+                        item.pop("id", None)
+                        entry = Artifact(**item)
+                        db.session.add(entry)
+                elif actual_table_name == Emperor.__tablename__:
+                    for item in table_dictionary:
+                        item.pop("id", None)
+                        entry = Emperor(**item)
+                        db.session.add(entry)
+                elif actual_table_name == Image.__tablename__:
+                    for item in table_dictionary:
+                        item.pop("id", None)
+                        entry = Image(**item)
+                        db.session.add(entry)
+                elif actual_table_name == Literature.__tablename__:
+                    for item in table_dictionary:
+                        item.pop("id", None)
+                        entry = Literature(**item)
+                        db.session.add(entry)
+                elif actual_table_name == War.__tablename__:
+                    for item in table_dictionary:
+                        item.pop("id", None)
+                        entry = War(**item)
+                        db.session.add(entry)
+    #db.session.delete(version)
+    current_version = db.session.query(CurrentVersion).first()
+    if current_version and version.id != first_version_.id:
+        current_version.username = version.username
+        current_version.time_version = version.created_at
+    if id == first_version_.id:
+        current_version.username = first_version_.username
+        current_version.time_version = "-"
+    db.session.commit()
+    return redirect(url_for("versions_"))
+
+
+
+
 
 @app.route("/logbook", methods=["GET", "POST"])
 @login_required
 def logbook():
     logbook = db.session.query(LogBook).all()
     return render_template('logbook.html', title = "Logbook", logbook =logbook)
-
 
 
 
@@ -239,6 +399,7 @@ def approve_emperor_add(id):
         db.session.delete(add_emperor.temporary_images[0])
     approval_email(user_email=user.email, emperor_title=new_emperor.title)
     db.session.delete(add_emperor)
+    to_csv(current_user.username)
     db.session.commit()
     return redirect(url_for('manage_additions'))
 
@@ -322,30 +483,10 @@ def edit_emperor_users(id):
     emperor_first_users = db.session.get(TemporaryEmperor, id)
     form = AllEmperorForm()
     if request.method == "GET":
-        form.edit.data = emperor_first_users.id
-        form.title.data = emperor_first_users.title
-        form.reign_start.data = emperor_first_users.reign_start
-        form.ascent_to_power.data = emperor_first_users.ascent_to_power
-        form.references.data = emperor_first_users.references
-        form.in_greek.data = emperor_first_users.in_greek
-        form.birth.data = emperor_first_users.birth
-        form.death.data = emperor_first_users.death
-        form.reign.data = emperor_first_users.reign
-        form.life.data = emperor_first_users.life
-        form.dynasty.data = emperor_first_users.dynasty
-
+        form = AllEmperorForm(obj=emperor_first_users)
     if form.validate_on_submit():
             emperor_new_edit_users = db.session.get(TemporaryEmperor, int(form.edit.data))
-            emperor_new_edit_users.title = form.title.data
-            emperor_new_edit_users.in_greek = form.in_greek.data
-            emperor_new_edit_users.birth = form.birth.data
-            emperor_new_edit_users.ascent_to_power = form.ascent_to_power.data
-            emperor_new_edit_users.reign_start = form.reign_start.data
-            emperor_new_edit_users.references = form.references.data
-            emperor_new_edit_users.death = form.death.data
-            emperor_new_edit_users.reign = form.reign.data
-            emperor_new_edit_users.life = form.life.data
-            emperor_new_edit_users.dynasty = form.dynasty.data
+            form.populate_obj(emperor_new_edit_users)
             if form.portrait.data:
                 file_name = secure_filename(form.portrait.data.filename)
                 uuid_ = uuid.uuid4().hex[:8]
@@ -489,6 +630,7 @@ def approve_emperor_edit(id):
     new_log_14 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title,
                          username=current_user.username)
     db.session.add(new_log_14)
+    to_csv(current_user.username)
     if edit_emperor.temporary_images:
         photo = db.session.query(Image).filter_by(emperor_id=emperor_new_edit.id).order_by(Image.id.asc()).first()
         if photo:
@@ -719,6 +861,7 @@ def add_new_emperor():
     macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin" :
+            to_csv(current_user.username)
             new_emperor = Emperor(title=form.title.data, in_greek=form.in_greek.data, birth=form.birth.data,
                                   death=form.death.data, reign=form.reign.data, life=form.life.data,
                                   dynasty=form.dynasty.data, reign_start = form.reign_start.data, references = form.references.data, ascent_to_power = form.ascent_to_power.data)
@@ -1131,32 +1274,13 @@ def edit_emperor(id):
     emperor_first = db.session.get(Emperor, id)
     form = AllEmperorForm()
     if request.method == "GET":
-        form.edit.data = emperor_first.id
-        form.title.data = emperor_first.title
-        form.reign_start.data = emperor_first.reign_start
-        form.ascent_to_power.data = emperor_first.ascent_to_power
-        form.references.data = emperor_first.references
-        form.in_greek.data = emperor_first.in_greek
-        form.birth.data = emperor_first.birth
-        form.death.data = emperor_first.death
-        form.reign.data = emperor_first.reign
-        form.life.data = emperor_first.life
-        form.dynasty.data = emperor_first.dynasty
-
+        form = AllEmperorForm(obj=emperor_first)
     if form.validate_on_submit():
         if current_user.role == "Admin":
+            to_csv(current_user.username)
             if "test" not in form.title.data:
                 emperor_new_edit = db.session.get(Emperor, int(form.edit.data))
-                emperor_new_edit.title = form.title.data
-                emperor_new_edit.ascent_to_power = form.ascent_to_power.data
-                emperor_new_edit.reign_start = form.reign_start.data
-                emperor_new_edit.references = form.references.data
-                emperor_new_edit.in_greek = form.in_greek.data
-                emperor_new_edit.birth = form.birth.data
-                emperor_new_edit.death = form.death.data
-                emperor_new_edit.reign = form.reign.data
-                emperor_new_edit.life = form.life.data
-                emperor_new_edit.dynasty = form.dynasty.data
+                form.populate_obj(emperor_new_edit)
                 new_log_2 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title,
                                     username=current_user.username)
                 db.session.add(new_log_2)
@@ -1180,16 +1304,7 @@ def edit_emperor(id):
                 db.session.commit()
             else:
                 emperor_new_edit = db.session.get(Emperor, int(form.edit.data))
-                emperor_new_edit.title = form.title.data
-                emperor_new_edit.ascent_to_power = form.ascent_to_power.data
-                emperor_new_edit.reign_start = form.reign_start.data
-                emperor_new_edit.references = form.references.data
-                emperor_new_edit.in_greek = form.in_greek.data
-                emperor_new_edit.birth = form.birth.data
-                emperor_new_edit.death = form.death.data
-                emperor_new_edit.reign = form.reign.data
-                emperor_new_edit.life = form.life.data
-                emperor_new_edit.dynasty = form.dynasty.data
+                form.populate_obj(emperor_new_edit)
             return redirect(url_for('macedonian_emperors', id=emperor_first.id))
         else:
             temporary_edit = TemporaryEmperor(username = current_user.username, old_id = int(form.edit.data), title = form.title.data, in_greek = form.in_greek.data, birth = form.birth.data, death = form.death.data, reign = form.reign.data, life = form.life.data, dynasty = form.dynasty.data, reign_start = form.reign_start.data, references = form.references.data, ascent_to_power = form.ascent_to_power.data)
@@ -1240,6 +1355,7 @@ def add_new_war_1():
     war_html = war_map._repr_html_()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin":
+            to_csv(current_user.username)
             new_war = War(title=form.title.data, start_year=form.start_year.data, dates=form.dates.data,
                                   location=form.location.data, longitude =form.longitude.data, latitude =form.latitude.data,
                                   roman_commanders=form.roman_commanders.data, enemy_commanders = form.enemy_commanders.data, roman_strength = form.roman_strength.data,
@@ -1334,6 +1450,7 @@ def add_new_war_2():
     war_html = war_map._repr_html_()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin":
+            to_csv(current_user.username)
             new_war = War(title=form.title.data, start_year=form.start_year.data, dates=form.dates.data,
                                   location=form.location.data, longitude =form.longitude.data, latitude =form.latitude.data,
                                   roman_commanders=form.roman_commanders.data, enemy_commanders = form.enemy_commanders.data, roman_strength = form.roman_strength.data,
@@ -1413,47 +1530,12 @@ def edit_war(id):
     war_first = db.session.get(War, id)
     form = WarForm()
     if request.method == "GET":
-        form.edit.data = war_first.id
-        form.title.data = war_first.title
-        form.start_year.data = war_first.start_year
-        form.dates.data = war_first.dates
-        form.location.data = war_first.location
-        form.longitude.data = war_first.longitude
-        form.latitude.data = war_first.latitude
-        form.roman_commanders.data = war_first.roman_commanders
-        form.enemy_commanders.data = war_first.enemy_commanders
-        form.roman_strength.data = war_first.roman_strength
-        form.enemy_strength.data = war_first.enemy_strength
-        form.roman_loss.data = war_first.roman_loss
-        form.enemy_loss.data = war_first.enemy_loss
-        form.dynasty.data = war_first.dynasty
-        form.war_name.data = war_first.war_name
-        form.war_type.data = war_first.war_type
-        form.description.data = war_first.description
-        form.references.data = war_first.references
-        form.result.data = war_first.result
-
+        form = WarForm(obj=war_first)
     if form.validate_on_submit():
         if current_user.role == "Admin":
+            to_csv(current_user.username)
             war_new_edit = db.session.get(War, int(form.edit.data))
-            war_new_edit.title = form.title.data
-            war_new_edit.start_year =  form.start_year.data
-            war_new_edit.dates = form.dates.data
-            war_new_edit.location = form.location.data
-            war_new_edit.longitude = form.longitude.data
-            war_new_edit.latitude = form.latitude.data
-            war_new_edit.roman_commanders = form.roman_commanders.data
-            war_new_edit.enemy_commanders = form.enemy_commanders.data
-            war_new_edit.roman_strength = form.roman_strength.data
-            war_new_edit.enemy_strength = form.enemy_strength.data
-            war_new_edit.roman_loss = form.roman_loss.data
-            war_new_edit.enemy_loss = form.enemy_loss.data
-            war_new_edit.dynasty = form.dynasty.data
-            war_new_edit.war_name = form.war_name.data
-            war_new_edit.war_type = form.war_type.data
-            war_new_edit.description = form.description.data
-            war_new_edit.references = form.references.data
-            war_new_edit.result = form.result.data
+            form.populate_obj(war_new_edit)
             new_log_6 = LogBook(original_id=war_new_edit.id, title=war_new_edit.title, username=current_user.username)
             db.session.add(new_log_6)
             if form.image.data:
@@ -1523,45 +1605,10 @@ def edit_wars_users(id):
     war_first = db.session.get(TemporaryWar, id)
     form = WarForm()
     if request.method == "GET":
-        form.edit.data = war_first.id
-        form.title.data = war_first.title
-        form.start_year.data = war_first.start_year
-        form.dates.data = war_first.dates
-        form.location.data = war_first.location
-        form.longitude.data = war_first.longitude
-        form.latitude.data = war_first.latitude
-        form.roman_commanders.data = war_first.roman_commanders
-        form.enemy_commanders.data = war_first.enemy_commanders
-        form.roman_strength.data = war_first.roman_strength
-        form.enemy_strength.data = war_first.enemy_strength
-        form.roman_loss.data = war_first.roman_loss
-        form.enemy_loss.data = war_first.enemy_loss
-        form.dynasty.data = war_first.dynasty
-        form.war_name.data = war_first.war_name
-        form.war_type.data = war_first.war_type
-        form.description.data = war_first.description
-        form.references.data = war_first.references
-        form.result.data = war_first.result
+        form = WarForm(obj=war_first)
     if form.validate_on_submit():
         war_new_edit = db.session.get(TemporaryWar, int(form.edit.data))
-        war_new_edit.title = form.title.data
-        war_new_edit.start_year = form.start_year.data
-        war_new_edit.dates = form.dates.data
-        war_new_edit.location = form.location.data
-        war_new_edit.longitude = form.longitude.data
-        war_new_edit.latitude = form.latitude.data
-        war_new_edit.roman_commanders = form.roman_commanders.data
-        war_new_edit.enemy_commanders = form.enemy_commanders.data
-        war_new_edit.roman_strength = form.roman_strength.data
-        war_new_edit.enemy_strength = form.enemy_strength.data
-        war_new_edit.roman_loss = form.roman_loss.data
-        war_new_edit.enemy_loss = form.enemy_loss.data
-        war_new_edit.dynasty = form.dynasty.data
-        war_new_edit.war_name = form.war_name.data
-        war_new_edit.war_type = form.war_type.data
-        war_new_edit.description = form.description.data
-        war_new_edit.references = form.references.data
-        war_new_edit.result = form.result.data
+        form.populate_obj(war_new_edit)
         if form.image.data:
             file_name = secure_filename(form.image.data.filename)
             uuid_ = uuid.uuid4().hex[:8]
@@ -1616,6 +1663,7 @@ def approve_war_edit(id):
     new_log_8 = LogBook(original_id=id, title=new_war.title,
                         username=current_user.username)
     db.session.add(new_log_8)
+    to_csv(current_user.username)
     if war_first.temporary_images:
         photo = db.session.query(Image).filter_by(war_id=new_war.id).order_by(Image.id.asc()).first()
         if photo:
@@ -1644,6 +1692,7 @@ def approve_war_edit(id):
 @admin_only
 def approve_war_add(id):
     add_war = db.session.get(TemporaryWar, id)
+    to_csv(current_user.username)
     new_war = War(title=add_war.title, start_year=add_war.start_year, dates=add_war.dates,
                       location=add_war.location, longitude=add_war.longitude, latitude=add_war.latitude,
      roman_commanders=add_war.roman_commanders, enemy_commanders = add_war.enemy_commanders, roman_strength = add_war.roman_strength,
@@ -1817,6 +1866,7 @@ def add_new_architecture():
     building_html = buildings_map._repr_html_()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin":
+            to_csv(current_user.username)
             new_architecture = Architecture(title=form.title.data, location = form.location.data, references= form.references.data, in_greek = form.in_greek.data, construction_completed = form.construction_completed.data, architectural_style = form.architectural_style.data,
                                             current_status = form.current_status.data, longitude = form.longitude.data, latitude = form.latitude.data, description = form.description.data, building_type = form.building_type.data )
             db.session.add(new_architecture)
@@ -1891,33 +1941,12 @@ def edit_architecture(id):
     form_2 = ImageEditForm()
     images = db.session.query(Image).filter(Image.architecture_id == id).all() or []
     if request.method == "GET":
-        form.edit.data = architecture_first.id
-        form.title.data = architecture_first.title
-        form.construction_completed.data = architecture_first.construction_completed
-        form.location.data = architecture_first.location
-        form.longitude.data = architecture_first.longitude
-        form.latitude.data = architecture_first.latitude
-        form.in_greek.data = architecture_first.in_greek
-        form.description.data = architecture_first.description
-        form.references.data = architecture_first.references
-        form.current_status.data = architecture_first.current_status
-        form.building_type.data = architecture_first.building_type
-        form.architectural_style.data = architecture_first.architectural_style
-
+        form = ArchitectureForm(obj=architecture_first)
     if form.validate_on_submit():
         if current_user.role == "Admin":
+            to_csv(current_user.username)
             architecture_new_edit = db.session.get(Architecture, int(form.edit.data))
-            architecture_new_edit.title = form.title.data
-            architecture_new_edit.construction_completed =  form.construction_completed.data
-            architecture_new_edit.location = form.location.data
-            architecture_new_edit.longitude = form.longitude.data
-            architecture_new_edit.latitude = form.latitude.data
-            architecture_new_edit.in_greek = form.in_greek.data
-            architecture_new_edit.description = form.description.data
-            architecture_new_edit.references = form.references.data
-            architecture_new_edit.current_status = form.current_status.data
-            architecture_new_edit.building_type = form.building_type.data
-            architecture_new_edit.architectural_style = form.architectural_style.data
+            form.populate_obj(architecture_new_edit)
             new_log_18 = LogBook(original_id=id, title=architecture_new_edit.title,
                                  username=current_user.username)
             db.session.add(new_log_18)
@@ -1986,32 +2015,11 @@ def edit_architecture_users(id):
     form = ArchitectureForm()
 
     if request.method == "GET":
-        form.edit.data = architecture_first.id
-        form.title.data = architecture_first.title
-        form.construction_completed.data = architecture_first.construction_completed
-        form.location.data = architecture_first.location
-        form.longitude.data = architecture_first.longitude
-        form.latitude.data = architecture_first.latitude
-        form.in_greek.data = architecture_first.in_greek
-        form.description.data = architecture_first.description
-        form.references.data = architecture_first.references
-        form.current_status.data = architecture_first.current_status
-        form.building_type.data = architecture_first.building_type
-        form.architectural_style.data = architecture_first.architectural_style
+        form = ArchitectureForm(obj=architecture_first)
 
     if form.validate_on_submit():
         architecture_new_edit = db.session.get(TemporaryArchitecture, int(form.edit.data))
-        architecture_new_edit.title = form.title.data
-        architecture_new_edit.construction_completed = form.construction_completed.data
-        architecture_new_edit.location = form.location.data
-        architecture_new_edit.longitude = form.longitude.data
-        architecture_new_edit.latitude = form.latitude.data
-        architecture_new_edit.in_greek = form.in_greek.data
-        architecture_new_edit.description = form.description.data
-        architecture_new_edit.references = form.references.data
-        architecture_new_edit.current_status = form.current_status.data
-        architecture_new_edit.building_type = form.building_type.data
-        architecture_new_edit.architectural_style = form.architectural_style.data
+        form.populate_obj(architecture_new_edit)
         if form.image.data:
             file_name = secure_filename(form.image.data.filename)
             uuid_ = uuid.uuid4().hex[:8]
@@ -2044,6 +2052,7 @@ def edit_architecture_users(id):
 @app.route("/approve_architecture_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_architecture_edit(id):
+    to_csv(current_user.username)
     architecture_first = db.session.get(TemporaryArchitecture, id)
     new_architecture = db.session.get(Architecture, int(architecture_first.old_id))
     new_architecture.title = architecture_first.title
@@ -2089,6 +2098,7 @@ def approve_architecture_edit(id):
 @app.route("/approve_architecture_add/<int:id>", methods=['GET', 'POST'])
 @admin_only
 def approve_architecture_add(id):
+    to_csv(current_user.username)
     add_architecture = db.session.get(TemporaryArchitecture, id)
     new_architecture = Architecture(title=add_architecture.title, location = add_architecture.location, references= add_architecture.references, in_greek = add_architecture.in_greek, construction_completed = add_architecture.construction_completed, architectural_style = add_architecture.architectural_style,
                                             current_status = add_architecture.current_status, longitude = add_architecture.longitude, latitude = add_architecture.latitude, description = add_architecture.description, building_type = add_architecture.building_type)
@@ -2163,6 +2173,7 @@ def edit_an_image(id):
     form_2 = ImageUploadForm()
     if current_user.user_type == "Authorised" or current_user.role == "Admin":
         if form.validate_on_submit():
+            to_csv(current_user.username)
             file_name = secure_filename(form.image.data.filename)
             uuid_ = uuid.uuid4().hex[:8]
             file_name = f"{uuid_}_{file_name}"
@@ -2173,7 +2184,8 @@ def edit_an_image(id):
             photo = db.session.query(Image).filter_by(id=form.id_number.data).first()
             if photo:
                 if photo.architecture_id:
-                    new_confirmation_email(id =photo.id, category="architecture")
+                    if current_user.user_type == "Authorised":
+                        new_confirmation_email(id =photo.id, category="architecture")
                     photo.filename = file_name
                     photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
                     photo.caption = form.caption.data
@@ -2186,7 +2198,8 @@ def edit_an_image(id):
                     flash("Successfully edited", "success")
                     return redirect(url_for('architecture_info_detail', id=id))
                 elif photo.literature_id:
-                    new_confirmation_email(id=photo.id, category="literature")
+                    if current_user.user_type == "Authorised":
+                        new_confirmation_email(id=photo.id, category="literature")
                     photo.filename = file_name
                     photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
                     photo.caption = form.caption.data
@@ -2199,7 +2212,8 @@ def edit_an_image(id):
                     flash("Successfully edited", "success")
                     return redirect(url_for('literature_info_detail', id=id))
                 elif photo.artifact_id:
-                    new_confirmation_email(id=photo.id, category="artifact")
+                    if current_user.user_type == "Authorised":
+                        new_confirmation_email(id=photo.id, category="artifact")
                     photo.filename = file_name
                     photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
                     photo.caption = form.caption.data
@@ -2227,6 +2241,7 @@ def add_an_image(id):
     form_2 = ImageEditForm()
     if current_user.user_type == "Authorised" or current_user.role == "Admin":
         if form.validate_on_submit():
+            to_csv(current_user.username)
             file_name = secure_filename(form.image.data.filename)
             uuid_ = uuid.uuid4().hex[:8]
             file_name = f"{uuid_}_{file_name}"
@@ -2242,7 +2257,8 @@ def add_an_image(id):
                                  username=current_user.username)
             db.session.add(new_log_25000)
             db.session.commit()
-            new_confirmation_email(id=photo.id, category="architecture")
+            if current_user.user_type == "Authorised":
+                new_confirmation_email(id=photo.id, category="architecture")
             flash("Successfully uploaded", "success")
             return redirect(url_for('architecture_info_detail', id=id))
     flash("Invalid details, please resubmit the form", "warning")
@@ -2315,6 +2331,7 @@ def add_new_literature():
     literature_lst = db.session.query(Literature).all()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin":
+            to_csv(current_user.username)
             new_literature = Literature(title=form.title.data, current_location = form.current_location.data, references= form.references.data, in_greek = form.in_greek.data, year_completed = form.year_completed.data, genre = form.genre.data,
                                 description = form.description.data, author = form.author.data )
             db.session.add(new_literature)
@@ -2385,26 +2402,12 @@ def edit_literature(id):
     form_2 = ImageEditForm()
     images = db.session.query(Image).filter(Image.literature_id == id).all() or []
     if request.method == "GET":
-        form.edit.data = literature_first.id
-        form.title.data = literature_first.title
-        form.year_completed.data = literature_first.year_completed
-        form.genre.data = literature_first.genre
-        form.in_greek.data = literature_first.in_greek
-        form.description.data = literature_first.description
-        form.references.data = literature_first.references
-        form.current_location.data = literature_first.current_location
-        form.author.data = literature_first.author
+        form = LiteratureForm(obj=literature_first)
     if form.validate_on_submit():
         if current_user.role == "Admin":
+            to_csv(current_user.username)
             literature_new_edit = db.session.get(Literature, int(form.edit.data))
-            literature_new_edit.title = form.title.data
-            literature_new_edit.year_completed =  form.year_completed.data
-            literature_new_edit.current_location= form.current_location.data
-            literature_new_edit.genre = form.genre.data
-            literature_new_edit.in_greek = form.in_greek.data
-            literature_new_edit.description = form.description.data
-            literature_new_edit.references = form.references.data
-            literature_new_edit.author = form.author.data
+            form.populate_obj(literature_new_edit)
             new_log_28 = LogBook(original_id=literature_new_edit.id, title=literature_new_edit.title,
                                  username=current_user.username)
             db.session.add(new_log_28)
@@ -2467,25 +2470,10 @@ def edit_literature_users(id):
     literature_first = db.session.get(TemporaryLiterature, id)
     form = LiteratureForm()
     if request.method == "GET":
-        form.edit.data = literature_first.id
-        form.title.data = literature_first.title
-        form.year_completed.data = literature_first.year_completed
-        form.genre.data = literature_first.genre
-        form.in_greek.data = literature_first.in_greek
-        form.description.data = literature_first.description
-        form.references.data = literature_first.references
-        form.current_location.data = literature_first.current_location
-        form.author.data = literature_first.author
+        form = LiteratureForm(obj=literature_first)
     if form.validate_on_submit():
         literature_new_edit = db.session.get(TemporaryLiterature, int(form.edit.data))
-        literature_new_edit.title = form.title.data
-        literature_new_edit.year_completed = form.year_completed.data
-        literature_new_edit.current_location = form.current_location.data
-        literature_new_edit.genre = form.genre.data
-        literature_new_edit.in_greek = form.in_greek.data
-        literature_new_edit.description = form.description.data
-        literature_new_edit.references = form.references.data
-        literature_new_edit.author = form.author.data
+        form.populate_obj(literature_new_edit)
         if form.image.data:
             file_name = secure_filename(form.image.data.filename)
             uuid_ = uuid.uuid4().hex[:8]
@@ -2518,6 +2506,7 @@ def edit_literature_users(id):
 @app.route("/approve_literature_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_literature_edit(id):
+    to_csv(current_user.username)
     literature_first = db.session.get(TemporaryLiterature, id)
     new_literature = db.session.get(Literature, int(literature_first.old_id))
     new_literature.title = literature_first.title
@@ -2562,6 +2551,7 @@ def approve_literature_edit(id):
 @app.route("/approve_literature_add/<int:id>", methods=['GET', 'POST'])
 @admin_only
 def approve_literature_add(id):
+    to_csv(current_user.username)
     add_literature = db.session.get(TemporaryLiterature, id)
     new_literature = Literature(title=add_literature.title, current_location = add_literature.current_location, references= add_literature.references, in_greek = add_literature.in_greek, year_completed = add_literature.year_completed, genre = add_literature.genre,
                                 description = add_literature.description, author = add_literature.author)
@@ -2659,6 +2649,7 @@ def add_an_image_1(id):
     form_2 = ImageEditForm()
     if current_user.user_type == "Authorised" or current_user.role == "Admin":
         if form.validate_on_submit():
+            to_csv(current_user.username)
             file_name = secure_filename(form.image.data.filename)
             uuid_ = uuid.uuid4().hex[:8]
             file_name = f"{uuid_}_{file_name}"
@@ -2734,6 +2725,7 @@ def add_new_artifact():
     artifact_lst = db.session.query(Artifact).all()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin":
+            to_csv(current_user.username)
             new_artifact = Artifact(title=form.title.data, current_location = form.current_location.data, references= form.references.data, in_greek = form.in_greek.data, year_completed = form.year_completed.data,
                                 description = form.description.data )
             db.session.add(new_artifact)
@@ -2805,22 +2797,12 @@ def edit_artifact(id):
     form_2 = ImageEditForm()
     images = db.session.query(Image).filter(Image.artifact_id == id).all() or []
     if request.method == "GET":
-        form.edit.data = artifact_first.id
-        form.title.data = artifact_first.title
-        form.year_completed.data = artifact_first.year_completed
-        form.in_greek.data = artifact_first.in_greek
-        form.description.data = artifact_first.description
-        form.references.data = artifact_first.references
-        form.current_location.data = artifact_first.current_location
+        form = ArtifactForm(obj=artifact_first)
     if form.validate_on_submit():
         if current_user.role == "Admin":
+            to_csv(current_user.username)
             artifact_new_edit = db.session.get(Artifact, int(form.edit.data))
-            artifact_new_edit.title = form.title.data
-            artifact_new_edit.year_completed =  form.year_completed.data
-            artifact_new_edit.current_location= form.current_location.data
-            artifact_new_edit.in_greek = form.in_greek.data
-            artifact_new_edit.description = form.description.data
-            artifact_new_edit.references = form.references.data
+            form.populate_obj(artifact_new_edit)
             new_log_37 = LogBook(original_id=artifact_new_edit.id, title=artifact_new_edit.title, username=current_user.username)
             db.session.add(new_log_37)
             if form.image.data:
@@ -2883,21 +2865,10 @@ def edit_artifact_users(id):
     artifact_first = db.session.get(TemporaryArtifact, id)
     form = ArtifactForm()
     if request.method == "GET":
-        form.edit.data = artifact_first.id
-        form.title.data = artifact_first.title
-        form.year_completed.data = artifact_first.year_completed
-        form.in_greek.data = artifact_first.in_greek
-        form.description.data = artifact_first.description
-        form.references.data = artifact_first.references
-        form.current_location.data = artifact_first.current_location
+        form = ArtifactForm(obj=artifact_first)
     if form.validate_on_submit():
         artifact_new_edit = db.session.get(TemporaryArtifact, int(form.edit.data))
-        artifact_new_edit.title = form.title.data
-        artifact_new_edit.year_completed = form.year_completed.data
-        artifact_new_edit.current_location = form.current_location.data
-        artifact_new_edit.in_greek = form.in_greek.data
-        artifact_new_edit.description = form.description.data
-        artifact_new_edit.references = form.references.data
+        form.populate_obj(artifact_new_edit)
         if form.image.data:
             file_name = secure_filename(form.image.data.filename)
             uuid_ = uuid.uuid4().hex[:8]
@@ -2931,6 +2902,7 @@ def edit_artifact_users(id):
 @app.route("/approve_artifact_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_artifact_edit(id):
+    to_csv(current_user.username)
     artifact_first = db.session.get(TemporaryArtifact, id)
     new_artifact = db.session.get(Artifact, int(artifact_first.old_id))
     new_artifact.title = artifact_first.title
@@ -2975,6 +2947,7 @@ def approve_artifact_edit(id):
 @app.route("/approve_artifact_add/<int:id>", methods=['GET', 'POST'])
 @admin_only
 def approve_artifact_add(id):
+    to_csv(current_user.username)
     add_artifact = db.session.get(TemporaryArtifact, id)
     new_artifact = Artifact(title=add_artifact.title, current_location = add_artifact.current_location, references= add_artifact.references, in_greek = add_artifact.in_greek, year_completed = add_artifact.year_completed,
                                 description = add_artifact.description)
@@ -3076,6 +3049,7 @@ def add_an_image_2(id):
     form_2 = ImageEditForm()
     if current_user.user_type == "Authorised" or current_user.role == "Admin":
         if form.validate_on_submit():
+            to_csv(current_user.username)
             file_name = secure_filename(form.image.data.filename)
             uuid_ = uuid.uuid4().hex[:8]
             file_name = f"{uuid_}_{file_name}"
@@ -3189,16 +3163,49 @@ def login():
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password', 'danger')
             return redirect(url_for('login'))
+        session_token = str(uuid.uuid4())
+        user_now = db.session.query(User).filter(or_(User.username == form.username.data, User.email == form.username.data)).first()
+        user_now.active_session = session_token
+        current_version = db.session.query(CurrentVersion).first()
+        db.session.commit()
         login_user(user, remember=form.remember_me.data)
+        session['active_session'] = session_token
+        if user_now.role != "Admin":
+            pass
+        else:
+            if current_version is not None:
+                pass
+            else:
+                current_version = CurrentVersion(username=current_user.username, time_version="-")
+                db.session.add(current_version)
+                db.session.commit()
+            version_check = db.session.query(Version).first()
+            if version_check is not None:
+                pass
+            else:
+                to_csv_first(current_user.username)
         next_page = request.args.get('next')
         if not next_page or urlsplit(next_page).netloc != '':
             next_page = url_for('home')
         return redirect(next_page)
     return render_template('generic_form.html', title='Sign In', form=form)
 
+@app.before_request
+def only_one_device_allowed_at_one_time():
+    if current_user.is_authenticated:
+        if current_user.active_session != session.get("active_session"):
+            logout_user()
+            session.clear()
+            return redirect(url_for('home'))
+    return None
+
+
 @app.route('/logout')
 def logout():
+    current_user.active_session = None
+    db.session.commit()
     logout_user()
+    session.clear()
     return redirect(url_for('home'))
 
 

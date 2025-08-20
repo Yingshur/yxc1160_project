@@ -1,9 +1,11 @@
 import random
+import uuid
 #from ensurepip import bootstrap
 from wtforms import form, ValidationError
 #from time import timezone
 import os
 import pymysql
+from app.new_file import db
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timezone, timedelta
 from flask import Flask, url_for, render_template
@@ -11,11 +13,11 @@ import flask_mail, itsdangerous
 from flask_mail import Mail, Message
 from itsdangerous import  URLSafeSerializer, SignatureExpired, BadSignature, URLSafeTimedSerializer
 from pycparser.ply.lex import TOKEN
-from app.models import User, Verification
+from app.models import User, Verification, Version
 from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
 from flask_login import current_user, login_user, logout_user, login_required, fresh_login_required
 
-
+import pymysql
 # from pymupdf import message
 
 
@@ -27,7 +29,7 @@ from flask_login import LoginManager
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 from app.new_file import db, login
-
+import csv
 app = Flask(__name__)
 app.jinja_env.undefined = StrictUndefined
 app.config.from_object(Config)
@@ -54,6 +56,8 @@ BASE = os.path.abspath(os.path.dirname(__file__))
 app.config['UPLOAD_FOLDER'] = os.path.join(BASE, 'static', 'images', 'uploaded_photos')
 app.config['UPLOAD_FOLDER_TEMPORARY'] = os.path.join(BASE, 'static', 'images', 'temporary')
 app.config['MAX_CONTENT_LENGTH'] = 2000*1024*1024
+
+
 
 
 
@@ -141,9 +145,27 @@ def deleting_expired_auto():
         db.session.commit()
 
 
+
+def to_csv_total():
+    dir_regular_backup = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "regular_backup"))
+    os.makedirs(dir_regular_backup, exist_ok=True)
+    time = datetime.now().strftime('%Y%m%d_%H%M%S')
+    with (app.app_context()):
+        for name_of_table, table in db.metadata.tables.items():
+            rows_ = db.session.execute(table.select()).all()
+            columns = [column_.name for column_ in table.columns]
+            file_name = os.path.join(dir_regular_backup,
+                                     f"{name_of_table}_{time}.csv")
+            with open(file_name, "w", newline="", encoding="utf-8-sig") as csv_file:
+                writer = csv.writer(csv_file)
+                writer.writerow(columns)
+                for row in rows_:
+                    writer.writerow(row)
+
 def schedule_start():
     schedule = BackgroundScheduler()
     schedule.add_job(deleting_expired_auto, 'interval', minutes = 10, misfire_grace_time=2)
+    schedule.add_job(to_csv_total, 'interval', minutes = 720, misfire_grace_time=2)
     schedule.start()
 
 
@@ -154,3 +176,4 @@ from app.debug_utils import reset_db
 @app.shell_context_processor
 def make_shell_context():
     return dict(db=db, sa=sa, so=so, reset_db=reset_db)
+
