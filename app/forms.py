@@ -94,6 +94,11 @@ class ImageUploadForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
+class ChatForm(FlaskForm):
+    chat_content=  TextAreaField('Question', validators=[DataRequired('Data is required')])
+    submit = SubmitField('Submit')
+
+
 
 
 

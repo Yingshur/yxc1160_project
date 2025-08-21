@@ -286,6 +286,14 @@ class CurrentVersion(db.Model):
     time_version: so.Mapped[str] = so.mapped_column(sa.String(256))
 
 
+class NewVersion(db.Model):
+    __tablename__ = 'new_versions'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
+    username: so.Mapped[str] = so.mapped_column(sa.String(256))
+    time_version: so.Mapped[str] = so.mapped_column(sa.String(256))
+
+
+
 
 
 

@@ -16,12 +16,11 @@ from pycparser.ply.lex import TOKEN
 from app.models import User, Verification, Version
 from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
 from flask_login import current_user, login_user, logout_user, login_required, fresh_login_required
-
 import pymysql
 # from pymupdf import message
 
 
-
+from transformers import pipeline
 from config import Config
 from jinja2 import StrictUndefined
 from flask_sqlalchemy import SQLAlchemy
@@ -56,8 +55,6 @@ BASE = os.path.abspath(os.path.dirname(__file__))
 app.config['UPLOAD_FOLDER'] = os.path.join(BASE, 'static', 'images', 'uploaded_photos')
 app.config['UPLOAD_FOLDER_TEMPORARY'] = os.path.join(BASE, 'static', 'images', 'temporary')
 app.config['MAX_CONTENT_LENGTH'] = 2000*1024*1024
-
-
 
 
 

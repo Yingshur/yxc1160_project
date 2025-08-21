@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% import "bootstrap_wtf.html" as wtf %}
 {% block head_extra %}
@@ -52,7 +53,7 @@
     font-size: 1rem;
     color: #000000;
     letter-spacing: 1px;
-    text-transform: none;
+    text-transform: uppercase;
     font-weight: bold;
     }
     .latin-heading_3 {
@@ -61,13 +62,14 @@
     letter-spacing: 1px;
     text-transform: none;
     font-weight: bold;
+    font-size: 1.3rem;
     }
     .greek-heading_2 {
     font-family: 'GFS Didot', serif;
     font-size: 1rem;
     color: #000000;
     letter-spacing: 1px;
-    text-transform: none;
+    text-transform: uppercase;
     font-weight: bold;
     }
 
@@ -89,8 +91,8 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    min-height:100vh;
     background-attachment: fixed;
+    min-height:100vh;
     display: flex;
     flex-direction:column;
     padding: 0.5rem;
@@ -171,71 +173,98 @@
     text-align: right;
     }
     }
+    .container-split{
+    display: flex;
+    justify-content: space-between;
+    margin: 2rem 10%;
+    border-top: 0px solid #000000;
+    border-bottom: 0px solid #000000;
+    padding-top: 2rem;
+    gap: 2rem;
+    flex-wrap: wrap;
+    }
+    .image-left-wrap {
+    float: left;
+    width: 600px;
+    height: auto;
+    margin: 0 1.5rem 1rem 0;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.15);
+}
+    .container-left {
+    flex:1;
+    text-align: center;
+    }
+
+    .divider {
+    width: 1.5px;
+    background-color: #000000;
+    margin: 0;
+    }
+
+    .container-right {
+    flex:1;
+    text-align: left;
+    line-height:1.5;
+    }
+
+    .text-wrap-container {
+    max-width: 80%;
+    margin: 2rem auto;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #000;
+    text-align: justify;
+    }
+
+    .desktop-margins_3{
+    text-align: left;
+    margin-left: 15rem;
+    }
+
+    @media (max-width: 800px) {
+    .desktop-margins_3{
+    margin-left: 0rem;
+    text-align:left;
+    }
+    }
+
+@media (max-width: 800px) {
+    .image-left-wrap {
+        float: none;
+        display: block;
+        margin: 1rem auto;
+        width: 90%;
+    }
+}
 
 </style>
 {% endblock %}
 
-
-
-
-
-
+{% block flash_messages %}{% endblock %}
 
 
 {% block content %}
 <div class="background-container">
-    <h1 class="latin-heading_3">Current Version</h1>
-    <div class="col-lg-9">
-                    <div class="table-responsive">
-    <table class="table" style="background-color: transparent;">
-    <thead>
-        <tr>
-            <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Username</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Most recent Edit/Addition</th>
-        </tr>
-    </thead>
-    {% for version in current_versions %}
-        <tr>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ version.id }}</td>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ version.username }}</td>
-            <td class="greek-heading_2" style="font-size: 1rem">{{ version.time_version }}</td>
-        </tr>
-
+    <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+            </div>
     {% endfor %}
-</table>
-                    </div>
-    </div>
-    {% if new_version %}
-    <div style="text-align: left;">
-    <a href="{{url_for('version_control_overwrite', id = new_version[0].id)}}" class="btn btn-dark" style="background-color: transparent"> Latest Version </a>
-        </div>
-    <h1 class="latin-heading_3">Version Control</h1>
     {% endif %}
-
-<div class="col-lg-9">
-                    <div class="table-responsive">
-<table class="table" style="background-color: transparent;">
-    <thead>
-        <tr>
-            <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Username</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Time</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">Version before this Edit/Addition</th>
-        </tr>
-    </thead>
-    {% for version in versions %}
-        <tr>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ version.id }}</td>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ version.username }}</td>
-            <td class="greek-heading_2" style="font-size: 1rem">{{ version.created_at }}</td>
-                <td>    <a href="{{ url_for('version_control_', id=version.id) }}" class="btn btn-dark" style="background-color: transparent"> Go back to this version </a>
-                </td>
-        </tr>
-    {% endfor %}
-</table>
-
-</div>
-</div>
+    {% endwith %}
+    <h1 class="latin-heading_3" style="text-align: center;" >AI Chatbot</h1>
+    <div class="latin-heading_new w-50 mx-auto" style="background-color: transparent; font-size: 1rem;">
+<form method="post">
+                    {{ wtf.quick_form(form, novalidate=True, autofocus=False) }}
+            </form>
+    </div>
+{% if text_ %}
+    <h1 class="latin-heading_3" >Response</h1>
+    <p class="latin-heading_new ">{{ text_ }}</p>
+    {% endif %}
+    </div>
 </div>
 {% endblock %}

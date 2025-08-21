@@ -93,6 +93,9 @@
 
             </ul>
             <ul class="navbar-nav mb-0">
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="{{ url_for('chatbot') }}">Chatbot</a>
+                </li>
                 {% if current_user.is_anonymous %}
                 <li class="nav-item">
                     <a class="nav-link" aria-current="page" href="https://docs.google.com/forms/d/e/1FAIpQLSchRiG_ZYDuvYIrWltSb1kEee0P51tydTD-Y_IJ8rnrhaw5oA/viewform?usp=dialog">Feedback</a>
