@@ -45,6 +45,9 @@ model_ready = False
 client = None
 
 
+
+
+
 def to_csv_function_1(user_name):
     #dir_old_version = os.path.join(os.getcwd(), "old_versions")
     #os.makedirs(r"C:\Users\verit\PycharmProjects\yxc1160 project\old_versions", exist_ok=True)
@@ -113,7 +116,7 @@ def background_chatbot():
         result = client.chat.completions.create(model="meta-llama/Meta-Llama-3-8B-Instruct",
                                                 messages=[{"role": "user", "content": "Hello World!"}], max_tokens=5)
         model_ready = True
-        print("Sucess")
+        print("Success!")
     except Exception as exception_:
         print(f"Not working, Error: {exception_}")
 
@@ -243,8 +246,19 @@ def chatbot():
             result = client.chat.completions.create(model="meta-llama/Meta-Llama-3-8B-Instruct", messages=[
                 {"role": "system",
                  "content": "Keep the answer concise please, 15 sentences should be the maximum! It is preferable to keep the answer between ten and fifteen sentences! Also, complete sentences only!"},
-                {"role": "system",
-                 "content": "Only answer topics related to Roman Empire and Eastern Roman Empire, with a strong focus on Macedonian dynasty, Doukas dynasty, Komnenos dynasty, Angelos dynasty and Palaiologos dynasty (topics related to other dynasties and periods can still be answered). Good topics include Eastern Roman Emperors, wars (battles), domestic political struggles, literature, architecture, and artifacts. Also answer questions about Byzantine Empire's allies and enemies, such as Bulgars, Cumans, Pechenegs, Ottoman Turks etc. Other topics include foreign relations of the Empire, even with really distant lands as far as East Asia and Africa. For irrelevant topics please just reply 'topic unrelated to this website'"},
+                {
+                    "role": "system",
+                    "content": (
+                        "Only answer topics related to the Roman Empire and Eastern Roman Empire.\n"
+                        "Place a strong focus on the Macedonian dynasty, Doukas dynasty, Komnenos dynasty, Angelos dynasty, and Palaiologos dynasty.\n"
+                        "Topics related to other dynasties and periods can still be answered.\n"
+                        "Good topics include Eastern Roman Emperors, wars (battles), domestic political struggles, literature, architecture, and artifacts.\n"
+                        "Also answer questions about the Byzantine Empire's allies and enemies, such as the Bulgars, Cumans, Pechenegs, and Ottoman Turks.\n"
+                        "Other topics include foreign relations of the Empire, even with distant lands as far as East Asia and Africa.\n"
+                        "Please do answer regular greeting questions such as 'Hello', 'Good morning' and 'Good evening'\n"
+                        "For irrelevant topics, please just reply 'Irrelevant topic, please ask a Byzantine/Roman related question!'."
+                    )
+                },
                 {"role": "system",
                  "content": "I only want answers, not the process of thinking! !Important! Only direct answers! I do not want anything related to <think>! For example, when I ask about Roman Empire just tell me about relevant information!" },
                 {"role": "user", "content": user_input}], max_tokens=300)
@@ -751,46 +765,50 @@ def add_info_artifact(id):
 @app.route("/approve_emperor_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_emperor_edit(id):
-    edit_emperor = db.session.get(TemporaryEmperor, id)
-    emperor_new_edit = db.session.get(Emperor, int(edit_emperor.old_id))
-    emperor_new_edit.title = edit_emperor.title
-    emperor_new_edit.ascent_to_power = edit_emperor.ascent_to_power
-    emperor_new_edit.reign_start = edit_emperor.reign_start
-    emperor_new_edit.references = edit_emperor.references
-    emperor_new_edit.in_greek = edit_emperor.in_greek
-    emperor_new_edit.birth = edit_emperor.birth
-    emperor_new_edit.death = edit_emperor.death
-    emperor_new_edit.reign = edit_emperor.reign
-    emperor_new_edit.life = edit_emperor.life
-    emperor_new_edit.dynasty = edit_emperor.dynasty
-    user = db.session.query(User).filter_by(username = edit_emperor.username).first()
-    new_log_14 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title,
-                         username=current_user.username)
-    db.session.add(new_log_14)
-    to_csv(current_user.username)
-    if edit_emperor.temporary_images:
-        photo = db.session.query(Image).filter_by(emperor_id=emperor_new_edit.id).order_by(Image.id.asc()).first()
-        if photo:
-            file_name = secure_filename(edit_emperor.temporary_images[0].filename)
-            photo.filename = file_name
-            photo.url = f"/static/images/uploaded_photos/{file_name}"
-            photo.emperor_id = emperor_new_edit.id
-            new_log_15 = LogBook(original_id=photo.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_15)
-            db.session.delete(edit_emperor.temporary_images[0])
-        else:
-            file_name = secure_filename(edit_emperor.temporary_images[0].filename)
-            photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", emperor_id = emperor_new_edit.id)
-            db.session.add(photo)
-            new_log_15 = LogBook(original_id=photo.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_15)
-            db.session.delete(edit_emperor.temporary_images[0])
-    approval_email(user_email=user.email, emperor_title=edit_emperor.title)
-    db.session.delete(edit_emperor)
-    db.session.commit()
-    to_csv_overwrite(current_user.username)
+    try:
+        edit_emperor = db.session.get(TemporaryEmperor, id)
+        emperor_new_edit = db.session.get(Emperor, int(edit_emperor.old_id))
+        emperor_new_edit.title = edit_emperor.title
+        emperor_new_edit.ascent_to_power = edit_emperor.ascent_to_power
+        emperor_new_edit.reign_start = edit_emperor.reign_start
+        emperor_new_edit.references = edit_emperor.references
+        emperor_new_edit.in_greek = edit_emperor.in_greek
+        emperor_new_edit.birth = edit_emperor.birth
+        emperor_new_edit.death = edit_emperor.death
+        emperor_new_edit.reign = edit_emperor.reign
+        emperor_new_edit.life = edit_emperor.life
+        emperor_new_edit.dynasty = edit_emperor.dynasty
+        user = db.session.query(User).filter_by(username=edit_emperor.username).first()
+        new_log_14 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title,
+                             username=current_user.username)
+        db.session.add(new_log_14)
+        to_csv(current_user.username)
+        if edit_emperor.temporary_images:
+            photo = db.session.query(Image).filter_by(emperor_id=emperor_new_edit.id).order_by(Image.id.asc()).first()
+            if photo:
+                file_name = secure_filename(edit_emperor.temporary_images[0].filename)
+                photo.filename = file_name
+                photo.url = f"/static/images/uploaded_photos/{file_name}"
+                photo.emperor_id = emperor_new_edit.id
+                new_log_15 = LogBook(original_id=photo.id, title=file_name,
+                                     username=current_user.username)
+                db.session.add(new_log_15)
+                db.session.delete(edit_emperor.temporary_images[0])
+            else:
+                file_name = secure_filename(edit_emperor.temporary_images[0].filename)
+                photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
+                              emperor_id=emperor_new_edit.id)
+                db.session.add(photo)
+                new_log_15 = LogBook(original_id=photo.id, title=file_name,
+                                     username=current_user.username)
+                db.session.add(new_log_15)
+                db.session.delete(edit_emperor.temporary_images[0])
+        approval_email(user_email=user.email, emperor_title=edit_emperor.title)
+        db.session.delete(edit_emperor)
+        db.session.commit()
+        to_csv_overwrite(current_user.username)
+    except Exception as e:
+        flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
 
 @app.route("/reject_emperor_edit/<int:id>", methods = ['GET', 'POST'])
@@ -1744,55 +1762,58 @@ def edit_wars_users(id):
 @app.route("/approve_war_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_war_edit(id):
-    war_first = db.session.get(TemporaryWar, id)
-    new_war = db.session.get(War, int(war_first.old_id))
+    try:
+        war_first = db.session.get(TemporaryWar, id)
+        new_war = db.session.get(War, int(war_first.old_id))
 
-    new_war.title = war_first.title
-    new_war.start_year = war_first.start_year
-    new_war.dates = war_first.dates
-    new_war.location = war_first.location
-    new_war.longitude = war_first.longitude
-    new_war.latitude = war_first.latitude
-    new_war.roman_commanders = war_first.roman_commanders
-    new_war.enemy_commanders = war_first.enemy_commanders
-    new_war.roman_strength = war_first.roman_strength
-    new_war.enemy_strength = war_first.enemy_strength
-    new_war.roman_loss = war_first.roman_loss
-    new_war.enemy_loss = war_first.enemy_loss
-    new_war.dynasty = war_first.dynasty
-    new_war.war_name = war_first.war_name
-    new_war.war_type = war_first.war_type
-    new_war.description = war_first.description
-    new_war.references = war_first.references
-    new_war.result = war_first.result
-    user = db.session.query(User).filter_by(username = war_first.username).first()
-    new_log_8 = LogBook(original_id=id, title=new_war.title,
-                        username=current_user.username)
-    db.session.add(new_log_8)
-    to_csv(current_user.username)
-    if war_first.temporary_images:
-        photo = db.session.query(Image).filter_by(war_id=new_war.id).order_by(Image.id.asc()).first()
-        if photo:
-            file_name = secure_filename(war_first.temporary_images[0].filename)
-            photo.filename = file_name
-            photo.url = f"/static/images/uploaded_photos/{file_name}"
-            photo.war_id = new_war.id
-            db.session.delete(war_first.temporary_images[0])
-            new_log_900 = LogBook(original_id=photo.id, title=file_name,
-                                username=current_user.username)
-            db.session.add(new_log_900)
-        else:
-            file_name = secure_filename(war_first.temporary_images[0].filename)
-            photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", war_id = new_war.id)
-            db.session.add(photo)
-            db.session.delete(war_first.temporary_images[0])
-            new_log_9 = LogBook(original_id=photo.id, title=file_name,
-                                username=current_user.username)
-            db.session.add(new_log_9)
-    approval_email(user_email=user.email, emperor_title=new_war.title)
-    db.session.delete(war_first)
-    db.session.commit()
-    to_csv_overwrite(current_user.username)
+        new_war.title = war_first.title
+        new_war.start_year = war_first.start_year
+        new_war.dates = war_first.dates
+        new_war.location = war_first.location
+        new_war.longitude = war_first.longitude
+        new_war.latitude = war_first.latitude
+        new_war.roman_commanders = war_first.roman_commanders
+        new_war.enemy_commanders = war_first.enemy_commanders
+        new_war.roman_strength = war_first.roman_strength
+        new_war.enemy_strength = war_first.enemy_strength
+        new_war.roman_loss = war_first.roman_loss
+        new_war.enemy_loss = war_first.enemy_loss
+        new_war.dynasty = war_first.dynasty
+        new_war.war_name = war_first.war_name
+        new_war.war_type = war_first.war_type
+        new_war.description = war_first.description
+        new_war.references = war_first.references
+        new_war.result = war_first.result
+        user = db.session.query(User).filter_by(username=war_first.username).first()
+        new_log_8 = LogBook(original_id=id, title=new_war.title,
+                            username=current_user.username)
+        db.session.add(new_log_8)
+        to_csv(current_user.username)
+        if war_first.temporary_images:
+            photo = db.session.query(Image).filter_by(war_id=new_war.id).order_by(Image.id.asc()).first()
+            if photo:
+                file_name = secure_filename(war_first.temporary_images[0].filename)
+                photo.filename = file_name
+                photo.url = f"/static/images/uploaded_photos/{file_name}"
+                photo.war_id = new_war.id
+                db.session.delete(war_first.temporary_images[0])
+                new_log_900 = LogBook(original_id=photo.id, title=file_name,
+                                      username=current_user.username)
+                db.session.add(new_log_900)
+            else:
+                file_name = secure_filename(war_first.temporary_images[0].filename)
+                photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}", war_id=new_war.id)
+                db.session.add(photo)
+                db.session.delete(war_first.temporary_images[0])
+                new_log_9 = LogBook(original_id=photo.id, title=file_name,
+                                    username=current_user.username)
+                db.session.add(new_log_9)
+        approval_email(user_email=user.email, emperor_title=new_war.title)
+        db.session.delete(war_first)
+        db.session.commit()
+        to_csv_overwrite(current_user.username)
+    except Exception as e:
+        flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
 
 @app.route("/approve_war_add/<int:id>", methods=['GET', 'POST'])
@@ -2145,47 +2166,52 @@ def edit_architecture_users(id):
 @app.route("/approve_architecture_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_architecture_edit(id):
-    to_csv(current_user.username)
-    architecture_first = db.session.get(TemporaryArchitecture, id)
-    new_architecture = db.session.get(Architecture, int(architecture_first.old_id))
-    new_architecture.title = architecture_first.title
-    new_architecture.in_greek = architecture_first.in_greek
-    new_architecture.architectural_style = architecture_first.architectural_style
-    new_architecture.location = architecture_first.location
-    new_architecture.longitude = architecture_first.longitude
-    new_architecture.latitude = architecture_first.latitude
-    new_architecture.current_status = architecture_first.current_status
-    new_architecture.construction_completed = architecture_first.construction_completed
-    new_architecture.building_type = architecture_first.building_type
-    new_architecture.description = architecture_first.description
-    new_architecture.references = architecture_first.references
-    user = db.session.query(User).filter_by(username = architecture_first.username).first()
-    new_log_20 = LogBook(original_id=id, title=new_architecture.title,
-                         username=current_user.username)
-    db.session.add(new_log_20)
-    if architecture_first.temporary_images:
-        photo = db.session.query(Image).filter_by(architecture_id=new_architecture.id).order_by(Image.id.asc()).first()
-        if photo:
-            file_name = secure_filename(architecture_first.temporary_images[0].filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            photo.url = f"/static/images/uploaded_photos/{file_name}"
-            photo.architecture_id = new_architecture.id
-            new_log_2100 = LogBook(original_id=photo.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_2100)
-            db.session.delete(architecture_first.temporary_images[0])
-        else:
-            file_name = secure_filename(architecture_first.temporary_images[0].filename)
-            photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", architecture_id = new_architecture.id)
-            db.session.add(photo)
-            new_log_21 = LogBook(original_id=photo.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_21)
-            db.session.delete(architecture_first.temporary_images[0])
-    approval_email(user_email=user.email, emperor_title=new_architecture.title)
-    db.session.delete(architecture_first)
-    db.session.commit()
-    to_csv_overwrite(current_user.username)
+    try:
+        to_csv(current_user.username)
+        architecture_first = db.session.get(TemporaryArchitecture, id)
+        new_architecture = db.session.get(Architecture, int(architecture_first.old_id))
+        new_architecture.title = architecture_first.title
+        new_architecture.in_greek = architecture_first.in_greek
+        new_architecture.architectural_style = architecture_first.architectural_style
+        new_architecture.location = architecture_first.location
+        new_architecture.longitude = architecture_first.longitude
+        new_architecture.latitude = architecture_first.latitude
+        new_architecture.current_status = architecture_first.current_status
+        new_architecture.construction_completed = architecture_first.construction_completed
+        new_architecture.building_type = architecture_first.building_type
+        new_architecture.description = architecture_first.description
+        new_architecture.references = architecture_first.references
+        user = db.session.query(User).filter_by(username=architecture_first.username).first()
+        new_log_20 = LogBook(original_id=id, title=new_architecture.title,
+                             username=current_user.username)
+        db.session.add(new_log_20)
+        if architecture_first.temporary_images:
+            photo = db.session.query(Image).filter_by(architecture_id=new_architecture.id).order_by(
+                Image.id.asc()).first()
+            if photo:
+                file_name = secure_filename(architecture_first.temporary_images[0].filename)
+                uuid_ = uuid.uuid4().hex[:8]
+                photo.url = f"/static/images/uploaded_photos/{file_name}"
+                photo.architecture_id = new_architecture.id
+                new_log_2100 = LogBook(original_id=photo.id, title=file_name,
+                                       username=current_user.username)
+                db.session.add(new_log_2100)
+                db.session.delete(architecture_first.temporary_images[0])
+            else:
+                file_name = secure_filename(architecture_first.temporary_images[0].filename)
+                photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
+                              architecture_id=new_architecture.id)
+                db.session.add(photo)
+                new_log_21 = LogBook(original_id=photo.id, title=file_name,
+                                     username=current_user.username)
+                db.session.add(new_log_21)
+                db.session.delete(architecture_first.temporary_images[0])
+        approval_email(user_email=user.email, emperor_title=new_architecture.title)
+        db.session.delete(architecture_first)
+        db.session.commit()
+        to_csv_overwrite(current_user.username)
+    except Exception as e:
+        flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
 
 
@@ -2595,44 +2621,48 @@ def edit_literature_users(id):
 @app.route("/approve_literature_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_literature_edit(id):
-    to_csv(current_user.username)
-    literature_first = db.session.get(TemporaryLiterature, id)
-    new_literature = db.session.get(Literature, int(literature_first.old_id))
-    new_literature.title = literature_first.title
-    new_literature.in_greek = literature_first.in_greek
-    new_literature.current_location = literature_first.current_location
-    new_literature.genre = literature_first.genre
-    new_literature.author = literature_first.author
-    new_literature.year_completed = literature_first.year_completed
-    new_literature.description = literature_first.description
-    new_literature.references = literature_first.references
-    user = db.session.query(User).filter_by(username = literature_first.username).first()
-    new_log_30 = LogBook(original_id=id, title=new_literature.title,
-                         username=current_user.username)
-    db.session.add(new_log_30)
-    if literature_first.temporary_images:
-        photo = db.session.query(Image).filter_by(literature_id=new_literature.id).order_by(Image.id.asc()).first()
-        if photo:
-            file_name = secure_filename(literature_first.temporary_images[0].filename)
-            photo.filename = file_name
-            photo.url = f"/static/images/uploaded_photos/{file_name}"
-            photo.literature_id = new_literature.id
-            new_log_3100 = LogBook(original_id=photo.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_3100)
-            db.session.delete(literature_first.temporary_images[0])
-        else:
-            file_name = secure_filename(literature_first.temporary_images[0].filename)
-            photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", literature_id = new_literature.id)
-            db.session.add(photo)
-            new_log_31 = LogBook(original_id=photo.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_31)
-            db.session.delete(literature_first.temporary_images[0])
-    approval_email(user_email=user.email, emperor_title=new_literature.title)
-    db.session.delete(literature_first)
-    db.session.commit()
-    to_csv_overwrite(current_user.username)
+    try:
+        to_csv(current_user.username)
+        literature_first = db.session.get(TemporaryLiterature, id)
+        new_literature = db.session.get(Literature, int(literature_first.old_id))
+        new_literature.title = literature_first.title
+        new_literature.in_greek = literature_first.in_greek
+        new_literature.current_location = literature_first.current_location
+        new_literature.genre = literature_first.genre
+        new_literature.author = literature_first.author
+        new_literature.year_completed = literature_first.year_completed
+        new_literature.description = literature_first.description
+        new_literature.references = literature_first.references
+        user = db.session.query(User).filter_by(username=literature_first.username).first()
+        new_log_30 = LogBook(original_id=id, title=new_literature.title,
+                             username=current_user.username)
+        db.session.add(new_log_30)
+        if literature_first.temporary_images:
+            photo = db.session.query(Image).filter_by(literature_id=new_literature.id).order_by(Image.id.asc()).first()
+            if photo:
+                file_name = secure_filename(literature_first.temporary_images[0].filename)
+                photo.filename = file_name
+                photo.url = f"/static/images/uploaded_photos/{file_name}"
+                photo.literature_id = new_literature.id
+                new_log_3100 = LogBook(original_id=photo.id, title=file_name,
+                                       username=current_user.username)
+                db.session.add(new_log_3100)
+                db.session.delete(literature_first.temporary_images[0])
+            else:
+                file_name = secure_filename(literature_first.temporary_images[0].filename)
+                photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
+                              literature_id=new_literature.id)
+                db.session.add(photo)
+                new_log_31 = LogBook(original_id=photo.id, title=file_name,
+                                     username=current_user.username)
+                db.session.add(new_log_31)
+                db.session.delete(literature_first.temporary_images[0])
+        approval_email(user_email=user.email, emperor_title=new_literature.title)
+        db.session.delete(literature_first)
+        db.session.commit()
+        to_csv_overwrite(current_user.username)
+    except Exception as e:
+        flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
 
 
@@ -2985,46 +3015,50 @@ def edit_artifact_users(id):
 @app.route("/approve_artifact_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_artifact_edit(id):
-    to_csv(current_user.username)
-    artifact_first = db.session.get(TemporaryArtifact, id)
-    new_artifact = db.session.get(Artifact, int(artifact_first.old_id))
-    new_artifact.title = artifact_first.title
-    new_artifact.in_greek = artifact_first.in_greek
-    new_artifact.current_location = artifact_first.current_location
-    new_artifact.year_completed = artifact_first.year_completed
-    new_artifact.description = artifact_first.description
-    new_artifact.references = artifact_first.references
-    user = db.session.query(User).filter_by(username = artifact_first.username).first()
-    new_log_39 = LogBook(original_id=id, title=new_artifact.title,
-                         username=current_user.username)
-    db.session.add(new_log_39)
-    if artifact_first.temporary_images:
-        photo = db.session.query(Image).filter_by(artifact_id=new_artifact.id).order_by(Image.id.asc()).first()
-        if photo:
-            file_name = secure_filename(artifact_first.temporary_images[0].filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
-            photo.filename = file_name
-            photo.url = f"/static/images/uploaded_photos/{file_name}"
-            photo.artifact_id = new_artifact.id
-            db.session.delete(artifact_first.temporary_images[0])
-            new_log_4000 = LogBook(original_id=photo.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_4000)
-        else:
-            file_name = secure_filename(artifact_first.temporary_images[0].filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
-            photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", artifact_id = new_artifact.id)
-            new_log_40 = LogBook(original_id=photo.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_40)
-            db.session.add(photo)
-            db.session.delete(artifact_first.temporary_images[0])
-    approval_email(user_email=user.email, emperor_title=new_artifact.title)
-    db.session.delete(artifact_first)
-    db.session.commit()
-    to_csv_overwrite(current_user.username)
+    try:
+        to_csv(current_user.username)
+        artifact_first = db.session.get(TemporaryArtifact, id)
+        new_artifact = db.session.get(Artifact, int(artifact_first.old_id))
+        new_artifact.title = artifact_first.title
+        new_artifact.in_greek = artifact_first.in_greek
+        new_artifact.current_location = artifact_first.current_location
+        new_artifact.year_completed = artifact_first.year_completed
+        new_artifact.description = artifact_first.description
+        new_artifact.references = artifact_first.references
+        user = db.session.query(User).filter_by(username=artifact_first.username).first()
+        new_log_39 = LogBook(original_id=id, title=new_artifact.title,
+                             username=current_user.username)
+        db.session.add(new_log_39)
+        if artifact_first.temporary_images:
+            photo = db.session.query(Image).filter_by(artifact_id=new_artifact.id).order_by(Image.id.asc()).first()
+            if photo:
+                file_name = secure_filename(artifact_first.temporary_images[0].filename)
+                uuid_ = uuid.uuid4().hex[:8]
+                file_name = f"{uuid_}_{file_name}"
+                photo.filename = file_name
+                photo.url = f"/static/images/uploaded_photos/{file_name}"
+                photo.artifact_id = new_artifact.id
+                db.session.delete(artifact_first.temporary_images[0])
+                new_log_4000 = LogBook(original_id=photo.id, title=file_name,
+                                       username=current_user.username)
+                db.session.add(new_log_4000)
+            else:
+                file_name = secure_filename(artifact_first.temporary_images[0].filename)
+                uuid_ = uuid.uuid4().hex[:8]
+                file_name = f"{uuid_}_{file_name}"
+                photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
+                              artifact_id=new_artifact.id)
+                new_log_40 = LogBook(original_id=photo.id, title=file_name,
+                                     username=current_user.username)
+                db.session.add(new_log_40)
+                db.session.add(photo)
+                db.session.delete(artifact_first.temporary_images[0])
+        approval_email(user_email=user.email, emperor_title=new_artifact.title)
+        db.session.delete(artifact_first)
+        db.session.commit()
+        to_csv_overwrite(current_user.username)
+    except Exception as e:
+        flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
 
 
@@ -3278,6 +3312,24 @@ def only_one_device_allowed_at_one_time():
             logout_user()
             session.clear()
             return redirect(url_for('home'))
+    return None
+
+@app.before_request
+def prevent_frequent_requests():
+    if request.method == "POST" and request.endpoint == "chatbot":
+        form = ChatForm()
+        latest_request_time = session.get("last_request_time", 0)
+        current_time = time.time()
+        if latest_request_time is not None:
+            if current_user.is_authenticated:
+                if current_time - latest_request_time < 3:
+                    flash("Please wait for a few seconds before making another request!", "warning")
+                    return render_template("chatbot.html", text_=None, title="Chatbot", form=form)
+            else:
+                if current_time - latest_request_time < 10:
+                    flash("Please wait for ten seconds before making another request!", "warning")
+                    return render_template("chatbot.html", text_=None, title="Chatbot", form=form)
+        session["last_request_time"] = current_time
     return None
 
 

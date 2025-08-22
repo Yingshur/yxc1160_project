@@ -17,6 +17,26 @@ from datetime import datetime
 
 
 
+#def background_chatbot():
+    #global client, model_ready
+    #try:
+        #print("Initialization starts!")
+        #client = genai.Client(api_key=token_)
+        #contents = [
+            #types.Content(
+                #role="user",
+                #parts=[
+                    #types.Part.from_text(text="Hello world"),
+                #],
+            #),
+        #]
+        #generate_content_config = types.GenerateContentConfig(max_output_tokens=5)
+        #result = client.models.generate_content(model="gemini-2.5-flash",contents=contents, config=generate_content_config)
+        #model_ready = True
+        #print("Success")
+    #except Exception as exception_:
+        #print(f"Not working, Error: {exception_}")
+
 
 def to_csv_total():
     dir_regular_backup = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "regular_backup"))
