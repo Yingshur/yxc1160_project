@@ -20,7 +20,6 @@ import pymysql
 # from pymupdf import message
 
 
-from transformers import pipeline
 from config import Config
 from jinja2 import StrictUndefined
 from flask_sqlalchemy import SQLAlchemy
