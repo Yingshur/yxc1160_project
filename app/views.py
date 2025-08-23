@@ -1139,32 +1139,31 @@ def reject_war_add_edit(id):
 
 @app.route("/admin_delete_war/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_war(id):
+    to_csv(current_user.username)
     delete_war_temporary = db.session.get(TemporaryWar, id)
     if delete_war_temporary.temporary_images:
         delete_image_temporary = delete_war_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_war_temporary)
     db.session.commit()
+    to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
 #68
 #Wars
 #69
 @app.route("/admin_delete_emperor/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_emperor(id):
+    to_csv(current_user.username)
     delete_emperor_temporary = db.session.get(TemporaryEmperor, id)
     if delete_emperor_temporary.temporary_images:
         delete_image_temporary = delete_emperor_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_emperor_temporary)
     db.session.commit()
+    to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
 #Wars end
-
-
-
 #architecture
-
-
 #70
 @app.route('/art_selection/architecture_info', methods= ['GET', 'POST'])
 def architecture_info():
@@ -1398,20 +1397,18 @@ def reject_architecture_add_edit(id):
     db.session.commit()
     return redirect(request.referrer)
 #78
-
-
 #79
 @app.route("/admin_delete_architectur1/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_architecture(id):
+    to_csv(current_user.username)
     delete_architecture_temporary = db.session.get(TemporaryArchitecture, id)
     if delete_architecture_temporary.temporary_images:
         delete_image_temporary = delete_architecture_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_architecture_temporary)
     db.session.commit()
+    to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
-
-
 #80
 #81
 @app.route("/edit_an_image/<int:id>", methods = ['GET', 'POST'])
@@ -1692,12 +1689,14 @@ def reject_literature_add_edit(id):
 #93
 @app.route("/admin_delete_literature/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_literature(id):
+    to_csv(current_user.username)
     delete_literature_temporary = db.session.get(TemporaryLiterature, id)
     if delete_literature_temporary.temporary_images:
         delete_image_temporary = delete_literature_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_literature_temporary)
     db.session.commit()
+    to_csv_overwrite(current_user.username)
     return redirect(url_for(request.referrer))
 #94
 #95
@@ -1923,12 +1922,14 @@ def reject_artifact_add_edit(id):
 #107
 @app.route("/admin_delete_artifact/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_artifact(id):
+    to_csv(current_user.username)
     delete_artifact_temporary = db.session.get(TemporaryArtifact, id)
     if delete_artifact_temporary.temporary_images:
         delete_image_temporary = delete_artifact_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_artifact_temporary)
     db.session.commit()
+    to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
 
 
