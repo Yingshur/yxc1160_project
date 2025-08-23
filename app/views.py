@@ -30,6 +30,7 @@ from app.version_control import to_csv_function_1, to_csv_function_overwrite
 from app.images_handling import save_uploaded_images, approval_add_image, gallery_upload, gallery_upload_addition
 from flask import Blueprint
 import os
+from app.mixed.delete_unused_images import delete_unused_images
 
 token_ = "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"
 model_ready = False
@@ -1968,13 +1969,6 @@ def de_admin(id):
     return redirect(url_for('admin'))
     #return render_template("admin.html", title = "Admin", user_lst = user_lst, form = form)
 
-
-
-
-
-
-
-
 #112
 @app.route("/change_pw",methods=['POST','GET'])
 def change_pw():
@@ -2068,7 +2062,11 @@ def delete_image(id):
     return redirect(request.referrer)
 
 
-
+@app.route("/delete_unused_images_/", methods = ["GET", "POST"])
+@admin_only
+def delete_unused_images_():
+    delete_unused_images()
+    return redirect(url_for('admin'))
 
 
 @app.before_request
@@ -2097,8 +2095,6 @@ def prevent_frequent_requests():
                     return render_template("chatbot.html", text_=None, title="Chatbot", form=form)
         session["last_request_time"] = current_time
     return None
-
-
 
 #116
 @app.route('/logout')
