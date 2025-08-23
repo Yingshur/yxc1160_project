@@ -3,28 +3,77 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="\regular_backup\new_versions_20250822_032606.csv">
+        <entry key="\new_versions\architecture.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\regular_backup\new_versions_20250822_032841.csv">
+        <entry key="\new_versions\emperors.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\regular_backup\new_versions_20250822_040207.csv">
+        <entry key="\new_versions\images.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\regular_backup\temporary_artifact_20250822_040207.csv">
+        <entry key="\old_versions\architecture_4cdc645c4eeb401eb83b4b0c88becc07.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\old_versions\architecture_55ecdf18ab82413992db17ce5f0d20ef.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\old_versions\architecture_763443fe48f0420ebdecaefd6044d904.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\old_versions\architecture_ac60c83746ed49f886c89c08e02c4310.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\old_versions\emperors_4cdc645c4eeb401eb83b4b0c88becc07.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\old_versions\emperors_55ecdf18ab82413992db17ce5f0d20ef.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\old_versions\emperors_763443fe48f0420ebdecaefd6044d904.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\old_versions\emperors_ac60c83746ed49f886c89c08e02c4310.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

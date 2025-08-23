@@ -33,112 +33,15 @@ from sqlalchemy import or_, and_
 import csv
 from datetime import datetime
 from huggingface_hub import InferenceClient
-
-
-token_ = "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"
+from app.version_control import to_csv_function_1, to_csv_function_overwrite
+from app.images_handling import save_uploaded_images
 #pipe_line = pipeline("text-generation", model="google/gemma-3-270m", token=token_)
 
 import os
 
-
+token_ = "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"
 model_ready = False
 client = None
-
-
-def save_uploaded_images(file, obj_id, field_name, model, form_data = None, temporary = False):
-    file_name = secure_filename(file.filename)
-    uuid_ = uuid.uuid4().hex[:8]
-    file_name = f"{uuid_}_{file_name}"
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    path_for_uploading = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
-    new_path_for_uploading = path_for_uploading.replace('\\', '/')
-    file.save(new_path_for_uploading)
-    if temporary == False:
-        photo = db.session.query(model).filter_by(**{field_name: obj_id}).order_by(
-            model.id.asc()).first()
-        if not photo:
-            photo = model()
-            setattr(photo, field_name, obj_id)
-            db.session.add(photo)
-        photo.filename = file_name
-        photo.url = url_for("static", filename=f"images/uploaded_photos/{file_name}")
-    else:
-        photo = db.session.query(model).filter_by(**{field_name: obj_id}).order_by(
-            model.id.asc()).first()
-        if not photo:
-            photo = model(username = current_user.username, old_id = int(form_data.edit.data), filename = file_name, url = url_for("static", filename=f"images/uploaded_photos/{file_name}"), **{field_name: obj_id})
-            setattr(photo, field_name, obj_id)
-            db.session.add(photo)
-            db.session.commit()
-        photo.filename = file_name
-        photo.url = url_for("static", filename=f"images/uploaded_photos/{file_name}")
-    db.session.commit()
-    new_log_record = LogBook(original_id=photo.id, title=file_name, username=current_user.username)
-    db.session.add(new_log_record)
-    db.session.commit()
-    return photo
-
-
-
-
-
-
-
-def to_csv_function_1(user_name):
-    #dir_old_version = os.path.join(os.getcwd(), "old_versions")
-    #os.makedirs(r"C:\Users\verit\PycharmProjects\yxc1160 project\old_versions", exist_ok=True)
-    unique_number = uuid.uuid4().hex
-    time_ = datetime.now().strftime('%Y%m%d_%H%M%S')
-    dir_old_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "old_versions"))
-    os.makedirs(dir_old_versions, exist_ok=True)
-    with (app.app_context()):
-        for name_of_table, table in db.metadata.tables.items():
-            if name_of_table in (Emperor.__tablename__, Image.__tablename__, Artifact.__tablename__, Literature.__tablename__, Architecture.__tablename__, War.__tablename__):
-                rows_ = db.session.execute(table.select()).all()
-                columns = [column_.name for column_ in table.columns]
-                file_name = os.path.join(dir_old_versions,
-                                         f"{name_of_table}_{unique_number}.csv")
-                with open(file_name, "w", newline="", encoding="utf-8-sig") as csv_file:
-                    writer = csv.writer(csv_file)
-                    writer.writerow(columns)
-                    for row in rows_:
-                        writer.writerow(row)
-        old_version = Version(username=user_name, created_at=time_, unique=unique_number)
-        db.session.add(old_version)
-        current_version = db.session.query(CurrentVersion).first()
-        if current_version:
-            current_version.username = user_name
-            current_version.time_version = time_
-        db.session.commit()
-
-
-
-def to_csv_function_overwrite(user_name):
-    #dir_old_version = os.path.join(os.getcwd(), "old_versions")
-    #os.makedirs(r"C:\Users\verit\PycharmProjects\yxc1160 project\old_versions", exist_ok=True)
-    time_ = datetime.now().strftime('%Y%m%d_%H%M%S')
-    dir_old_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "new_versions"))
-    os.makedirs(dir_old_versions, exist_ok=True)
-    with (app.app_context()):
-        for name_of_table, table in db.metadata.tables.items():
-            if name_of_table in (Emperor.__tablename__, Image.__tablename__, Artifact.__tablename__, Literature.__tablename__, Architecture.__tablename__, War.__tablename__):
-                rows_ = db.session.execute(table.select()).all()
-                columns = [column_.name for column_ in table.columns]
-                file_name = os.path.join(dir_old_versions,
-                                         f"{name_of_table}.csv")
-                with open(file_name, "w", newline="", encoding="utf-8-sig") as csv_file:
-                    writer = csv.writer(csv_file)
-                    writer.writerow(columns)
-                    for row in rows_:
-                        writer.writerow(row)
-        current_version_ = db.session.query(NewVersion).first()
-        if current_version_:
-            current_version_.username = user_name
-            current_version_.time_version = time_
-        else:
-            current_version_1 = NewVersion(username=user_name, time_version=time_)
-            db.session.add(current_version_1)
-        db.session.commit()
 
 
 def background_chatbot():
@@ -189,34 +92,26 @@ def versions_():
 @login_required
 @admin_only
 def version_control_(id):
-    csv_list = []
     version = db.session.get(Version, id)
     versions = db.session.query(Version).order_by(Version.id.desc()).all()
     first_version = versions[-1]
     unique_number_ = version.unique
+    models = [Image, Architecture, Emperor, War, Literature, Artifact]
     with db.engine.begin() as context:
         context.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
-        Image.__table__.drop(context, checkfirst=True)
-        Architecture.__table__.drop(context, checkfirst=True)
-        Emperor.__table__.drop(context, checkfirst=True)
-        War.__table__.drop(context, checkfirst=True)
-        Literature.__table__.drop(context, checkfirst=True)
-        Artifact.__table__.drop(context, checkfirst=True)
-        Architecture.__table__.create(context, checkfirst=True)
-        Emperor.__table__.create(context, checkfirst=True)
-        War.__table__.create(context, checkfirst=True)
-        Literature.__table__.create(context, checkfirst=True)
-        Artifact.__table__.create(context, checkfirst=True)
-        Image.__table__.create(context, checkfirst=True)
+        for each in models:
+            each.__table__.drop(context, checkfirst= True)
+        for each in models:
+            each.__table__.create(context, checkfirst= True)
         context.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
+    model_table_names = {model.__tablename__: model for model in models}
     dir_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "old_versions"))
     os.makedirs(dir_versions, exist_ok=True)
-    for path_of_file in glob.glob(
-            os.path.join(dir_versions, "*.csv")):
+    for path_of_file in glob.glob(os.path.join(dir_versions, "*.csv")):
         name_of_table_full = os.path.splitext(os.path.basename(path_of_file))[0]
         actual_table_name = name_of_table_full[:-33]
-        if name_of_table_full[-32:] == unique_number_:
-            csv_list.append(name_of_table_full)
+
+        if name_of_table_full[-32:] == unique_number_ and actual_table_name in model_table_names:
             with open(path_of_file, "r", encoding="utf-8-sig") as csv_file:
                 dictionary_reader = csv.DictReader(csv_file)
                 table_dictionary = [dict(row) for row in dictionary_reader]
@@ -224,36 +119,9 @@ def version_control_(id):
                     for a, b in item.items():
                         if b in ("", ',', None, ''):
                             item[a] = None
-                if actual_table_name == Architecture.__tablename__:
-                    for building_data in table_dictionary:
-                        building_data.pop("id", None)
-                        building = Architecture(**building_data)
-                        db.session.add(building)
-                elif actual_table_name == Artifact.__tablename__:
-                    for item in table_dictionary:
-                        item.pop("id", None)
-                        entry = Artifact(**item)
-                        db.session.add(entry)
-                elif actual_table_name == Emperor.__tablename__:
-                    for item in table_dictionary:
-                        item.pop("id", None)
-                        entry = Emperor(**item)
-                        db.session.add(entry)
-                elif actual_table_name == Image.__tablename__:
-                    for item in table_dictionary:
-                        item.pop("id", None)
-                        entry = Image(**item)
-                        db.session.add(entry)
-                elif actual_table_name == Literature.__tablename__:
-                    for item in table_dictionary:
-                        item.pop("id", None)
-                        entry = Literature(**item)
-                        db.session.add(entry)
-                elif actual_table_name == War.__tablename__:
-                    for item in table_dictionary:
-                        item.pop("id", None)
-                        entry = War(**item)
-                        db.session.add(entry)
+                    item.pop("id", None)
+                add_data = [model_table_names[actual_table_name](**row) for row in table_dictionary]
+                db.session.add_all(add_data)
     #db.session.delete(version)
     current_version = db.session.query(CurrentVersion).first()
     if current_version:
@@ -262,7 +130,8 @@ def version_control_(id):
             current_version.time_version = "-"
         else:
             current_version.username = version.username
-            current_version.time_version = version.created_at
+            latest_edit = db.session.query(Version).filter(Version.id < id).order_by(Version.id.desc()).first()
+            current_version.time_version = latest_edit.created_at
     db.session.commit()
     return redirect(url_for("versions_"))
 
@@ -314,29 +183,21 @@ def chatbot():
 @login_required
 @admin_only
 def version_control_overwrite(id):
-    csv_list = []
     version = db.session.get(NewVersion, id)
     with db.engine.begin() as context:
         context.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
-        Image.__table__.drop(context, checkfirst=True)
-        Architecture.__table__.drop(context, checkfirst=True)
-        Emperor.__table__.drop(context, checkfirst=True)
-        War.__table__.drop(context, checkfirst=True)
-        Literature.__table__.drop(context, checkfirst=True)
-        Artifact.__table__.drop(context, checkfirst=True)
-        Architecture.__table__.create(context, checkfirst=True)
-        Emperor.__table__.create(context, checkfirst=True)
-        War.__table__.create(context, checkfirst=True)
-        Literature.__table__.create(context, checkfirst=True)
-        Artifact.__table__.create(context, checkfirst=True)
-        Image.__table__.create(context, checkfirst=True)
+        models = [Image, Architecture, Emperor, War, Literature, Artifact]
+        for each in models:
+            each.__table__.drop(context, checkfirst=True)
+        for each in models:
+            each.__table__.create(context, checkfirst=True)
         context.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
     dir_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "new_versions"))
     os.makedirs(dir_versions, exist_ok=True)
+    model_table_names = {model.__tablename__: model for model in models}
     for path_of_file in glob.glob(
             os.path.join(dir_versions, "*.csv")):
         actual_table_name = os.path.splitext(os.path.basename(path_of_file))[0]
-        csv_list.append(actual_table_name)
         with open(path_of_file, "r", encoding="utf-8-sig") as csv_file:
                 dictionary_reader = csv.DictReader(csv_file)
                 table_dictionary = [dict(row) for row in dictionary_reader]
@@ -344,36 +205,9 @@ def version_control_overwrite(id):
                     for a, b in item.items():
                         if b in ("", ',', None, ''):
                             item[a] = None
-                if actual_table_name == Architecture.__tablename__:
-                    for building_data in table_dictionary:
-                        building_data.pop("id", None)
-                        building = Architecture(**building_data)
-                        db.session.add(building)
-                elif actual_table_name == Artifact.__tablename__:
-                    for item in table_dictionary:
-                        item.pop("id", None)
-                        entry = Artifact(**item)
-                        db.session.add(entry)
-                elif actual_table_name == Emperor.__tablename__:
-                    for item in table_dictionary:
-                        item.pop("id", None)
-                        entry = Emperor(**item)
-                        db.session.add(entry)
-                elif actual_table_name == Image.__tablename__:
-                    for item in table_dictionary:
-                        item.pop("id", None)
-                        entry = Image(**item)
-                        db.session.add(entry)
-                elif actual_table_name == Literature.__tablename__:
-                    for item in table_dictionary:
-                        item.pop("id", None)
-                        entry = Literature(**item)
-                        db.session.add(entry)
-                elif actual_table_name == War.__tablename__:
-                    for item in table_dictionary:
-                        item.pop("id", None)
-                        entry = War(**item)
-                        db.session.add(entry)
+                    item.pop("id", None)
+                add_data = [model_table_names[actual_table_name](**row) for row in table_dictionary]
+                db.session.add_all(add_data)
     #db.session.delete(version)
     current_version = db.session.query(CurrentVersion).first()
     if current_version:
@@ -575,7 +409,7 @@ def approve_emperor_add(id):
                          username=current_user.username)
     db.session.add(new_log_12)
     if add_emperor.temporary_images:
-        file_name = secure_filename(add_emperor.temporary_images[0].filename)
+        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", emperor_id = new_emperor.id)
         db.session.add(photo)
         db.session.commit()
@@ -619,27 +453,8 @@ def manage_edits_additions_users():
 @login_required
 def war_info_edit_user(id):
     war_first = db.session.get(TemporaryWar, id)
-    form = WarForm()
+    form = WarForm(obj=war_first)
     form.edit.data = war_first.id
-    form.title.data = war_first.title
-    form.start_year.data = war_first.start_year
-    form.dates.data = war_first.dates
-    form.location.data = war_first.location
-    form.longitude.data = war_first.longitude
-    form.latitude.data = war_first.latitude
-    form.roman_commanders.data = war_first.roman_commanders
-    form.enemy_commanders.data = war_first.enemy_commanders
-    form.roman_strength.data = war_first.roman_strength
-    form.enemy_strength.data = war_first.enemy_strength
-    form.roman_loss.data = war_first.roman_loss
-    form.enemy_loss.data = war_first.enemy_loss
-    form.dynasty.data = war_first.dynasty
-    form.war_name.data = war_first.war_name
-    form.war_type.data = war_first.war_type
-    form.description.data = war_first.description
-    form.references.data = war_first.references
-    form.result.data = war_first.result
-
     return render_template("war_info_edit_user.html",war = war_first, form_open = False, title="War edit/addition information", new_form=form)
 
 
@@ -649,18 +464,8 @@ def war_info_edit_user(id):
 @login_required
 def user_editing(id):
     emperors_edit_additions = db.session.get(TemporaryEmperor, id)
-    form = AllEmperorForm()
+    form = AllEmperorForm(obj=emperors_edit_additions)
     form.edit.data = emperors_edit_additions.id
-    form.title.data = emperors_edit_additions.title
-    form.in_greek.data = emperors_edit_additions.in_greek
-    form.birth.data = emperors_edit_additions.birth
-    form.reign_start.data = emperors_edit_additions.reign_start
-    form.ascent_to_power.data = emperors_edit_additions.ascent_to_power
-    form.references.data = emperors_edit_additions.references
-    form.death.data = emperors_edit_additions.death
-    form.reign.data = emperors_edit_additions.reign
-    form.life.data = emperors_edit_additions.life
-    form.dynasty.data = emperors_edit_additions.dynasty
     return render_template("user_info.html", emperors_edit_additions=emperors_edit_additions, form_open = False, title="Macedonian dynasty", new_form=form)
 
 
@@ -675,20 +480,9 @@ def edit_emperor_users(id):
             emperor_new_edit_users = db.session.get(TemporaryEmperor, int(form.edit.data))
             form.populate_obj(emperor_new_edit_users)
             if form.portrait.data:
-                file_name = secure_filename(form.portrait.data.filename)
-                uuid_ = uuid.uuid4().hex[:8]
-                file_name = f"{uuid_}_{file_name}"
-                path_for_uploading = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
-                new_path_for_uploading = path_for_uploading.replace('\\', '/')
-                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-                form.portrait.data.save(new_path_for_uploading)
-                photo = db.session.query(TemporaryImage).filter_by(temporary_emperor_id=emperor_new_edit_users.id).order_by(
-                    TemporaryImage.id.asc()).first()
-                if not photo:
-                    photo = TemporaryImage(temporary_emperor_id =emperor_new_edit_users.id)
-                    db.session.add(photo)
-                photo.filename = file_name
-                photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
+                save_uploaded_images(file=form.image.data, obj_id=emperor_new_edit_users.id,
+                                     field_name="temporary_artifact_id",
+                                     model=TemporaryImage, form_data=form, temporary=True)
             if emperor_first_users.status != "Pending":
                 emperor_new_edit_users.status = "Pending"
                 confirmation_email(id=emperor_first_users.id)
@@ -821,24 +615,19 @@ def approve_emperor_edit(id):
         to_csv(current_user.username)
         if edit_emperor.temporary_images:
             photo = db.session.query(Image).filter_by(emperor_id=emperor_new_edit.id).order_by(Image.id.asc()).first()
+            file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
             if photo:
-                file_name = secure_filename(edit_emperor.temporary_images[0].filename)
                 photo.filename = file_name
                 photo.url = f"/static/images/uploaded_photos/{file_name}"
                 photo.emperor_id = emperor_new_edit.id
-                new_log_15 = LogBook(original_id=photo.id, title=file_name,
-                                     username=current_user.username)
-                db.session.add(new_log_15)
-                db.session.delete(edit_emperor.temporary_images[0])
             else:
-                file_name = secure_filename(edit_emperor.temporary_images[0].filename)
                 photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
                               emperor_id=emperor_new_edit.id)
                 db.session.add(photo)
-                new_log_15 = LogBook(original_id=photo.id, title=file_name,
-                                     username=current_user.username)
-                db.session.add(new_log_15)
-                db.session.delete(edit_emperor.temporary_images[0])
+            db.session.delete(edit_emperor.temporary_images[0])
+            new_log_15 = LogBook(original_id=photo.id, title=file_name,
+                             username=current_user.username)
+            db.session.add(new_log_15)
         approval_email(user_email=user.email, emperor_title=edit_emperor.title)
         db.session.delete(edit_emperor)
         db.session.commit()
@@ -1614,23 +1403,18 @@ def approve_war_edit(id):
         to_csv(current_user.username)
         if war_first.temporary_images:
             photo = db.session.query(Image).filter_by(war_id=new_war.id).order_by(Image.id.asc()).first()
+            file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
             if photo:
-                file_name = secure_filename(war_first.temporary_images[0].filename)
                 photo.filename = file_name
                 photo.url = f"/static/images/uploaded_photos/{file_name}"
                 photo.war_id = new_war.id
-                db.session.delete(war_first.temporary_images[0])
-                new_log_900 = LogBook(original_id=photo.id, title=file_name,
-                                      username=current_user.username)
-                db.session.add(new_log_900)
             else:
-                file_name = secure_filename(war_first.temporary_images[0].filename)
                 photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}", war_id=new_war.id)
                 db.session.add(photo)
-                db.session.delete(war_first.temporary_images[0])
-                new_log_9 = LogBook(original_id=photo.id, title=file_name,
-                                    username=current_user.username)
-                db.session.add(new_log_9)
+            new_log_9 = LogBook(original_id=photo.id, title=file_name,
+                                username=current_user.username)
+            db.session.add(new_log_9)
+            db.session.delete(war_first.temporary_images[0])
         approval_email(user_email=user.email, emperor_title=new_war.title)
         db.session.delete(war_first)
         db.session.commit()
@@ -1655,7 +1439,7 @@ def approve_war_add(id):
                         username=current_user.username)
     db.session.add(new_log_1000)
     if add_war.temporary_images:
-        file_name = secure_filename(add_war.temporary_images[0].filename)
+        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", war_id = new_war.id)
         db.session.add(photo)
         db.session.delete(add_war.temporary_images[0])
@@ -1948,24 +1732,19 @@ def approve_architecture_edit(id):
         if architecture_first.temporary_images:
             photo = db.session.query(Image).filter_by(architecture_id=new_architecture.id).order_by(
                 Image.id.asc()).first()
+            file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
             if photo:
-                file_name = secure_filename(architecture_first.temporary_images[0].filename)
-                uuid_ = uuid.uuid4().hex[:8]
+                photo.filename = file_name
                 photo.url = f"/static/images/uploaded_photos/{file_name}"
                 photo.architecture_id = new_architecture.id
-                new_log_2100 = LogBook(original_id=photo.id, title=file_name,
-                                       username=current_user.username)
-                db.session.add(new_log_2100)
-                db.session.delete(architecture_first.temporary_images[0])
             else:
-                file_name = secure_filename(architecture_first.temporary_images[0].filename)
                 photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
                               architecture_id=new_architecture.id)
                 db.session.add(photo)
-                new_log_21 = LogBook(original_id=photo.id, title=file_name,
-                                     username=current_user.username)
-                db.session.add(new_log_21)
-                db.session.delete(architecture_first.temporary_images[0])
+            new_log_21 = LogBook(original_id=photo.id, title=file_name,
+                                 username=current_user.username)
+            db.session.add(new_log_21)
+            db.session.delete(architecture_first.temporary_images[0])
         approval_email(user_email=user.email, emperor_title=new_architecture.title)
         db.session.delete(architecture_first)
         db.session.commit()
@@ -1988,7 +1767,7 @@ def approve_architecture_add(id):
                          username=current_user.username)
     db.session.add(new_log_2200)
     if add_architecture.temporary_images:
-        file_name = secure_filename(add_architecture.temporary_images[0].filename)
+        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", architecture_id = new_architecture.id)
         db.session.add(photo)
         new_log_2300 = LogBook(original_id=photo.id, title=file_name,
@@ -2155,21 +1934,9 @@ def add_an_image(id):
 @login_required
 def architecture_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
-    form = ArchitectureForm()
     architecture_first = db.session.get(TemporaryArchitecture, id)
+    form = ArchitectureForm(obj=architecture_first)
     form.edit.data = architecture_first.id
-    form.title.data = architecture_first.title
-    form.construction_completed.data = architecture_first.construction_completed
-    form.location.data = architecture_first.location
-    form.longitude.data = architecture_first.longitude
-    form.latitude.data = architecture_first.latitude
-    form.in_greek.data = architecture_first.in_greek
-    form.description.data = architecture_first.description
-    form.references.data = architecture_first.references
-    form.current_status.data = architecture_first.current_status
-    form.building_type.data = architecture_first.building_type
-    form.architectural_style.data = architecture_first.architectural_style
-
     return render_template("architecture_info_edit_user.html",building = architecture_first, form_open = False, title="Architecture edit/addition information", new_form=form)
 
 
@@ -2339,24 +2106,19 @@ def approve_literature_edit(id):
         db.session.add(new_log_30)
         if literature_first.temporary_images:
             photo = db.session.query(Image).filter_by(literature_id=new_literature.id).order_by(Image.id.asc()).first()
+            file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
             if photo:
-                file_name = secure_filename(literature_first.temporary_images[0].filename)
                 photo.filename = file_name
                 photo.url = f"/static/images/uploaded_photos/{file_name}"
                 photo.literature_id = new_literature.id
-                new_log_3100 = LogBook(original_id=photo.id, title=file_name,
-                                       username=current_user.username)
-                db.session.add(new_log_3100)
-                db.session.delete(literature_first.temporary_images[0])
             else:
-                file_name = secure_filename(literature_first.temporary_images[0].filename)
                 photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
                               literature_id=new_literature.id)
                 db.session.add(photo)
-                new_log_31 = LogBook(original_id=photo.id, title=file_name,
-                                     username=current_user.username)
-                db.session.add(new_log_31)
-                db.session.delete(literature_first.temporary_images[0])
+            new_log_31 = LogBook(original_id=photo.id, title=file_name,
+                                 username=current_user.username)
+            db.session.add(new_log_31)
+            db.session.delete(literature_first.temporary_images[0])
         approval_email(user_email=user.email, emperor_title=new_literature.title)
         db.session.delete(literature_first)
         db.session.commit()
@@ -2381,7 +2143,7 @@ def approve_literature_add(id):
                          username=current_user.username)
     db.session.add(new_log_3200)
     if add_literature.temporary_images:
-        file_name = secure_filename(add_literature.temporary_images[0].filename)
+        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", literature_id = new_literature.id)
         db.session.add(photo)
         new_log_3300 = LogBook(original_id=photo.id, title=file_name,
@@ -2445,18 +2207,9 @@ def admin_delete_literature_2(id):
 @login_required
 def literature_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
-    form = LiteratureForm()
     literature_first = db.session.get(TemporaryLiterature, id)
+    form = LiteratureForm(obj=literature_first)
     form.edit.data = literature_first.id
-    form.title.data = literature_first.title
-    form.year_completed.data = literature_first.year_completed
-    form.genre.data = literature_first.genre
-    form.in_greek.data = literature_first.in_greek
-    form.description.data = literature_first.description
-    form.references.data = literature_first.references
-    form.current_location.data = literature_first.current_location
-    form.author.data = literature_first.author
-
     return render_template("literature_info_edit_user.html",book = literature_first, form_open = False, title="Literature edit/addition information", new_form=form)
 
 
@@ -2602,6 +2355,7 @@ def edit_artifact(id):
             if form.image.data:
                 save_uploaded_images(file=form.image.data, obj_id=artifact_new_edit.id, field_name="artifact_id", model=Image)
             db.session.commit()
+            to_csv_overwrite(current_user.username)
             return redirect(url_for('artifact_info_detail', id=artifact_new_edit.id))
         else:
             column_names = [column.name for column in TemporaryArtifact.__table__.columns if column.name != "id"]
@@ -2669,28 +2423,17 @@ def approve_artifact_edit(id):
         db.session.add(new_log_39)
         if artifact_first.temporary_images:
             photo = db.session.query(Image).filter_by(artifact_id=new_artifact.id).order_by(Image.id.asc()).first()
+            file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
             if photo:
-                file_name = secure_filename(artifact_first.temporary_images[0].filename)
-                uuid_ = uuid.uuid4().hex[:8]
-                file_name = f"{uuid_}_{file_name}"
                 photo.filename = file_name
                 photo.url = f"/static/images/uploaded_photos/{file_name}"
                 photo.artifact_id = new_artifact.id
-                db.session.delete(artifact_first.temporary_images[0])
-                new_log_4000 = LogBook(original_id=photo.id, title=file_name,
-                                       username=current_user.username)
-                db.session.add(new_log_4000)
             else:
-                file_name = secure_filename(artifact_first.temporary_images[0].filename)
-                uuid_ = uuid.uuid4().hex[:8]
-                file_name = f"{uuid_}_{file_name}"
                 photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
                               artifact_id=new_artifact.id)
-                new_log_40 = LogBook(original_id=photo.id, title=file_name,
-                                     username=current_user.username)
-                db.session.add(new_log_40)
-                db.session.add(photo)
-                db.session.delete(artifact_first.temporary_images[0])
+            db.session.delete(artifact_first.temporary_images[0])
+            new_log_4000 = LogBook(original_id=photo.id, title=file_name, username=current_user.username)
+            db.session.add(new_log_4000)
         approval_email(user_email=user.email, emperor_title=new_artifact.title)
         db.session.delete(artifact_first)
         db.session.commit()
@@ -2713,7 +2456,7 @@ def approve_artifact_add(id):
                          username=current_user.username)
     db.session.add(new_log_4100)
     if add_artifact.temporary_images:
-        file_name = secure_filename(add_artifact.temporary_images[0].filename)
+        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
         uuid_ = uuid.uuid4().hex[:8]
         file_name = f"{uuid_}_{file_name}"
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", artifact_id = new_artifact.id)
@@ -2780,16 +2523,9 @@ def admin_delete_artifact_2(id):
 @login_required
 def artifact_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
-    form = ArtifactForm()
     artifact_first = db.session.get(TemporaryArtifact, id)
+    form = ArtifactForm(obj=artifact_first)
     form.edit.data = artifact_first.id
-    form.title.data = artifact_first.title
-    form.year_completed.data = artifact_first.year_completed
-    form.in_greek.data = artifact_first.in_greek
-    form.description.data = artifact_first.description
-    form.references.data = artifact_first.references
-    form.current_location.data = artifact_first.current_location
-
     return render_template("artifact_info_edit_user.html",artifact = artifact_first, form_open = False, title="Artifacts edit/addition information", new_form=form)
 
 
