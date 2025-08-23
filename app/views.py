@@ -1,26 +1,19 @@
 import glob
 import time
-from os import write
 import re
 from flask import abort
 from itertools import cycle
 import uuid
 from functools import wraps
-import os
-import csv
-import pymysql
 from random import randint
 from sqlalchemy import text
 import threading
 from folium.plugins import MarkerCluster
 from markupsafe import Markup
-from pymysql.converters import escape_string
 from werkzeug.utils import secure_filename
-from app import signer, TOKEN_MAX_AGE, verification_email, confirmation_email, approval_email, rejection_email, new_confirmation_email
 from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
-
+from app.mixed.emails import verification_email, confirmation_email, approval_email, new_confirmation_email, rejection_email
 import folium
-from app import app
 from app.models import User, Emperor, \
     Verification, Invitation, Image, TemporaryEmperor, TemporaryImage, War, TemporaryWar, Architecture, TemporaryArchitecture, Literature, TemporaryLiterature, Artifact, TemporaryArtifact, LogBook, Deletion, Version, CurrentVersion, NewVersion
 from app.forms import ChooseForm, LoginForm, ChangePasswordForm, ChangeEmailForm, RegisterForm, RegisterEmail, \
@@ -30,13 +23,12 @@ import sqlalchemy as sa
 from app.new_file import db
 from urllib.parse import urlsplit
 from sqlalchemy import or_, and_
+from app import app
 import csv
-from datetime import datetime
 from huggingface_hub import InferenceClient
 from app.version_control import to_csv_function_1, to_csv_function_overwrite
-from app.images_handling import save_uploaded_images
-#pipe_line = pipeline("text-generation", model="google/gemma-3-270m", token=token_)
-
+from app.images_handling import save_uploaded_images, approval_add_image
+from flask import Blueprint
 import os
 
 token_ = "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"
@@ -409,7 +401,7 @@ def approve_emperor_add(id):
                          username=current_user.username)
     db.session.add(new_log_12)
     if add_emperor.temporary_images:
-        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
+        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{add_emperor.temporary_images[0].filename}")
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", emperor_id = new_emperor.id)
         db.session.add(photo)
         db.session.commit()
@@ -437,7 +429,7 @@ def reject_emperor_add(id):
 
 
 
-@app.route("/admin/manage_edits_additions_users", methods = ['GET', 'POST'])
+@app.route("/manage_edits_additions_users", methods = ['GET', 'POST'])
 @login_required
 def manage_edits_additions_users():
     total_list = db.session.query(TemporaryEmperor).all()
@@ -449,7 +441,7 @@ def manage_edits_additions_users():
 
 
 
-@app.route("/admin/manage_edits_additions_users/war_info_edit_user/<int:id>", methods = ['GET', 'POST'])
+@app.route("/manage_edits_additions_users/war_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def war_info_edit_user(id):
     war_first = db.session.get(TemporaryWar, id)
@@ -460,7 +452,7 @@ def war_info_edit_user(id):
 
 
 
-@app.route("/admin/manage_edits_additions_users/<int:id>", methods = ['GET', 'POST'])
+@app.route("/manage_edits_additions_users/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def user_editing(id):
     emperors_edit_additions = db.session.get(TemporaryEmperor, id)
@@ -489,16 +481,6 @@ def edit_emperor_users(id):
             db.session.commit()
             return redirect(url_for('user_editing', id=emperor_first_users.id))
     return render_template("user_info.html", emperors_edit_additions = emperor_first_users, new_form = form, form_open = True, title = "Editing requests")
-
-
-
-
-
-
-
-
-
-
 
 
 @app.route("/admin/manage_edits", methods = ['GET', 'POST'])
@@ -614,20 +596,7 @@ def approve_emperor_edit(id):
         db.session.add(new_log_14)
         to_csv(current_user.username)
         if edit_emperor.temporary_images:
-            photo = db.session.query(Image).filter_by(emperor_id=emperor_new_edit.id).order_by(Image.id.asc()).first()
-            file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
-            if photo:
-                photo.filename = file_name
-                photo.url = f"/static/images/uploaded_photos/{file_name}"
-                photo.emperor_id = emperor_new_edit.id
-            else:
-                photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
-                              emperor_id=emperor_new_edit.id)
-                db.session.add(photo)
-            db.session.delete(edit_emperor.temporary_images[0])
-            new_log_15 = LogBook(original_id=photo.id, title=file_name,
-                             username=current_user.username)
-            db.session.add(new_log_15)
+            approval_add_image(edit_emperor, obj_id=emperor_new_edit.id, field_name="emperor_id", model=Image)
         approval_email(user_email=user.email, emperor_title=edit_emperor.title)
         db.session.delete(edit_emperor)
         db.session.commit()
@@ -1402,19 +1371,7 @@ def approve_war_edit(id):
         db.session.add(new_log_8)
         to_csv(current_user.username)
         if war_first.temporary_images:
-            photo = db.session.query(Image).filter_by(war_id=new_war.id).order_by(Image.id.asc()).first()
-            file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
-            if photo:
-                photo.filename = file_name
-                photo.url = f"/static/images/uploaded_photos/{file_name}"
-                photo.war_id = new_war.id
-            else:
-                photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}", war_id=new_war.id)
-                db.session.add(photo)
-            new_log_9 = LogBook(original_id=photo.id, title=file_name,
-                                username=current_user.username)
-            db.session.add(new_log_9)
-            db.session.delete(war_first.temporary_images[0])
+            approval_add_image(war_first, obj_id=new_war.id, field_name="war_id", model=Image)
         approval_email(user_email=user.email, emperor_title=new_war.title)
         db.session.delete(war_first)
         db.session.commit()
@@ -1439,7 +1396,7 @@ def approve_war_add(id):
                         username=current_user.username)
     db.session.add(new_log_1000)
     if add_war.temporary_images:
-        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
+        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{add_war.temporary_images[0].filename}")
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", war_id = new_war.id)
         db.session.add(photo)
         db.session.delete(add_war.temporary_images[0])
@@ -1730,21 +1687,7 @@ def approve_architecture_edit(id):
                              username=current_user.username)
         db.session.add(new_log_20)
         if architecture_first.temporary_images:
-            photo = db.session.query(Image).filter_by(architecture_id=new_architecture.id).order_by(
-                Image.id.asc()).first()
-            file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
-            if photo:
-                photo.filename = file_name
-                photo.url = f"/static/images/uploaded_photos/{file_name}"
-                photo.architecture_id = new_architecture.id
-            else:
-                photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
-                              architecture_id=new_architecture.id)
-                db.session.add(photo)
-            new_log_21 = LogBook(original_id=photo.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_21)
-            db.session.delete(architecture_first.temporary_images[0])
+            approval_add_image(architecture_first, obj_id=new_architecture.id, field_name="architecture_id", model=Image)
         approval_email(user_email=user.email, emperor_title=new_architecture.title)
         db.session.delete(architecture_first)
         db.session.commit()
@@ -1767,7 +1710,7 @@ def approve_architecture_add(id):
                          username=current_user.username)
     db.session.add(new_log_2200)
     if add_architecture.temporary_images:
-        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
+        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{add_architecture.temporary_images[0].filename}")
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", architecture_id = new_architecture.id)
         db.session.add(photo)
         new_log_2300 = LogBook(original_id=photo.id, title=file_name,
@@ -1930,7 +1873,7 @@ def add_an_image(id):
 
 
 
-@app.route("/admin/manage_edits_additions_users/architecture_info_edit_user/<int:id>", methods = ['GET', 'POST'])
+@app.route("/manage_edits_additions_users/architecture_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def architecture_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
@@ -2105,20 +2048,7 @@ def approve_literature_edit(id):
                              username=current_user.username)
         db.session.add(new_log_30)
         if literature_first.temporary_images:
-            photo = db.session.query(Image).filter_by(literature_id=new_literature.id).order_by(Image.id.asc()).first()
-            file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
-            if photo:
-                photo.filename = file_name
-                photo.url = f"/static/images/uploaded_photos/{file_name}"
-                photo.literature_id = new_literature.id
-            else:
-                photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
-                              literature_id=new_literature.id)
-                db.session.add(photo)
-            new_log_31 = LogBook(original_id=photo.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_31)
-            db.session.delete(literature_first.temporary_images[0])
+            approval_add_image(literature_first, obj_id=new_literature.id, field_name="literature_id", model=Image)
         approval_email(user_email=user.email, emperor_title=new_literature.title)
         db.session.delete(literature_first)
         db.session.commit()
@@ -2143,7 +2073,7 @@ def approve_literature_add(id):
                          username=current_user.username)
     db.session.add(new_log_3200)
     if add_literature.temporary_images:
-        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
+        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{add_literature.temporary_images[0].filename}")
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", literature_id = new_literature.id)
         db.session.add(photo)
         new_log_3300 = LogBook(original_id=photo.id, title=file_name,
@@ -2203,7 +2133,7 @@ def admin_delete_literature_2(id):
 
 
 
-@app.route("/admin/manage_edits_additions_users/literature_info_edit_user/<int:id>", methods = ['GET', 'POST'])
+@app.route("/manage_edits_additions_users/literature_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def literature_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)
@@ -2422,18 +2352,7 @@ def approve_artifact_edit(id):
                              username=current_user.username)
         db.session.add(new_log_39)
         if artifact_first.temporary_images:
-            photo = db.session.query(Image).filter_by(artifact_id=new_artifact.id).order_by(Image.id.asc()).first()
-            file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
-            if photo:
-                photo.filename = file_name
-                photo.url = f"/static/images/uploaded_photos/{file_name}"
-                photo.artifact_id = new_artifact.id
-            else:
-                photo = Image(filename=file_name, url=f"/static/images/uploaded_photos/{file_name}",
-                              artifact_id=new_artifact.id)
-            db.session.delete(artifact_first.temporary_images[0])
-            new_log_4000 = LogBook(original_id=photo.id, title=file_name, username=current_user.username)
-            db.session.add(new_log_4000)
+            approval_add_image(artifact_first, obj_id=new_artifact.id, field_name="artifact_id", model=Image)
         approval_email(user_email=user.email, emperor_title=new_artifact.title)
         db.session.delete(artifact_first)
         db.session.commit()
@@ -2448,15 +2367,17 @@ def approve_artifact_edit(id):
 def approve_artifact_add(id):
     to_csv(current_user.username)
     add_artifact = db.session.get(TemporaryArtifact, id)
-    new_artifact = Artifact(title=add_artifact.title, current_location = add_artifact.current_location, references= add_artifact.references, in_greek = add_artifact.in_greek, year_completed = add_artifact.year_completed,
-                                description = add_artifact.description)
+    column_names = [column.name for column in Artifact.__table__.columns if column.name != "id"]
+    new_artifact = Artifact(
+        **{column: getattr(add_artifact, column) for column in column_names if hasattr(add_artifact, column)})
+
     user = db.session.query(User).filter_by(username = add_artifact.username).first()
     db.session.add(new_artifact)
     new_log_4100 = LogBook(original_id=new_artifact.id, title=new_artifact.title,
                          username=current_user.username)
     db.session.add(new_log_4100)
     if add_artifact.temporary_images:
-        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{edit_emperor.temporary_images[0].filename}")
+        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{add_artifact.temporary_images[0].filename}")
         uuid_ = uuid.uuid4().hex[:8]
         file_name = f"{uuid_}_{file_name}"
         photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", artifact_id = new_artifact.id)
@@ -2519,7 +2440,7 @@ def admin_delete_artifact_2(id):
 
 
 
-@app.route("/admin/manage_edits_additions_users/artifact_info_edit_user/<int:id>", methods = ['GET', 'POST'])
+@app.route("/manage_edits_additions_users/artifact_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def artifact_info_edit_user(id):
     #war_first = db.session.get(TemporaryWar, id)

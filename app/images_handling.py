@@ -40,3 +40,19 @@ def save_uploaded_images(file, obj_id, field_name, model, form_data = None, temp
     db.session.add(new_log_record)
     db.session.commit()
     return photo
+
+def approval_add_image(temporary, obj_id, field_name, model):
+    file_name = secure_filename(f"{temporary.temporary_images[0].filename}")
+    photo = db.session.query(model).filter_by(**{field_name: obj_id}).order_by(
+        model.id.asc()).first()
+    if not photo:
+        photo = model(**{field_name: obj_id})
+        db.session.add(photo)
+    photo.filename = file_name
+    photo.url = url_for("static", filename=f"images/uploaded_photos/{file_name}")
+    db.session.commit()
+    new_log_record = LogBook(original_id=photo.id, title=file_name, username=current_user.username)
+    db.session.add(new_log_record)
+    db.session.delete(temporary.temporary_images[0])
+    db.session.commit()
+

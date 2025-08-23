@@ -1,6 +1,6 @@
-from app import app, schedule_start
+from app import app
+from app.mixed.scheduler import schedule_start
 import os
-
 if __name__ == '__main__':
     with app.app_context():
         schedule_start()

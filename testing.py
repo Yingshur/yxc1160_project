@@ -5,7 +5,8 @@ import os
 import csv
 import requests
 import time
-from app import db, app
+from app import db
+from flask import current_app as app
 from app.models import Emperor, Image, War, Artifact, Architecture, Literature, LogBook
 from playwright.sync_api import sync_playwright
 

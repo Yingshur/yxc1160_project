@@ -1,11 +1,11 @@
 from datetime import time, datetime
 import os
-from app import app
+from flask import current_app as app
 from app.models import Version, CurrentVersion, NewVersion, Emperor, Artifact, Image, Literature, Architecture, War
 import csv
-import uuid
+from app import app
 from app.new_file import db
-
+import uuid
 
 
 def to_csv_function_1(user_name):
