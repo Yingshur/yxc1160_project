@@ -295,7 +295,7 @@
     </button>
 
     <div id = 'admin-form' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem;">
-<form method="post" action="{{ url_for('add_new_emperor_1') }}" enctype="multipart/form-data" novalidate>
+<form method="post" action="{{ url_for('add_new_emperor', dynasty = 'Doukas') }}" enctype="multipart/form-data" novalidate>
                     {{ wtf.quick_form(new_form, novalidate=True, autofocus=False) }}
             </form>
     </div>

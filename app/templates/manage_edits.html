@@ -220,7 +220,7 @@
                             <i class="bi bi-check-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('reject_emperor_edit', id=edit.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('reject_emperor_add_edit', id=edit.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Reject" style="font-size: 1.8rem;">
                             <i class="bi bi-x-circle-fill"></i>
                     </button>
@@ -265,12 +265,12 @@
                             <i class="bi bi-check-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('reject_war_edit', id=war.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('reject_war_add_edit', id=war.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Reject" style="font-size: 1.8rem;">
                             <i class="bi bi-x-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('admin_delete_war_1', id=war.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('admin_delete_war', id=war.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
                             <i class="bi bi-trash-fill"></i>
                     </button>
@@ -311,12 +311,12 @@
                             <i class="bi bi-check-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('reject_architecture_edit', id=building.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('reject_architecture_add_edit', id=building.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Reject" style="font-size: 1.8rem;">
                             <i class="bi bi-x-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('admin_delete_architecture_1', id=building.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('admin_delete_architecture', id=building.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
                             <i class="bi bi-trash-fill"></i>
                     </button>
@@ -357,12 +357,12 @@
                             <i class="bi bi-check-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('reject_literature_edit', id=book.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('reject_literature_add_edit', id=book.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Reject" style="font-size: 1.8rem;">
                             <i class="bi bi-x-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('admin_delete_literature_1', id=book.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('admin_delete_literature', id=book.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
                             <i class="bi bi-trash-fill"></i>
                     </button>
@@ -406,13 +406,13 @@
                             <i class="bi bi-check-circle-fill"></i>
                     </button>
                  </form>
-            <td> <form action="{{ url_for('reject_artifact_edit', id=artifact.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('reject_artifact_add_edit', id=artifact.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Reject" style="font-size: 1.8rem;">
                             <i class="bi bi-x-circle-fill"></i>
                     </button>
                  </form>
 
-            <td> <form action="{{ url_for('admin_delete_artifact_1', id=artifact.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('admin_delete_artifact', id=artifact.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
                             <i class="bi bi-trash-fill"></i>
                     </button>

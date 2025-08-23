@@ -324,7 +324,7 @@
     </button>
 
     <div id = 'edit-form-2' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open_2 %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem;">
-        <form method="post" action="{{ url_for('add_an_image_2', id = artifact.id) }}" enctype="multipart/form-data" novalidate>
+        <form method="post" action="{{ url_for('add_an_image', id = artifact.id, category = 'artifact') }}" enctype="multipart/form-data" novalidate>
                                {{ wtf.quick_form(new_form_1, novalidate=True, autofocus=False) }}
             </form>
     </div>

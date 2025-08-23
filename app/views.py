@@ -27,7 +27,7 @@ from app import app
 import csv
 from huggingface_hub import InferenceClient
 from app.version_control import to_csv_function_1, to_csv_function_overwrite
-from app.images_handling import save_uploaded_images, approval_add_image
+from app.images_handling import save_uploaded_images, approval_add_image, gallery_upload, gallery_upload_addition
 from flask import Blueprint
 import os
 
@@ -305,17 +305,17 @@ def wars_selection():
 @app.route('/wars_selection/foreign_wars', methods= ['GET', 'POST'])
 def foreign_wars_1():
     form = WarForm()
-    foreign_wars_lst = db.session.query(War).filter(and_(War.war_type == "Foreign War")).all()
+    wars_lst = db.session.query(War).filter(and_(War.war_type == "Foreign War")).all()
     war_map = folium.Map(location=[41.008333, 28.98], zoom_start=3)
 
     colors = cycle(['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred',
                     'beige', 'darkblue', 'darkgreen', 'cadetblue', 'darkpurple',
                     'white', 'pink', 'lightblue', 'lightgreen', 'gray', 'black', 'lightgray'])
-    names = sorted({ war.war_name for war in foreign_wars_lst if war.war_name})
+    names = sorted({ war.war_name for war in wars_lst if war.war_name})
     war_colors = {name: next(colors) for name in names}
     cluster = MarkerCluster().add_to(war_map)
 
-    for war in foreign_wars_lst:
+    for war in wars_lst:
         if war.latitude is not None and war.longitude is not None:
             color = war_colors.get(war.war_name, 'gray')
             folium.Marker(location= [war.latitude, war.longitude],
@@ -325,7 +325,7 @@ def foreign_wars_1():
             ).add_to(cluster)
     war_html = war_map._repr_html_()
 
-    return render_template('foreign_war_1.html', title = "Foreign Wars", foreign_wars_lst = foreign_wars_lst, war_html =Markup(war_html) , form_open = False, new_form = form)
+    return render_template('foreign_war_1.html', title = "Foreign Wars", wars_lst = wars_lst, war_html =Markup(war_html) , form_open = False, new_form = form)
 
 
 
@@ -333,17 +333,17 @@ def foreign_wars_1():
 @app.route('/wars_selection/civil_wars', methods= ['GET', 'POST'])
 def civil_wars():
     form = WarForm()
-    civil_wars_lst = db.session.query(War).filter(War.war_type == "Civil War").all()
+    wars_lst = db.session.query(War).filter(War.war_type == "Civil War").all()
     war_map = folium.Map(location=[41.008333, 28.98], zoom_start=3)
 
     colors = cycle(['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred',
                     'beige', 'darkblue', 'darkgreen', 'cadetblue', 'darkpurple',
                     'white', 'pink', 'lightblue', 'lightgreen', 'gray', 'black', 'lightgray'])
-    names = sorted({war.war_name for war in civil_wars_lst if war.war_name})
+    names = sorted({war.war_name for war in wars_lst if war.war_name})
     war_colors = {name: next(colors) for name in names}
     cluster = MarkerCluster().add_to(war_map)
 
-    for war in civil_wars_lst:
+    for war in wars_lst:
         if war.latitude is not None and war.longitude is not None:
             color = war_colors.get(war.war_name, 'gray')
             folium.Marker(location=[war.latitude, war.longitude],
@@ -352,7 +352,7 @@ def civil_wars():
                           icon=folium.Icon(color=color)
                           ).add_to(cluster)
     war_html = war_map._repr_html_()
-    return render_template('civil_wars.html', title = "Civil Wars", foreign_wars_lst = civil_wars_lst, war_html =Markup(war_html) , form_open = False, new_form = form)
+    return render_template('civil_wars.html', title = "Civil Wars", wars_lst = wars_lst, war_html =Markup(war_html) , form_open = False, new_form = form)
 
 
 #17
@@ -391,9 +391,8 @@ def add_info_war(id):
 @admin_only
 def approve_emperor_add(id):
     add_emperor = db.session.get(TemporaryEmperor, id)
-    new_emperor = Emperor(title=add_emperor.title, in_greek=add_emperor.in_greek, birth=add_emperor.birth,
-                          death=add_emperor.death, reign=add_emperor.reign, life=add_emperor.life,
-                          dynasty=add_emperor.dynasty, reign_start = add_emperor.reign_start, references = add_emperor.references, ascent_to_power = add_emperor.ascent_to_power)
+    column_names = [column.name for column in Emperor.__table__.columns if column.name != "id"]
+    new_emperor = Emperor(**{column: getattr(add_emperor, column) for column in column_names if hasattr(add_emperor, column)})
     user = db.session.query(User).filter_by(username = add_emperor.username).first()
     db.session.add(new_emperor)
     db.session.commit()
@@ -401,14 +400,7 @@ def approve_emperor_add(id):
                          username=current_user.username)
     db.session.add(new_log_12)
     if add_emperor.temporary_images:
-        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{add_emperor.temporary_images[0].filename}")
-        photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", emperor_id = new_emperor.id)
-        db.session.add(photo)
-        db.session.commit()
-        new_log_13 = LogBook(original_id=photo.id, title=file_name,
-                             username=current_user.username)
-        db.session.add(new_log_13)
-        db.session.delete(add_emperor.temporary_images[0])
+        approval_add_image(add_emperor, obj_id=new_emperor.id, field_name="emperor_id", model=Image)
     approval_email(user_email=user.email, emperor_title=new_emperor.title)
     db.session.delete(add_emperor)
     to_csv(current_user.username)
@@ -417,14 +409,14 @@ def approve_emperor_add(id):
     return redirect(url_for('manage_additions'))
 
 #21
-@app.route("/reject_emperor_add/<int:id>", methods = ['GET', 'POST'])
-def reject_emperor_add(id):
+@app.route("/reject_emperor_add_edit/<int:id>", methods = ['GET', 'POST'])
+def reject_emperor_add_edit(id):
     add_emperor = db.session.get(TemporaryEmperor, id)
     add_emperor.status = "Reject"
     user = db.session.query(User).filter_by(username = add_emperor.username).first()
     rejection_email(user_email=user.email, emperor_title=add_emperor.title)
     db.session.commit()
-    return redirect(url_for('manage_additions'))
+    return redirect(url_for(request.referrer))
 
 
 
@@ -581,16 +573,9 @@ def approve_emperor_edit(id):
     try:
         edit_emperor = db.session.get(TemporaryEmperor, id)
         emperor_new_edit = db.session.get(Emperor, int(edit_emperor.old_id))
-        emperor_new_edit.title = edit_emperor.title
-        emperor_new_edit.ascent_to_power = edit_emperor.ascent_to_power
-        emperor_new_edit.reign_start = edit_emperor.reign_start
-        emperor_new_edit.references = edit_emperor.references
-        emperor_new_edit.in_greek = edit_emperor.in_greek
-        emperor_new_edit.birth = edit_emperor.birth
-        emperor_new_edit.death = edit_emperor.death
-        emperor_new_edit.reign = edit_emperor.reign
-        emperor_new_edit.life = edit_emperor.life
-        emperor_new_edit.dynasty = edit_emperor.dynasty
+        column_names = [column.name for column in Emperor.__table__.columns if column.name not in ("id", "old_id")]
+        for column in column_names:
+            setattr(emperor_new_edit, column, getattr(edit_emperor, column))
         user = db.session.query(User).filter_by(username=edit_emperor.username).first()
         new_log_14 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title,
                              username=current_user.username)
@@ -606,26 +591,7 @@ def approve_emperor_edit(id):
         flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
 #36
-@app.route("/reject_emperor_edit/<int:id>", methods = ['GET', 'POST'])
-def reject_emperor_edit(id):
-    edit_emperor = db.session.get(TemporaryEmperor, id)
-    edit_emperor.status = "Reject"
-    user = db.session.query(User).filter_by(username = edit_emperor.username).first()
-    rejection_email(user_email=user.email, emperor_title=edit_emperor.title)
-    db.session.commit()
-    return redirect(url_for('manage_edits'))
-
 #37
-@app.route("/admin_delete_emperor/<int:id>", methods = ['GET', 'POST'])
-@admin_only
-def admin_delete_emperor(id):
-    delete_emperor_temporary = db.session.get(TemporaryEmperor, id)
-    if delete_emperor_temporary.temporary_images:
-        delete_image_temporary = delete_emperor_temporary.temporary_images[0]
-        db.session.delete(delete_image_temporary)
-    db.session.delete(delete_emperor_temporary)
-    db.session.commit()
-    return redirect(url_for('manage_edits'))
 #38
 @app.route("/delete_emperors_/<int:id>", methods = ['GET', 'POST'])
 @admin_only
@@ -637,7 +603,6 @@ def delete_emperors_(id):
     db.session.delete(delete_emperors_)
     db.session.commit()
     return redirect(request.referrer)
-
 #39
 @app.route("/delete_wars_/<int:id>", methods = ['GET', 'POST'])
 @admin_only
@@ -695,52 +660,24 @@ def delete_artifacts_(id):
     return redirect(url_for('artifact_info'))
 
 
-#43!!
+#43
 @app.route("/wars_selection/foreign_wars/war_info_foreign_1/<int:id>", methods=['GET','POST'])
 def war_info_foreign_1(id):
     #m_e = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
-    form = WarForm()
     war_first = db.session.get(War, id)
+    form = WarForm(obj=war_first)
     form.edit.data = war_first.id
-    form.title.data = war_first.title
-    form.start_year.data = war_first.start_year
-    form.dates.data = war_first.dates
-    form.location.data = war_first.location
-    form.longitude.data = war_first.longitude
-    form.latitude.data = war_first.latitude
-    form.roman_commanders.data = war_first.roman_commanders
-    form.enemy_commanders.data = war_first.enemy_commanders
-    form.roman_strength.data = war_first.roman_strength
-    form.enemy_strength.data = war_first.enemy_strength
-    form.roman_loss.data = war_first.roman_loss
-    form.enemy_loss.data = war_first.enemy_loss
-    form.dynasty.data = war_first.dynasty
-    form.war_name.data = war_first.war_name
-    form.war_type.data = war_first.war_type
-    form.description.data = war_first.description
-    form.references.data = war_first.references
-    form.result.data = war_first.result
     return render_template("war_info.html", war = war_first, title = "Battle information", new_form = form, form_open = False)
 
 
 
-#44!!
+#44
 @app.route("/dynasties/macedonians/<int:id>", methods=['GET','POST'])
 def macedonian_emperors(id):
     #m_e = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
     m_e = db.session.get(Emperor, id)
-    form = AllEmperorForm()
+    form = AllEmperorForm(obj=m_e)
     form.edit.data = m_e.id
-    form.references.data = m_e.references
-    form.title.data = m_e.title
-    form.in_greek.data = m_e.in_greek
-    form.birth.data = m_e.birth
-    form.death.data = m_e.death
-    form.reign_start.data = m_e.reign_start
-    form.ascent_to_power.data = m_e.ascent_to_power
-    form.reign.data = m_e.reign
-    form.life.data = m_e.life
-    form.dynasty.data = m_e.dynasty
     if m_e.dynasty == "Macedonian":
         return render_template("macedonian_emperors.html", m_e=m_e, form_open=False, title="Macedonian dynasty",new_form=form)
     elif m_e.dynasty == "Doukas":
@@ -807,11 +744,38 @@ def change_to_admin():
     return render_template("account.html", new_form = form, title = "Account")
 
 #48
-@app.route("/add_new_emperor", methods = ['POST'])
+@app.route("/add_new_emperor/<string:dynasty>", methods = ['POST'])
 @login_required
-def add_new_emperor():
+def add_new_emperor(dynasty):
     form = AllEmperorForm()
-    macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
+    if dynasty == "Macedonian":
+        template = "macedonians.html"
+        redirect_ = "macedonians"
+        page_title = "Macedonian dynasty"
+        article_title = "Macedonian Dynasty (867-1056)"
+    elif dynasty == "Doukas":
+        template = "doukas.html"
+        redirect_ = "doukas"
+        page_title = "Doukas dynasty"
+        article_title = "Doukas dynasty (1059-1081)"
+    elif dynasty == "Komnenos":
+        template = "komnenos.html"
+        redirect_ = "komnenos"
+        page_title = "Komnenos dynasty"
+        article_title = "Komnenos dynasty (1081-1185)"
+    elif dynasty == "Angelos":
+        template = "angelos.html"
+        redirect_ = "angelos"
+        page_title = "Angelos dynasty"
+        article_title = "Angelos dynasty (1085-1204)"
+    elif dynasty == "Palaiologos":
+        template = "palaiologos.html"
+        redirect_ = "palaiologos"
+        page_title = "Palaiologos dynasty"
+        article_title = "Palaiologos dynasty (1259-1453)"
+    else:
+        return None
+    macedonian_lst = db.session.query(Emperor).filter_by(dynasty = dynasty).all()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin" :
             to_csv(current_user.username)
@@ -836,7 +800,7 @@ def add_new_emperor():
                                      model=Image)
                 db.session.commit()
             to_csv_overwrite(current_user.username)
-            return redirect(url_for("macedonians"))
+            return redirect(url_for(redirect_))
 
         elif current_user.role != "Admin" and "test" not in form.title.data:
             column_names = [column.name for column in TemporaryEmperor.__table__.columns if column.name != "id"]
@@ -851,96 +815,17 @@ def add_new_emperor():
 
                 db.session.commit()
                 confirmation_email(id=temporary_edit.id)
-                return redirect(url_for("macedonians"))
+                return redirect(url_for(redirect_))
 
         else:
-            return redirect(url_for("macedonians"))
-    return render_template('macedonians.html', title = "Macedonian dynasty", macedonian_lst = macedonian_lst, new_form = form, form_open = True, article_title = "Macedonian Dynasty (867-1056)")
+            return redirect(url_for(redirect_))
+    return render_template(template, title = page_title, macedonian_lst = macedonian_lst, new_form = form, form_open = True, article_title = article_title)
 
 
 #add_emperor
 
-#49!!
-@app.route("/add_new_emperor_1", methods = ['POST'])
-@login_required
-def add_new_emperor_1():
-    form = AllEmperorForm()
-    macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Doukas').all()
-    if form.validate_on_submit() and int(form.edit.data) == -1:
-        if current_user.role == "Admin":
-            to_csv(current_user.username)
-            column_names = [column.name for column in Emperor.__table__.columns if column.name != "id"]
-            new_emperor = Emperor(
-                **{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
-            db.session.add(new_emperor)
-            db.session.commit()
-            new_log_104 = LogBook(original_id=new_emperor.id, title=new_emperor.title, username=current_user.username)
-            db.session.add(new_log_104)
-            db.session.commit()
-            # print(form.portrait.data.filename)
-            if form.portrait.data:
-                save_uploaded_images(file=form.portrait.data, obj_id=new_emperor.id, field_name="emperor_id",
-                                     model=Image)
-                db.session.commit()
-            to_csv_overwrite(current_user.username)
-            return redirect(url_for("doukas"))
-        else:
-            column_names = [column.name for column in TemporaryEmperor.__table__.columns if column.name != "id"]
-            temporary_edit_1 = TemporaryEmperor(
-                **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
-            db.session.add(temporary_edit_1)
-            db.session.commit()
-            if form.portrait.data:
-                id_data = db.session.query(TemporaryEmperor).filter_by(username = current_user.username).order_by(TemporaryEmperor.id.desc()).first()
-                save_uploaded_images(file=form.portrait.data, obj_id=id_data.id, field_name="temporary_emperor_id",
-                                     model=TemporaryImage, form_data=form, temporary=True)
-                db.session.commit()
-                confirmation_email(id=temporary_edit_1.id)
-            return redirect(url_for("doukas"))
-    return render_template('doukas.html', title = "Doukas dynasty", macedonian_lst = macedonian_lst, new_form = form, form_open = True, article_title = "Doukas dynasty (1059-1081)")
-
-
-
-#50!!
-@app.route("/add_new_emperor_2", methods = ['POST'])
-@login_required
-def add_new_emperor_2():
-    form = AllEmperorForm()
-    macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Komnenos').all()
-    if form.validate_on_submit() and int(form.edit.data) == -1:
-        if current_user.role == "Admin":
-            to_csv(current_user.username)
-            column_names = [column.name for column in Emperor.__table__.columns if column.name != "id"]
-            new_emperor = Emperor(
-                **{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
-            db.session.add(new_emperor)
-            db.session.commit()
-            new_log_102 = LogBook(original_id=new_emperor.id, title=new_emperor.title, username=current_user.username)
-            db.session.add(new_log_102)
-            db.session.commit()
-
-            # print(form.portrait.data.filename)
-            if form.portrait.data:
-                save_uploaded_images(file=form.portrait.data, obj_id=new_emperor.id, field_name="emperor_id",
-                                     model=Image)
-                db.session.commit()
-            to_csv_overwrite(current_user.username)
-            return redirect(url_for("komnenos"))
-        else:
-            column_names = [column.name for column in TemporaryEmperor.__table__.columns if column.name != "id"]
-            temporary_edit_1 = TemporaryEmperor(
-                **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
-            db.session.add(temporary_edit_1)
-            db.session.commit()
-            if form.portrait.data:
-                id_data = db.session.query(TemporaryEmperor).filter_by(username=current_user.username).order_by(
-                    TemporaryEmperor.id.desc()).first()
-                save_uploaded_images(file=form.portrait.data, obj_id=id_data.id, field_name="temporary_emperor_id",
-                                     model=TemporaryImage, form_data=form, temporary=True)
-                db.session.commit()
-                confirmation_email(id=temporary_edit_1.id)
-            return redirect(url_for("komnenos"))
-    return render_template('komnenos.html', title = "Komnenos dynasty", macedonian_lst = macedonian_lst, new_form = form, form_open = True, article_title = "Homnenos dynasty (1081-1185)")
+#49
+#50
 
 #51
 @app.route("/account_deletion_code", methods = ['GET','POST'])
@@ -973,101 +858,8 @@ def account_deletion():
     new_form = AdminCodeForm()
     return render_template('account.html', title="Account", choose_form=choose_form, form=form, new_form=new_form, delete_form = delete_form,
                            invitation=invitation)
-
-
-
-#53!!
-@app.route("/add_new_emperor_3", methods = ['POST'])
-@login_required
-def add_new_emperor_3():
-    form = AllEmperorForm()
-    macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Angelos').all()
-    if form.validate_on_submit() and int(form.edit.data) == -1:
-        if current_user.role == "Admin":
-            to_csv(current_user.username)
-            column_names = [column.name for column in Emperor.__table__.columns if column.name != "id"]
-            new_emperor = Emperor(
-                **{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
-            db.session.add(new_emperor)
-            #db.session.commit()
-            new_log = LogBook(original_id=new_emperor.id, title=new_emperor.title, username=current_user.username)
-            db.session.add(new_log)
-            db.session.commit()
-            # print(form.portrait.data.filename)
-            if form.portrait.data:
-                save_uploaded_images(file=form.portrait.data, obj_id=new_emperor.id, field_name="emperor_id",
-                                     model=Image)
-                db.session.commit()
-            to_csv_overwrite(current_user.username)
-            return redirect(url_for("angelos"))
-        else:
-            column_names = [column.name for column in TemporaryEmperor.__table__.columns if column.name != "id"]
-            temporary_edit = TemporaryEmperor(
-                **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
-            db.session.add(temporary_edit)
-            db.session.commit()
-            if form.portrait.data:
-                id_data = db.session.query(TemporaryEmperor).filter_by(username=current_user.username).order_by(
-                    TemporaryEmperor.id.desc()).first()
-                save_uploaded_images(file=form.portrait.data, obj_id=id_data.id, field_name="temporary_emperor_id",
-                                     model=TemporaryImage,form_data=form, temporary=True)
-                db.session.commit()
-                confirmation_email(id=temporary_edit.id)
-            return redirect(url_for("angelos"))
-    return render_template('angelos.html', title = "Angelos dynasty", macedonian_lst = macedonian_lst, new_form = form, form_open = True, article_title = "Angelos dynasty (1085-1204)")
-
-
-
-
-#54!!
-@app.route("/add_new_emperor_4", methods = ['POST'])
-@login_required
-def add_new_emperor_4():
-    form = AllEmperorForm()
-    macedonian_lst = db.session.query(Emperor).filter_by(dynasty = 'Palaiologos').all()
-    if form.validate_on_submit() and int(form.edit.data) == -1:
-        if current_user.role == "Admin":
-            to_csv(current_user.username)
-            column_names = [column.name for column in Emperor.__table__.columns if column.name != "id"]
-            new_emperor = Emperor(
-                **{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
-            db.session.add(new_emperor)
-            db.session.commit()
-            new_log_114 = LogBook(original_id=int(new_emperor.id), title=new_emperor.title, username=current_user.username)
-            db.session.add(new_log_114)
-            db.session.commit()
-            # print(form.portrait.data.filename)
-            if form.portrait.data:
-                save_uploaded_images(file=form.portrait.data, obj_id=new_emperor.id, field_name="emperor_id",
-                                     model=Image)
-                db.session.commit()
-            to_csv_overwrite(current_user.username)
-            return redirect(url_for("palaiologos"))
-        else:
-            column_names = [column.name for column in TemporaryEmperor.__table__.columns if column.name != "id"]
-            temporary_edit_1 = TemporaryEmperor(
-                **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
-            db.session.add(temporary_edit_1)
-            db.session.commit()
-
-            if form.portrait.data:
-                id_data = db.session.query(TemporaryEmperor).filter_by(username=current_user.username).order_by(
-                    TemporaryEmperor.id.desc()).first()
-                save_uploaded_images(file=form.portrait.data, obj_id=id_data.id, field_name="temporary_emperor_id",
-                                     model=TemporaryImage, form_data=form, temporary=True)
-                db.session.commit()
-                confirmation_email(id=temporary_edit_1.id)
-            return redirect(url_for("palaiologos"))
-    return render_template('palaiologos.html', title = "Palaiologos dynasty", macedonian_lst = macedonian_lst, new_form = form, form_open = True, article_title = "Palaiologos dynasty (1259-1453)")
-
-
-
-
-
-
-
-
-
+#53
+#54
 #55
 @app.route("/admin")
 @login_required
@@ -1158,21 +950,31 @@ def edit_emperor(id):
 
 #Wars
 
-#59!!
-@app.route("/add_new_war_1", methods = ['POST', 'GET'])
+#59
+@app.route("/add_new_war_1/<string:war_category>", methods = ['POST', 'GET'])
 @login_required
-def add_new_war_1():
+def add_new_war_1(war_category):
     form = WarForm()
-    foreign_wars_lst = db.session.query(War).filter(and_(War.war_type == "Foreign War")).all()
+    if war_category == "foreign":
+        war_type = "Foreign War"
+        template = "foreign_war_1.html"
+        redirect_ = "foreign_wars_1"
+        page_title = "Foreign War"
+    else:
+        war_type = "Civil War"
+        template = "civil_wars.html"
+        redirect_ = "civil_wars"
+        page_title = "Civil War"
+    wars_lst = db.session.query(War).filter(War.war_type == war_type).all()
     war_map = folium.Map(location=[41.008333, 28.98], zoom_start=3)
 
     colors = cycle(['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred',
                     'beige', 'darkblue', 'darkgreen', 'cadetblue', 'darkpurple',
                     'white', 'pink', 'lightblue', 'lightgreen', 'gray', 'black', 'lightgray'])
-    names = sorted({war.war_name for war in foreign_wars_lst if war.war_name})
+    names = sorted({war.war_name for war in wars_lst if war.war_name})
     war_colors = {name: next(colors) for name in names}
     cluster = MarkerCluster().add_to(war_map)
-    for war in foreign_wars_lst:
+    for war in wars_lst:
         if war.latitude is not None and war.longitude is not None:
             color = war_colors.get(war.war_name, 'gray')
             folium.Marker(location=[war.latitude, war.longitude],
@@ -1197,7 +999,7 @@ def add_new_war_1():
                                      model=Image)
                 db.session.commit()
             to_csv_overwrite(current_user.username)
-            return redirect(url_for("foreign_wars_1"))
+            return redirect(url_for(redirect_))
         else:
             column_names = [column.name for column in TemporaryWar.__table__.columns if column.name != "id"]
             temporary_war_edit = TemporaryWar(
@@ -1209,71 +1011,10 @@ def add_new_war_1():
                 save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_war_id",model=TemporaryImage, form_data=form, temporary=True)
                 db.session.commit()
                 confirmation_email(id = temporary_war_edit.id)
-            return redirect(url_for("foreign_wars_1"))
-    return render_template('foreign_war_1.html', title = "Foreign Wars", foreign_wars_lst = foreign_wars_lst, war_html =Markup(war_html), form_open = True, new_form = form )
+            return redirect(url_for(redirect_))
+    return render_template(template, title = page_title, wars_lst = wars_lst, war_html =Markup(war_html), form_open = True, new_form = form )
 
-
-
-
-
-#60!!
-@app.route("/add_new_war_2", methods = ['POST', 'GET'])
-@login_required
-def add_new_war_2():
-    form = WarForm()
-    foreign_wars_lst = db.session.query(War).filter(and_(War.war_type == "Civil War")).all()
-    war_map = folium.Map(location=[41.008333, 28.98], zoom_start=3)
-
-    colors = cycle(['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred',
-                    'beige', 'darkblue', 'darkgreen', 'cadetblue', 'darkpurple',
-                    'white', 'pink', 'lightblue', 'lightgreen', 'gray', 'black', 'lightgray'])
-    names = sorted({war.war_name for war in foreign_wars_lst if war.war_name})
-    war_colors = {name: next(colors) for name in names}
-    cluster = MarkerCluster().add_to(war_map)
-    for war in foreign_wars_lst:
-        if war.latitude is not None and war.longitude is not None:
-            color = war_colors.get(war.war_name, 'gray')
-            folium.Marker(location=[war.latitude, war.longitude],
-                          tooltip=war.title,
-                          popup=folium.Popup(f"<b>{war.title}</b><br>{war.war_name}<br>{war.dates}", max_width=300),
-                          icon=folium.Icon(color=color)
-                          ).add_to(cluster)
-    war_html = war_map._repr_html_()
-    if form.validate_on_submit() and int(form.edit.data) == -1:
-        if current_user.role == "Admin":
-            to_csv(current_user.username)
-            column_names = [column.name for column in War.__table__.columns if column.name != "id"]
-            new_war = War(
-                **{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
-            db.session.add(new_war)
-            db.session.commit()
-            new_log_4 = LogBook(original_id=new_war.id, title=new_war.title, username=current_user.username)
-            db.session.add(new_log_4)
-            # print(form.portrait.data.filename)
-            if form.image.data:
-                save_uploaded_images(file=form.image.data, obj_id=new_war.id, field_name="war_id",
-                                     model=Image)
-                db.session.commit()
-            to_csv_overwrite(current_user.username)
-            return redirect(url_for("civil_wars"))
-        else:
-            column_names = [column.name for column in TemporaryWar.__table__.columns if column.name != "id"]
-            temporary_war_edit = TemporaryWar(
-                **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
-            db.session.add(temporary_war_edit)
-            db.session.commit()
-            if form.image.data:
-                id_data = db.session.query(TemporaryWar).filter_by(username=current_user.username).order_by(TemporaryWar.id.desc()).first()
-                save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_war_id", model=TemporaryImage, form_data=form, temporary=True)
-                db.session.commit()
-                confirmation_email(id=temporary_war_edit.id)
-            return redirect(url_for("civil_wars"))
-    return render_template('civil_wars.html', title = "Civil Wars", foreign_wars_lst = foreign_wars_lst, war_html =Markup(war_html), form_open = True, new_form = form )
-
-
-
-
-
+#60
 #61
 @app.route('/edit_war/<int:id>', methods = ['POST', 'GET'])
 @login_required
@@ -1295,20 +1036,10 @@ def edit_war(id):
             to_csv_overwrite(current_user.username)
             return redirect(url_for('war_info_foreign_1', id=war_first.id))
         else:
-            temporary_edit = TemporaryWar(username=current_user.username, old_id=int(form.edit.data),
-                                                  title=form.title.data, start_year=form.start_year.data,
-                                                  dates=form.dates.data,
-                                                  location=form.location.data, longitude=form.longitude.data,
-                                                  latitude=form.latitude.data,
-                                                  roman_commanders=form.roman_commanders.data,
-                                                  enemy_commanders=form.enemy_commanders.data,
-                                                  roman_strength=form.roman_strength.data,
-                                                  enemy_strength=form.enemy_strength.data,
-                                                  roman_loss=form.roman_loss.data, enemy_loss=form.enemy_loss.data,
-                                                  references=form.references.data,
-                                                  dynasty=form.dynasty.data, war_name=form.war_name.data,
-                                                  war_type=form.war_type.data, description=form.description.data,
-                                                  result=form.result.data)
+            column_names = [column.name for column in TemporaryWar.__table__.columns if column.name != "id"]
+            temporary_edit = TemporaryWar(
+                **{column: getattr(form, column).data for column in column_names if hasattr(form, column)},
+                old_id=int(form.edit.data), username=current_user.username)
             db.session.add(temporary_edit)
             db.session.commit()
             if form.image.data:
@@ -1346,32 +1077,16 @@ def edit_wars_users(id):
         return redirect(url_for('war_info_edit_user', id=war_first.id))
     return render_template("war_info_edit_user.html", war = war_first, new_form = form, form_open = True, title = "Editing requests")
 
-#63!!
+#63
 @app.route("/approve_war_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_war_edit(id):
     try:
         war_first = db.session.get(TemporaryWar, id)
         new_war = db.session.get(War, int(war_first.old_id))
-
-        new_war.title = war_first.title
-        new_war.start_year = war_first.start_year
-        new_war.dates = war_first.dates
-        new_war.location = war_first.location
-        new_war.longitude = war_first.longitude
-        new_war.latitude = war_first.latitude
-        new_war.roman_commanders = war_first.roman_commanders
-        new_war.enemy_commanders = war_first.enemy_commanders
-        new_war.roman_strength = war_first.roman_strength
-        new_war.enemy_strength = war_first.enemy_strength
-        new_war.roman_loss = war_first.roman_loss
-        new_war.enemy_loss = war_first.enemy_loss
-        new_war.dynasty = war_first.dynasty
-        new_war.war_name = war_first.war_name
-        new_war.war_type = war_first.war_type
-        new_war.description = war_first.description
-        new_war.references = war_first.references
-        new_war.result = war_first.result
+        column_names = [column.name for column in War.__table__.columns if column.name not in ("id", "old_id")]
+        for column in column_names:
+            setattr(new_war, column, getattr(war_first, column))
         user = db.session.query(User).filter_by(username=war_first.username).first()
         new_log_8 = LogBook(original_id=id, title=new_war.title,
                             username=current_user.username)
@@ -1386,30 +1101,23 @@ def approve_war_edit(id):
     except Exception as e:
         flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
-#64!!
+
+#64
 @app.route("/approve_war_add/<int:id>", methods=['GET', 'POST'])
 @admin_only
 def approve_war_add(id):
     add_war = db.session.get(TemporaryWar, id)
     to_csv(current_user.username)
-    new_war = War(title=add_war.title, start_year=add_war.start_year, dates=add_war.dates,
-                      location=add_war.location, longitude=add_war.longitude, latitude=add_war.latitude,
-     roman_commanders=add_war.roman_commanders, enemy_commanders = add_war.enemy_commanders, roman_strength = add_war.roman_strength,
-                          enemy_strength = add_war.enemy_strength, roman_loss = add_war.roman_loss , enemy_loss = add_war.enemy_loss, references = add_war.references,
-                          dynasty = add_war.dynasty, war_name = add_war.war_name, war_type = add_war.war_type, description = add_war.description, result = add_war.result)
+    column_names = [column.name for column in War.__table__.columns if column.name != "id"]
+    new_war = War(**{column: getattr(add_war, column) for column in column_names if hasattr(add_war, column)})
     user = db.session.query(User).filter_by(username = add_war.username).first()
     db.session.add(new_war)
+    db.session.commit()
     new_log_1000 = LogBook(original_id=new_war.id, title=new_war.title,
                         username=current_user.username)
     db.session.add(new_log_1000)
     if add_war.temporary_images:
-        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{add_war.temporary_images[0].filename}")
-        photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", war_id = new_war.id)
-        db.session.add(photo)
-        db.session.delete(add_war.temporary_images[0])
-        new_log_1100 = LogBook(original_id=photo.id, title=file_name,
-                            username=current_user.username)
-        db.session.add(new_log_1100)
+        approval_add_image(add_war, obj_id=new_war.id, field_name="war_id", model=Image)
     approval_email(user_email=user.email, emperor_title=new_war.title)
     db.session.delete(add_war)
     db.session.commit()
@@ -1417,66 +1125,39 @@ def approve_war_add(id):
     return redirect(url_for('manage_additions'))
 
 #65
-@app.route("/reject_war_add/<int:id>", methods = ['GET', 'POST'])
-def reject_war_add(id):
+@app.route("/reject_war_add_edit/<int:id>", methods = ['GET', 'POST'])
+def reject_war_add_edit(id):
     add_war = db.session.get(TemporaryWar, id)
     add_war.status = "Reject"
     user = db.session.query(User).filter_by(username = add_war.username).first()
     rejection_email(user_email=user.email, emperor_title=add_war.title)
     db.session.commit()
-    return redirect(url_for('manage_additions'))
+    return redirect(request.referrer)
 #66
-@app.route("/reject_war_edit/<int:id>", methods=['GET', 'POST'])
-def reject_war_edit(id):
-    add_war = db.session.get(TemporaryWar, id)
-    add_war.status = "Reject"
-    user = db.session.query(User).filter_by(username=add_war.username).first()
-    rejection_email(user_email=user.email, emperor_title=add_war.title)
-    db.session.commit()
-    return redirect(url_for('manage_edits'))
 
+#67
 
-
-#67!!
-@app.route("/admin_delete_war_1/<int:id>", methods = ['GET', 'POST'])
-def admin_delete_war_1(id):
+@app.route("/admin_delete_war/<int:id>", methods = ['GET', 'POST'])
+def admin_delete_war(id):
     delete_war_temporary = db.session.get(TemporaryWar, id)
     if delete_war_temporary.temporary_images:
         delete_image_temporary = delete_war_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_war_temporary)
     db.session.commit()
-    return redirect(url_for('manage_edits'))
-
-
-
-#68!!
-@app.route("/admin_delete_war_2/<int:id>", methods = ['GET', 'POST'])
-def admin_delete_war_2(id):
-    delete_war_temporary = db.session.get(TemporaryWar, id)
-    if delete_war_temporary.temporary_images:
-        delete_image_temporary = delete_war_temporary.temporary_images[0]
-        db.session.delete(delete_image_temporary)
-    db.session.delete(delete_war_temporary)
-    db.session.commit()
-    return redirect(url_for('manage_additions'))
-
-
-
+    return redirect(request.referrer)
+#68
 #Wars
-
-
-
 #69
-@app.route("/admin_delete_emperor_1/<int:id>", methods = ['GET', 'POST'])
-def admin_delete_emperor_1(id):
+@app.route("/admin_delete_emperor/<int:id>", methods = ['GET', 'POST'])
+def admin_delete_emperor(id):
     delete_emperor_temporary = db.session.get(TemporaryEmperor, id)
     if delete_emperor_temporary.temporary_images:
         delete_image_temporary = delete_emperor_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_emperor_temporary)
     db.session.commit()
-    return redirect(url_for('manage_additions'))
+    return redirect(request.referrer)
 #Wars end
 
 
@@ -1511,27 +1192,15 @@ def architecture_info():
     return render_template('architecture_info.html', title = "Architecture", buildings_lst = buildings_lst, architecture_html =Markup(building_html) , new_form = form, form_open = False)
 
 
-#71!!
+#71
 @app.route('/art_selection/architecture_info/architecture_info_detail/<int:id>', methods= ['GET', 'POST'])
 def architecture_info_detail(id):
-    form = ArchitectureForm()
     form_1 = ImageUploadForm()
     form_2 = ImageEditForm()
     architecture_first = db.session.get(Architecture, id)
+    form = ArchitectureForm(obj=architecture_first)
     images = db.session.query(Image).filter(Image.architecture_id == id).all()
     form.edit.data = architecture_first.id
-    form.title.data = architecture_first.title
-    form.construction_completed.data = architecture_first.construction_completed
-    form.location.data = architecture_first.location
-    form.longitude.data = architecture_first.longitude
-    form.latitude.data = architecture_first.latitude
-    form.in_greek.data = architecture_first.in_greek
-    form.description.data = architecture_first.description
-    form.references.data = architecture_first.references
-    form.current_status.data = architecture_first.current_status
-    form.building_type.data = architecture_first.building_type
-    form.architectural_style.data = architecture_first.architectural_style
-
     return render_template('architecture_info_detail.html', title = "Architecture Info", new_form = form, new_form_1 = form_1, new_form_2 = form_2,form_open = False ,form_open_1 = False,form_open_2 = False ,building = architecture_first, images = images)
 
 
@@ -1670,7 +1339,7 @@ def edit_architecture_users(id):
 
 
 
-#75!!
+#75
 @app.route("/approve_architecture_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_architecture_edit(id):
@@ -1678,17 +1347,9 @@ def approve_architecture_edit(id):
         to_csv(current_user.username)
         architecture_first = db.session.get(TemporaryArchitecture, id)
         new_architecture = db.session.get(Architecture, int(architecture_first.old_id))
-        new_architecture.title = architecture_first.title
-        new_architecture.in_greek = architecture_first.in_greek
-        new_architecture.architectural_style = architecture_first.architectural_style
-        new_architecture.location = architecture_first.location
-        new_architecture.longitude = architecture_first.longitude
-        new_architecture.latitude = architecture_first.latitude
-        new_architecture.current_status = architecture_first.current_status
-        new_architecture.construction_completed = architecture_first.construction_completed
-        new_architecture.building_type = architecture_first.building_type
-        new_architecture.description = architecture_first.description
-        new_architecture.references = architecture_first.references
+        column_names = [column.name for column in Architecture.__table__.columns if column.name not in ("id", "old_id")]
+        for column in column_names:
+            setattr(new_architecture, column, getattr(architecture_first, column))
         user = db.session.query(User).filter_by(username=architecture_first.username).first()
         new_log_20 = LogBook(original_id=id, title=new_architecture.title,
                              username=current_user.username)
@@ -1703,27 +1364,23 @@ def approve_architecture_edit(id):
         flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
 
-#76!!
+#76
 @app.route("/approve_architecture_add/<int:id>", methods=['GET', 'POST'])
 @admin_only
 def approve_architecture_add(id):
     to_csv(current_user.username)
     add_architecture = db.session.get(TemporaryArchitecture, id)
-    new_architecture = Architecture(title=add_architecture.title, location = add_architecture.location, references= add_architecture.references, in_greek = add_architecture.in_greek, construction_completed = add_architecture.construction_completed, architectural_style = add_architecture.architectural_style,
-                                            current_status = add_architecture.current_status, longitude = add_architecture.longitude, latitude = add_architecture.latitude, description = add_architecture.description, building_type = add_architecture.building_type)
+    column_names = [column.name for column in Architecture.__table__.columns if column.name != "id"]
+    new_architecture = Architecture(
+        **{column: getattr(add_architecture, column) for column in column_names if hasattr(add_architecture, column)})
     user = db.session.query(User).filter_by(username = add_architecture.username).first()
     db.session.add(new_architecture)
+    db.session.commit()
     new_log_2200 = LogBook(original_id=new_architecture.id, title=new_architecture.title,
                          username=current_user.username)
     db.session.add(new_log_2200)
     if add_architecture.temporary_images:
-        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{add_architecture.temporary_images[0].filename}")
-        photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", architecture_id = new_architecture.id)
-        db.session.add(photo)
-        new_log_2300 = LogBook(original_id=photo.id, title=file_name,
-                             username=current_user.username)
-        db.session.add(new_log_2300)
-        db.session.delete(add_architecture.temporary_images[0])
+        approval_add_image(add_architecture, obj_id=new_architecture.id, field_name="architecture_id", model=Image)
     approval_email(user_email=user.email, emperor_title=add_architecture.title)
     db.session.delete(add_architecture)
     db.session.commit()
@@ -1732,110 +1389,56 @@ def approve_architecture_add(id):
 
 
 #77
-@app.route("/reject_architecture_add/<int:id>", methods = ['GET', 'POST'])
-def reject_architecture_add(id):
+@app.route("/reject_architecture_add_edit/<int:id>", methods = ['GET', 'POST'])
+def reject_architecture_add_edit(id):
     add_architecture = db.session.get(TemporaryArchitecture, id)
     add_architecture.status = "Reject"
     user = db.session.query(User).filter_by(username = add_architecture.username).first()
     rejection_email(user_email=user.email, emperor_title=add_architecture.title)
     db.session.commit()
-    return redirect(url_for('manage_additions'))
+    return redirect(request.referrer)
 #78
-@app.route("/reject_architecture_edit/<int:id>", methods=['GET', 'POST'])
-def reject_architecture_edit(id):
-    add_architecture = db.session.get(TemporaryArchitecture, id)
-    add_architecture.status = "Reject"
-    user = db.session.query(User).filter_by(username=add_architecture.username).first()
-    rejection_email(user_email=user.email, emperor_title=add_architecture.title)
-    db.session.commit()
-    return redirect(url_for('manage_edits'))
-
 
 
 #79
-@app.route("/admin_delete_architecture_1/<int:id>", methods = ['GET', 'POST'])
-def admin_delete_architecture_1(id):
+@app.route("/admin_delete_architectur1/<int:id>", methods = ['GET', 'POST'])
+def admin_delete_architecture(id):
     delete_architecture_temporary = db.session.get(TemporaryArchitecture, id)
     if delete_architecture_temporary.temporary_images:
         delete_image_temporary = delete_architecture_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_architecture_temporary)
     db.session.commit()
-    return redirect(url_for('manage_edits'))
+    return redirect(request.referrer)
 
 
 #80
-@app.route("/admin_delete_architecture_2/<int:id>", methods = ['GET', 'POST'])
-@admin_only
-def admin_delete_architecture_2(id):
-    delete_architecture_temporary = db.session.get(TemporaryArchitecture, id)
-    if delete_architecture_temporary.temporary_images:
-        delete_image_temporary = delete_architecture_temporary.temporary_images[0]
-        db.session.delete(delete_image_temporary)
-    db.session.delete(delete_architecture_temporary)
-    db.session.commit()
-    return redirect(url_for('manage_additions'))
-
-#81!!
+#81
 @app.route("/edit_an_image/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def edit_an_image(id):
     form = ImageEditForm()
     form_1 = ArchitectureForm()
     form_2 = ImageUploadForm()
-    if current_user.user_type == "Authorised" or current_user.role == "Admin":
+    if (current_user.user_type == "Authorised" or current_user.role == "Admin") and form.validate_on_submit():
         if form.validate_on_submit():
             to_csv(current_user.username)
-            file_name = secure_filename(form.image.data.filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
-            path_for_uploading = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
-            new_path_for_uploading = path_for_uploading.replace('\\', '/')
-            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-            form.image.data.save(new_path_for_uploading)
             photo = db.session.query(Image).filter_by(id=form.id_number.data).first()
             if photo:
                 if photo.architecture_id:
-                    if current_user.user_type == "Authorised":
-                        new_confirmation_email(id =photo.id, category="architecture")
-                    photo.filename = file_name
-                    photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
-                    photo.caption = form.caption.data
-                    db.session.add(photo)
-                    db.session.commit()
-                    new_log_24000 = LogBook(original_id=form.id_number.data, title=file_name,
-                                         username=current_user.username)
-                    db.session.add(new_log_24000)
+                    gallery_upload(form, photo, category="architecture")
                     db.session.commit()
                     to_csv_overwrite(current_user.username)
                     flash("Successfully edited", "success")
                     return redirect(url_for('architecture_info_detail', id=id))
                 elif photo.literature_id:
-                    if current_user.user_type == "Authorised":
-                        new_confirmation_email(id=photo.id, category="literature")
-                    photo.filename = file_name
-                    photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
-                    photo.caption = form.caption.data
-                    db.session.add(photo)
-                    db.session.commit()
-                    new_log_24000 = LogBook(original_id=form.id_number.data, title=file_name,
-                                         username=current_user.username)
-                    db.session.add(new_log_24000)
+                    gallery_upload(form, photo, category="literature")
                     db.session.commit()
                     to_csv_overwrite(current_user.username)
                     flash("Successfully edited", "success")
                     return redirect(url_for('literature_info_detail', id=id))
                 elif photo.artifact_id:
-                    if current_user.user_type == "Authorised":
-                        new_confirmation_email(id=photo.id, category="artifact")
-                    photo.filename = file_name
-                    photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
-                    photo.caption = form.caption.data
-                    db.session.add(photo)
-                    db.session.commit()
-                    new_log_24000 = LogBook(original_id=form.id_number.data, title=file_name,
-                                         username=current_user.username)
-                    db.session.add(new_log_24000)
+                    gallery_upload(form, photo, category="artifact")
                     db.session.commit()
                     to_csv_overwrite(current_user.username)
                     flash("Successfully edited", "success")
@@ -1847,38 +1450,33 @@ def edit_an_image(id):
     return redirect(request.referrer)
 
 
-#82!!
-@app.route('/add_an_image/<int:id>', methods = ['GET', 'POST'])
+#82
+@app.route('/add_an_image/<int:id>/<string:category>/', methods = ['GET', 'POST'])
 @login_required
-def add_an_image(id):
+def add_an_image(id, category):
     form = ImageUploadForm()
     form_1 = ArchitectureForm()
     form_2 = ImageEditForm()
     if current_user.user_type == "Authorised" or current_user.role == "Admin":
         if form.validate_on_submit():
             to_csv(current_user.username)
-            file_name = secure_filename(form.image.data.filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
-            path_for_uploading = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
-            new_path_for_uploading = path_for_uploading.replace('\\', '/')
-            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-            form.image.data.save(new_path_for_uploading)
-            photo = Image(filename = file_name, url = url_for('static', filename=f"images/uploaded_photos/{file_name}"), caption = form.caption.data, architecture_id = id)
-            db.session.add(photo)
-            db.session.commit()
-            id_data = db.session.query(Image).filter_by(architecture_id = id).order_by(Image.id.desc()).first()
-            new_log_25000 = LogBook(original_id=id_data.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_25000)
-            db.session.commit()
-            if current_user.user_type == "Authorised":
-                new_confirmation_email(id=photo.id, category="architecture")
-            flash("Successfully uploaded", "success")
-            to_csv_overwrite(current_user.username)
-            return redirect(url_for('architecture_info_detail', id=id))
+            if category == "architecture":
+                gallery_upload_addition(form, category, obj_id=id)
+                flash("Successfully uploaded", "success")
+                to_csv_overwrite(current_user.username)
+                return redirect(url_for('architecture_info_detail', id=id))
+            elif category == "literature":
+                gallery_upload_addition(form, category, obj_id=id)
+                flash("Successfully uploaded", "success")
+                to_csv_overwrite(current_user.username)
+                return redirect(url_for('literature_info_detail', id=id))
+            elif category == "artifact":
+                gallery_upload_addition(form, category, obj_id=id)
+                flash("Successfully uploaded", "success")
+                to_csv_overwrite(current_user.username)
+                return redirect(url_for('artifact_info_detail', id=id))
     flash("Invalid details, please resubmit the form", "warning")
-    return redirect(url_for('architecture_info_detail', id=id))
+    return redirect(request.referrer)
 
 
 #83
@@ -1904,23 +1502,15 @@ def literature_info():
     literature_lst = db.session.query(Literature).all()
     return render_template('literature_info.html', title = "Literature",literature_lst = literature_lst, new_form = form, form_open = False)
 
-#85!!
+#85
 @app.route('/art_selection/literature_info/literature_info_detail/<int:id>', methods= ['GET', 'POST'])
 def literature_info_detail(id):
-    form = LiteratureForm()
     literature_first = db.session.get(Literature, id)
     form_1 = ImageUploadForm()
     form_2 = ImageEditForm()
+    form = LiteratureForm(obj=literature_first)
     images = db.session.query(Image).filter(Image.literature_id == id).all()
     form.edit.data = literature_first.id
-    form.title.data = literature_first.title
-    form.year_completed.data = literature_first.year_completed
-    form.genre.data = literature_first.genre
-    form.in_greek.data = literature_first.in_greek
-    form.description.data = literature_first.description
-    form.references.data = literature_first.references
-    form.current_location.data = literature_first.current_location
-    form.author.data = literature_first.author
     return render_template('literature_info_detail.html', title = "Literature information",book = literature_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2, images =images, form_open = False, form_open_1 = False, form_open_2 = False)
 
 
@@ -2036,7 +1626,7 @@ def edit_literature_users(id):
 
 
 
-#89!!
+#89
 @app.route("/approve_literature_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_literature_edit(id):
@@ -2044,14 +1634,9 @@ def approve_literature_edit(id):
         to_csv(current_user.username)
         literature_first = db.session.get(TemporaryLiterature, id)
         new_literature = db.session.get(Literature, int(literature_first.old_id))
-        new_literature.title = literature_first.title
-        new_literature.in_greek = literature_first.in_greek
-        new_literature.current_location = literature_first.current_location
-        new_literature.genre = literature_first.genre
-        new_literature.author = literature_first.author
-        new_literature.year_completed = literature_first.year_completed
-        new_literature.description = literature_first.description
-        new_literature.references = literature_first.references
+        column_names = [column.name for column in Literature.__table__.columns if column.name not in ("id", "old_id")]
+        for column in column_names:
+            setattr(new_literature, column, getattr(literature_first, column))
         user = db.session.query(User).filter_by(username=literature_first.username).first()
         new_log_30 = LogBook(original_id=id, title=new_literature.title,
                              username=current_user.username)
@@ -2068,27 +1653,23 @@ def approve_literature_edit(id):
 
 
 
-#90!!
+#90
 @app.route("/approve_literature_add/<int:id>", methods=['GET', 'POST'])
 @admin_only
 def approve_literature_add(id):
     to_csv(current_user.username)
     add_literature = db.session.get(TemporaryLiterature, id)
-    new_literature = Literature(title=add_literature.title, current_location = add_literature.current_location, references= add_literature.references, in_greek = add_literature.in_greek, year_completed = add_literature.year_completed, genre = add_literature.genre,
-                                description = add_literature.description, author = add_literature.author)
+    column_names = [column.name for column in Literature.__table__.columns if column.name != "id"]
+    new_literature = Literature(
+        **{column: getattr(add_literature, column) for column in column_names if hasattr(add_literature, column)})
     user = db.session.query(User).filter_by(username = add_literature.username).first()
     db.session.add(new_literature)
+    db.session.commit()
     new_log_3200 = LogBook(original_id=new_literature.id, title=new_literature.title,
                          username=current_user.username)
     db.session.add(new_log_3200)
     if add_literature.temporary_images:
-        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{add_literature.temporary_images[0].filename}")
-        photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", literature_id = new_literature.id)
-        db.session.add(photo)
-        new_log_3300 = LogBook(original_id=photo.id, title=file_name,
-                             username=current_user.username)
-        db.session.add(new_log_3300)
-        db.session.delete(add_literature.temporary_images[0])
+        approval_add_image(add_literature, obj_id=new_literature.id, field_name="literature_id", model=Image)
     approval_email(user_email=user.email, emperor_title=add_literature.title)
     db.session.delete(add_literature)
     db.session.commit()
@@ -2098,49 +1679,27 @@ def approve_literature_add(id):
 
 
 #91
-@app.route("/reject_literature_add/<int:id>", methods = ['GET', 'POST'])
-def reject_literature_add(id):
+@app.route("/reject_literature_add_edit/<int:id>", methods = ['GET', 'POST'])
+def reject_literature_add_edit(id):
     add_literature = db.session.get(TemporaryLiterature, id)
     add_literature.status = "Reject"
     user = db.session.query(User).filter_by(username = add_literature.username).first()
     rejection_email(user_email=user.email, emperor_title=add_literature.title)
     db.session.commit()
-    return redirect(url_for('manage_additions'))
+    return redirect(request.referrer)
 #92
-@app.route("/reject_literature_edit/<int:id>", methods=['GET', 'POST'])
-def reject_literature_edit(id):
-    add_literature = db.session.get(TemporaryLiterature, id)
-    add_literature.status = "Reject"
-    user = db.session.query(User).filter_by(username=add_literature.username).first()
-    rejection_email(user_email=user.email, emperor_title=add_literature.title)
-    db.session.commit()
-    return redirect(url_for('manage_edits'))
-
 
 #93
-@app.route("/admin_delete_literature_1/<int:id>", methods = ['GET', 'POST'])
-def admin_delete_literature_1(id):
+@app.route("/admin_delete_literature/<int:id>", methods = ['GET', 'POST'])
+def admin_delete_literature(id):
     delete_literature_temporary = db.session.get(TemporaryLiterature, id)
     if delete_literature_temporary.temporary_images:
         delete_image_temporary = delete_literature_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_literature_temporary)
     db.session.commit()
-    return redirect(url_for('manage_edits'))
-
-
+    return redirect(url_for(request.referrer))
 #94
-@app.route("/admin_delete_literature_2/<int:id>", methods = ['GET', 'POST'])
-def admin_delete_literature_2(id):
-    delete_literature_temporary = db.session.get(TemporaryLiterature, id)
-    if delete_literature_temporary.temporary_images:
-        delete_image_temporary = delete_literature_temporary.temporary_images[0]
-        db.session.delete(delete_image_temporary)
-    db.session.delete(delete_literature_temporary)
-    db.session.commit()
-    return redirect(url_for('manage_additions'))
-
-
 #95
 @app.route("/manage_edits_additions_users/literature_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
@@ -2150,44 +1709,7 @@ def literature_info_edit_user(id):
     form = LiteratureForm(obj=literature_first)
     form.edit.data = literature_first.id
     return render_template("literature_info_edit_user.html",book = literature_first, form_open = False, title="Literature edit/addition information", new_form=form)
-
-
-
-#96!!
-@app.route('/add_an_image_1/<int:id>', methods = ['GET', 'POST'])
-@login_required
-def add_an_image_1(id):
-    form = ImageUploadForm()
-    form_1 = LiteratureForm()
-    form_2 = ImageEditForm()
-    if current_user.user_type == "Authorised" or current_user.role == "Admin":
-        if form.validate_on_submit():
-            to_csv(current_user.username)
-            file_name = secure_filename(form.image.data.filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
-            path_for_uploading = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
-            new_path_for_uploading = path_for_uploading.replace('\\', '/')
-            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-            form.image.data.save(new_path_for_uploading)
-            photo = Image(filename = file_name, url = url_for('static', filename=f"images/uploaded_photos/{file_name}"), caption = form.caption.data, literature_id = id)
-            db.session.add(photo)
-            db.session.commit()
-            id_data = db.session.query(Image).filter_by(literature_id = id).order_by(Image.id.desc()).first()
-            new_log_34 = LogBook(original_id=id_data.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_34)
-            db.session.commit()
-            new_confirmation_email(id=photo.id, category="literature")
-            flash("Successfully uploaded", "success")
-            to_csv_overwrite(current_user.username)
-            return redirect(url_for('literature_info_detail', id=id))
-    flash("Invalid details, please resubmit the form", "warning")
-    return redirect(url_for('literature_info_detail', id=id))
-
-
-
-
+#96
 #artifact
 
 
@@ -2198,21 +1720,15 @@ def artifact_info():
     artifact_lst = db.session.query(Artifact).all()
     return render_template('artifact_info.html', title = "Artifact",artifact_lst = artifact_lst, new_form = form, form_open = False)
 
-#98!!
+#98
 @app.route('/art_selection/artifact_info/artifact_info_detail/<int:id>', methods= ['GET', 'POST'])
 def artifact_info_detail(id):
-    form = ArtifactForm()
     artifact_first = db.session.get(Artifact, id)
     form_1 = ImageUploadForm()
     form_2 = ImageEditForm()
     images = db.session.query(Image).filter(Image.artifact_id == id).all()
+    form = ArtifactForm(obj=artifact_first)
     form.edit.data = artifact_first.id
-    form.title.data = artifact_first.title
-    form.year_completed.data = artifact_first.year_completed
-    form.in_greek.data = artifact_first.in_greek
-    form.description.data = artifact_first.description
-    form.references.data = artifact_first.references
-    form.current_location.data = artifact_first.current_location
     return render_template('artifact_info_detail.html', title = "Artifact information",artifact = artifact_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2, images =images, form_open = False, form_open_1 = False, form_open_2 = False)
 
 
@@ -2342,7 +1858,7 @@ def edit_artifact_users(id):
 
 
 
-#103!!
+#103
 @app.route("/approve_artifact_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_artifact_edit(id):
@@ -2350,12 +1866,9 @@ def approve_artifact_edit(id):
         to_csv(current_user.username)
         artifact_first = db.session.get(TemporaryArtifact, id)
         new_artifact = db.session.get(Artifact, int(artifact_first.old_id))
-        new_artifact.title = artifact_first.title
-        new_artifact.in_greek = artifact_first.in_greek
-        new_artifact.current_location = artifact_first.current_location
-        new_artifact.year_completed = artifact_first.year_completed
-        new_artifact.description = artifact_first.description
-        new_artifact.references = artifact_first.references
+        column_names = [column.name for column in Architecture.__table__.columns if column.name not in ("id", "old_id")]
+        for column in column_names:
+            setattr(new_artifact, column, getattr(artifact_first, column))
         user = db.session.query(User).filter_by(username=artifact_first.username).first()
         new_log_39 = LogBook(original_id=id, title=new_artifact.title,
                              username=current_user.username)
@@ -2370,7 +1883,7 @@ def approve_artifact_edit(id):
         flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
 
-#104!!
+#104
 @app.route("/approve_artifact_add/<int:id>", methods=['GET', 'POST'])
 @admin_only
 def approve_artifact_add(id):
@@ -2382,19 +1895,12 @@ def approve_artifact_add(id):
 
     user = db.session.query(User).filter_by(username = add_artifact.username).first()
     db.session.add(new_artifact)
+    db.session.commit()
     new_log_4100 = LogBook(original_id=new_artifact.id, title=new_artifact.title,
                          username=current_user.username)
     db.session.add(new_log_4100)
     if add_artifact.temporary_images:
-        file_name = secure_filename(f"{uuid.uuid4().hex[:8]}_{add_artifact.temporary_images[0].filename}")
-        uuid_ = uuid.uuid4().hex[:8]
-        file_name = f"{uuid_}_{file_name}"
-        photo = Image(filename = file_name, url = f"/static/images/uploaded_photos/{file_name}", artifact_id = new_artifact.id)
-        new_log_4200 = LogBook(original_id=photo.id, title=file_name,
-                             username=current_user.username)
-        db.session.add(new_log_4200)
-        db.session.add(photo)
-        db.session.delete(add_artifact.temporary_images[0])
+        approval_add_image(add_artifact, obj_id=new_artifact.id, field_name="artifact_id", model=Image)
     approval_email(user_email=user.email, emperor_title=add_artifact.title)
     db.session.delete(add_artifact)
     db.session.commit()
@@ -2403,50 +1909,30 @@ def approve_artifact_add(id):
 
 
 #105
-@app.route("/reject_artifact_add/<int:id>", methods = ['GET', 'POST'])
-def reject_artifact_add(id):
+@app.route("/reject_artifact_add_edit/<int:id>", methods = ['GET', 'POST'])
+def reject_artifact_add_edit(id):
     add_artifact = db.session.get(TemporaryArtifact, id)
     add_artifact.status = "Reject"
     user = db.session.query(User).filter_by(username = add_artifact.username).first()
     rejection_email(user_email=user.email, emperor_title=add_artifact.title)
     db.session.commit()
-    return redirect(url_for('manage_additions'))
+    return redirect(request.referrer)
 
 #106
-@app.route("/reject_artifact_edit/<int:id>", methods=['GET', 'POST'])
-def reject_artifact_edit(id):
-    add_artifact = db.session.get(TemporaryArtifact, id)
-    add_artifact.status = "Reject"
-    user = db.session.query(User).filter_by(username = add_artifact.username).first()
-    rejection_email(user_email=user.email, emperor_title=add_artifact.title)
-    db.session.commit()
-    return redirect(url_for('manage_edits'))
-
-
-
 
 #107
-@app.route("/admin_delete_artifact_1/<int:id>", methods = ['GET', 'POST'])
-def admin_delete_artifact_1(id):
+@app.route("/admin_delete_artifact/<int:id>", methods = ['GET', 'POST'])
+def admin_delete_artifact(id):
     delete_artifact_temporary = db.session.get(TemporaryArtifact, id)
     if delete_artifact_temporary.temporary_images:
         delete_image_temporary = delete_artifact_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_artifact_temporary)
     db.session.commit()
-    return redirect(url_for('manage_edits'))
+    return redirect(request.referrer)
 
 
 #108
-@app.route("/admin_delete_artifact_2/<int:id>", methods = ['GET', 'POST'])
-def admin_delete_artifact_2(id):
-    delete_artifact_temporary = db.session.get(TemporaryArtifact, id)
-    if delete_artifact_temporary.temporary_images:
-        delete_image_temporary = delete_artifact_temporary.temporary_images[0]
-        db.session.delete(delete_image_temporary)
-    db.session.delete(delete_artifact_temporary)
-    db.session.commit()
-    return redirect(url_for('manage_additions'))
 
 
 #109
@@ -2459,54 +1945,7 @@ def artifact_info_edit_user(id):
     form.edit.data = artifact_first.id
     return render_template("artifact_info_edit_user.html",artifact = artifact_first, form_open = False, title="Artifacts edit/addition information", new_form=form)
 
-
-
-
-
-
-#110!!
-@app.route('/add_an_image_2/<int:id>', methods = ['GET', 'POST'])
-@login_required
-def add_an_image_2(id):
-    form = ImageUploadForm()
-    form_1 = ArtifactForm()
-    form_2 = ImageEditForm()
-    if current_user.user_type == "Authorised" or current_user.role == "Admin":
-        if form.validate_on_submit():
-            to_csv(current_user.username)
-            file_name = secure_filename(form.image.data.filename)
-            uuid_ = uuid.uuid4().hex[:8]
-            file_name = f"{uuid_}_{file_name}"
-            path_for_uploading = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
-            new_path_for_uploading = path_for_uploading.replace('\\', '/')
-            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-            form.image.data.save(new_path_for_uploading)
-            photo = Image(filename = file_name, url = url_for('static', filename=f"images/uploaded_photos/{file_name}"), caption = form.caption.data, artifact_id = id)
-            db.session.add(photo)
-            db.session.commit()
-            id_data = db.session.query(Image).filter_by(architecture_id = id).order_by(Image.id.desc()).first()
-            new_log_43 = LogBook(original_id=id_data.id, title=file_name,
-                                 username=current_user.username)
-            db.session.add(new_log_43)
-            db.session.commit()
-            new_confirmation_email(id=photo.id, category="artifact")
-            to_csv_overwrite(current_user.username)
-            flash("Successfully uploaded", "success")
-            return redirect(url_for('artifact_info_detail', id=id))
-    flash("Invalid details, please resubmit the form", "warning")
-    return redirect(url_for('artifact_info_detail', id=id))
-
-
-
-
-
-
-
-
-
-
-
-
+#110
 #111
 @app.route('/admin/de_admin/<int:id>', methods=['POST', 'GET'])
 @admin_only
