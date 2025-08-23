@@ -61,9 +61,12 @@ def to_csv_overwrite(username):
 def admin_only(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if current_user.role != "Admin":
+        try:
+            if current_user.role != "Admin":
+                return abort(403)
+            return func(*args, **kwargs)
+        except Exception as e:
             return abort(403)
-        return func(*args, **kwargs)
     return wrapper
 
 
@@ -2052,6 +2055,21 @@ def login():
         return redirect(next_page)
     return render_template('generic_form.html', title='Sign In', form=form)
 
+#116
+@app.route("/delete_image/<int:id>", methods = ["POST"])
+@admin_only
+def delete_image(id):
+    image_for_deletion = db.session.get(Image, id)
+    if image_for_deletion:
+        to_csv(current_user.username)
+        db.session.delete(image_for_deletion)
+        db.session.commit()
+        to_csv_overwrite(current_user.username)
+    return redirect(request.referrer)
+
+
+
+
 
 @app.before_request
 def only_one_device_allowed_at_one_time():
@@ -2071,7 +2089,7 @@ def prevent_frequent_requests():
         if latest_request_time is not None:
             if current_user.is_authenticated:
                 if current_time - latest_request_time < 3:
-                    flash("Please wait for a few seconds before making another request!", "warning")
+                    flash("Please wait for three seconds before making another request!", "warning")
                     return render_template("chatbot.html", text_=None, title="Chatbot", form=form)
             else:
                 if current_time - latest_request_time < 10:
@@ -2079,6 +2097,8 @@ def prevent_frequent_requests():
                     return render_template("chatbot.html", text_=None, title="Chatbot", form=form)
         session["last_request_time"] = current_time
     return None
+
+
 
 #116
 @app.route('/logout')

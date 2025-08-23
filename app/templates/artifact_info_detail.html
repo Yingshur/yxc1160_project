@@ -296,7 +296,14 @@
         {% for image in images %}
         <figure>
         <img src="{{image.url}}" alt="{{image.filename}}"> <figcaption>
-         {{image.caption}} <br> ID number: {{image.id}}
+         {{image.caption}} <br> ID number: {{image.id}} <br>
+            {% if current_user.role == "Admin" %}
+        <form action="{{ url_for('delete_image', id=image.id) }}" method="POST" style="display:inline;">
+            <button type="submit" class="btn" title="delete" style="font-size: 1.2rem;">
+                <i class="bi bi-trash2"></i>
+            </button>
+        </form>
+        {% endif %}
     </figcaption>
        </figure>
         {% endfor %}
