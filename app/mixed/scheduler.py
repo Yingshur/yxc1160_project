@@ -3,11 +3,10 @@ from datetime import datetime, timezone, timedelta
 from app.new_file import db
 from app.models import User, Verification
 from app.mixed.total_backup import to_csv_total
-
+from app import app
 
 def deleting_expired_auto():
-    from flask import current_app
-    with current_app.app_context():
+    with app.app_context():
         from datetime import datetime, timezone, timedelta
         from app.models import User, Verification
         from app.new_file import db

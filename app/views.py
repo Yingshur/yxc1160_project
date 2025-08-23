@@ -68,7 +68,7 @@ def admin_only(func):
 
 
 
-
+#1
 @app.route('/versions_', methods = ["GET", "POST"])
 @login_required
 @admin_only
@@ -79,7 +79,7 @@ def versions_():
     return render_template("version_control.html", title = "Version control", versions = versions, current_versions = current_versions, new_version = new_version)
 
 
-
+#2
 @app.route('/versions_control_/<int:id>', methods = ["GET", "POST"])
 @login_required
 @admin_only
@@ -127,7 +127,7 @@ def version_control_(id):
     db.session.commit()
     return redirect(url_for("versions_"))
 
-
+#3
 @app.route('/chatbot', methods = ["GET", "POST"])
 def chatbot():
     global client, model_ready
@@ -170,7 +170,7 @@ def chatbot():
 
 
 
-
+#4
 @app.route('/versions_control_overwrite/<int:id>', methods = ["GET", "POST"])
 @login_required
 @admin_only
@@ -210,7 +210,7 @@ def version_control_overwrite(id):
 
 
 
-
+#5
 @app.route("/logbook", methods=["GET", "POST"])
 @login_required
 def logbook():
@@ -218,7 +218,7 @@ def logbook():
     return render_template('logbook.html', title = "Logbook", logbook =logbook)
 
 
-
+#6
 @app.route("/")
 def home():
     global client, model_ready
@@ -226,14 +226,14 @@ def home():
         threading.Thread(target=background_chatbot, daemon=True).start()
     return render_template('home.html', title="Roman Empire")
 
-
+#7
 @app.route("/dynasties")
 def dynasties():
     return render_template('dynasties.html', title = "Dynasties")
 
 
 
-
+#8
 @app.route("/dynasties/macedonians", methods=['GET','POST'])
 def macedonians():
     form = AllEmperorForm()
@@ -243,7 +243,7 @@ def macedonians():
     #, form_open = False
     return render_template('macedonians.html', title = "Macedonian dynasty", macedonian_lst = macedonian_lst, form_open = False ,new_form = form, article_title = "Macedonian Dynasty (867-1056)")
 
-
+#9
 @app.route("/dynasties/doukas", methods=['GET','POST'])
 def doukas():
     form = AllEmperorForm()
@@ -255,7 +255,7 @@ def doukas():
 
 
 
-
+#10
 @app.route("/dynasties/komnenos", methods=['GET','POST'])
 def komnenos():
     form = AllEmperorForm()
@@ -266,7 +266,7 @@ def komnenos():
     return render_template('komnenos.html', title = "Komnenos dynasty", macedonian_lst = macedonian_lst, form_open = False ,new_form = form, article_title = "Komnenos Dynasty (1081-1185)")
 
 
-
+#11
 @app.route("/dynasties/angelos", methods=['GET','POST'])
 def angelos():
     form = AllEmperorForm()
@@ -278,7 +278,7 @@ def angelos():
 
 
 
-
+#12
 @app.route("/dynasties/palaiologos", methods=['GET','POST'])
 def palaiologos():
     form = AllEmperorForm()
@@ -290,18 +290,18 @@ def palaiologos():
 
 
 
-
+#13
 @app.route('/art_selection')
 def art_selection():
     return render_template("art_selection.html", title = "Roman Culture")
 
-
+#14
 @app.route('/wars_selection')
 def wars_selection():
     return render_template("wars-selection.html", title = "Type of Wars")
 
 
-
+#15
 @app.route('/wars_selection/foreign_wars', methods= ['GET', 'POST'])
 def foreign_wars_1():
     form = WarForm()
@@ -329,7 +329,7 @@ def foreign_wars_1():
 
 
 
-
+#16
 @app.route('/wars_selection/civil_wars', methods= ['GET', 'POST'])
 def civil_wars():
     form = WarForm()
@@ -355,7 +355,7 @@ def civil_wars():
     return render_template('civil_wars.html', title = "Civil Wars", foreign_wars_lst = civil_wars_lst, war_html =Markup(war_html) , form_open = False, new_form = form)
 
 
-
+#17
 @app.route("/admin/manage_additions", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -367,7 +367,7 @@ def manage_additions():
     add_list_4 = db.session.query(TemporaryArtifact).filter(TemporaryArtifact.old_id == -1).all()
     return render_template('manage_additions.html', title = "Manage additions", add_list = add_list, add_list_1 = add_list_1, add_list_2 = add_list_2, add_list_3 = add_list_3, add_list_4 = add_list_4)
 
-
+#18
 @app.route("/admin/manage_additions/add_info_emperor/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -376,7 +376,7 @@ def add_info_emperor(id):
     return render_template("add_info_emperor.html", emperor_add = emperor_add, title = "Preview")
 
 
-
+#19
 @app.route("/admin/manage_additions/add_info_war/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -386,7 +386,7 @@ def add_info_war(id):
 
 
 
-
+#20
 @app.route("/approve_emperor_add/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_emperor_add(id):
@@ -416,6 +416,7 @@ def approve_emperor_add(id):
     to_csv_overwrite(current_user.username)
     return redirect(url_for('manage_additions'))
 
+#21
 @app.route("/reject_emperor_add/<int:id>", methods = ['GET', 'POST'])
 def reject_emperor_add(id):
     add_emperor = db.session.get(TemporaryEmperor, id)
@@ -428,7 +429,7 @@ def reject_emperor_add(id):
 
 
 
-
+#22
 @app.route("/manage_edits_additions_users", methods = ['GET', 'POST'])
 @login_required
 def manage_edits_additions_users():
@@ -440,7 +441,7 @@ def manage_edits_additions_users():
     return render_template('manage_edits_additions_users.html', title = "Manage edits and additions", total_list = total_list, total_list_1 = total_list_1, total_list_2 = total_list_2, total_list_3 = total_list_3, total_list_4 = total_list_4)
 
 
-
+#23
 @app.route("/manage_edits_additions_users/war_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def war_info_edit_user(id):
@@ -451,7 +452,7 @@ def war_info_edit_user(id):
 
 
 
-
+#24
 @app.route("/manage_edits_additions_users/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def user_editing(id):
@@ -460,7 +461,7 @@ def user_editing(id):
     form.edit.data = emperors_edit_additions.id
     return render_template("user_info.html", emperors_edit_additions=emperors_edit_additions, form_open = False, title="Macedonian dynasty", new_form=form)
 
-
+#25
 @app.route('/edit_emperor_users/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def edit_emperor_users(id):
@@ -482,7 +483,7 @@ def edit_emperor_users(id):
             return redirect(url_for('user_editing', id=emperor_first_users.id))
     return render_template("user_info.html", emperors_edit_additions = emperor_first_users, new_form = form, form_open = True, title = "Editing requests")
 
-
+#26
 @app.route("/admin/manage_edits", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -493,7 +494,7 @@ def manage_edits():
     edit_list_3 = db.session.query(TemporaryLiterature).filter(TemporaryLiterature.old_id != -1).all()
     edit_list_4 = db.session.query(TemporaryArtifact).filter(TemporaryArtifact.old_id != -1).all()
     return render_template('manage_edits.html', title = "Manage edits", edit_list = edit_list, edit_list_1 = edit_list_1, edit_list_2 = edit_list_2, edit_list_3 = edit_list_3, edit_list_4 = edit_list_4)
-
+#27
 @app.route("/admin/manage_edits/edit_info_emperor/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -501,7 +502,7 @@ def edit_info_emperor(id):
     emperor_edit = db.session.get(TemporaryEmperor, id)
     return render_template("edit_info_emperor.html", emperor_edit = emperor_edit, title = "Preview")
 
-
+#28
 @app.route("/admin/manage_edits/edit_info_war/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -509,7 +510,7 @@ def edit_info_war(id):
     war_edit = db.session.get(TemporaryWar, id)
     return render_template("edit_add_info_war.html", war = war_edit, title = "Preview")
 
-
+#29
 @app.route("/admin/manage_edits/edit_info_architecture/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -518,7 +519,7 @@ def edit_info_architecture(id):
     return render_template("edit_add_info_architecture.html", building = architecture_edit, title = "Preview")
 
 
-
+#30
 @app.route("/admin/manage_additions/add_info_architecture/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -529,7 +530,7 @@ def add_info_architecture(id):
 
 
 
-
+#31
 @app.route("/admin/manage_additions/edit_info_literature/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -538,7 +539,7 @@ def edit_info_literature(id):
     return render_template("edit_add_info_literature.html", book = literature_edit , title = "Preview")
 
 
-
+#32
 @app.route("/admin/manage_additions/add_info_literature/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -550,7 +551,7 @@ def add_info_literature(id):
 
 
 
-
+#33
 @app.route("/admin/manage_additions/edit_info_artifact/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -559,7 +560,7 @@ def edit_info_artifact(id):
     return render_template("edit_add_info_artifact.html", artifact = artifact_edit , title = "Preview")
 
 
-
+#34
 @app.route("/admin/manage_additions/add_info_artifact/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 @login_required
@@ -573,7 +574,7 @@ def add_info_artifact(id):
 
 
 
-
+#35
 @app.route("/approve_emperor_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_emperor_edit(id):
@@ -604,7 +605,7 @@ def approve_emperor_edit(id):
     except Exception as e:
         flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
-
+#36
 @app.route("/reject_emperor_edit/<int:id>", methods = ['GET', 'POST'])
 def reject_emperor_edit(id):
     edit_emperor = db.session.get(TemporaryEmperor, id)
@@ -614,7 +615,7 @@ def reject_emperor_edit(id):
     db.session.commit()
     return redirect(url_for('manage_edits'))
 
-
+#37
 @app.route("/admin_delete_emperor/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def admin_delete_emperor(id):
@@ -625,7 +626,7 @@ def admin_delete_emperor(id):
     db.session.delete(delete_emperor_temporary)
     db.session.commit()
     return redirect(url_for('manage_edits'))
-
+#38
 @app.route("/delete_emperors_/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def delete_emperors_(id):
@@ -637,7 +638,7 @@ def delete_emperors_(id):
     db.session.commit()
     return redirect(request.referrer)
 
-
+#39
 @app.route("/delete_wars_/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def delete_wars_(id):
@@ -655,6 +656,7 @@ def delete_wars_(id):
         return redirect(url_for("foreign_wars_1"))
     return redirect(request.referrer)
 
+#40
 @app.route("/delete_architecture_/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def delete_architecture_(id):
@@ -666,7 +668,7 @@ def delete_architecture_(id):
     db.session.delete(delete_architecture_)
     db.session.commit()
     return redirect(url_for('architecture_info'))
-
+#41
 @app.route("/delete_literature_/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def delete_literature_(id):
@@ -679,7 +681,7 @@ def delete_literature_(id):
     db.session.commit()
     return redirect(url_for('literature_info'))
 
-
+#42
 @app.route("/delete_artifacts_/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def delete_artifacts_(id):
@@ -693,7 +695,7 @@ def delete_artifacts_(id):
     return redirect(url_for('artifact_info'))
 
 
-
+#43!!
 @app.route("/wars_selection/foreign_wars/war_info_foreign_1/<int:id>", methods=['GET','POST'])
 def war_info_foreign_1(id):
     #m_e = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
@@ -722,7 +724,7 @@ def war_info_foreign_1(id):
 
 
 
-
+#44!!
 @app.route("/dynasties/macedonians/<int:id>", methods=['GET','POST'])
 def macedonian_emperors(id):
     #m_e = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
@@ -755,7 +757,7 @@ def macedonian_emperors(id):
     else:
         return render_template(request.referrer)
 
-
+#45
 @app.route("/account")
 @login_required
 def account():
@@ -766,7 +768,7 @@ def account():
     new_form = AdminCodeForm()
     return render_template('account.html', title="Account", choose_form = choose_form, form = form, new_form = new_form, invitation = invitation, delete_form = delete_form)
 
-
+#46
 @app.route("/register_emails_", methods = ['GET', 'POST'])
 def register_emails_():
     form = RegisterEmail()
@@ -781,7 +783,7 @@ def register_emails_():
             return redirect(url_for('register_emails_'))
     return render_template('register_form.html', title = "Register", form = form)
 
-
+#47
 @app.route("/account/change_to_admin", methods = ['POST'])
 def change_to_admin():
     form = AdminCodeForm()
@@ -804,6 +806,7 @@ def change_to_admin():
 
     return render_template("account.html", new_form = form, title = "Account")
 
+#48
 @app.route("/add_new_emperor", methods = ['POST'])
 @login_required
 def add_new_emperor():
@@ -857,7 +860,7 @@ def add_new_emperor():
 
 #add_emperor
 
-
+#49!!
 @app.route("/add_new_emperor_1", methods = ['POST'])
 @login_required
 def add_new_emperor_1():
@@ -898,7 +901,7 @@ def add_new_emperor_1():
 
 
 
-
+#50!!
 @app.route("/add_new_emperor_2", methods = ['POST'])
 @login_required
 def add_new_emperor_2():
@@ -939,6 +942,7 @@ def add_new_emperor_2():
             return redirect(url_for("komnenos"))
     return render_template('komnenos.html', title = "Komnenos dynasty", macedonian_lst = macedonian_lst, new_form = form, form_open = True, article_title = "Homnenos dynasty (1081-1185)")
 
+#51
 @app.route("/account_deletion_code", methods = ['GET','POST'])
 def account_deletion_code():
     code = randint(10**8, 10**9-1)
@@ -948,6 +952,7 @@ def account_deletion_code():
     db.session.commit()
     return redirect(url_for('account'))
 
+#52
 @app.route("/account_deletion", methods = ['GET','POST'])
 def account_deletion():
     delete_form = DeleteForm()
@@ -971,7 +976,7 @@ def account_deletion():
 
 
 
-
+#53!!
 @app.route("/add_new_emperor_3", methods = ['POST'])
 @login_required
 def add_new_emperor_3():
@@ -1014,7 +1019,7 @@ def add_new_emperor_3():
 
 
 
-
+#54!!
 @app.route("/add_new_emperor_4", methods = ['POST'])
 @login_required
 def add_new_emperor_4():
@@ -1063,7 +1068,7 @@ def add_new_emperor_4():
 
 
 
-
+#55
 @app.route("/admin")
 @login_required
 @admin_only
@@ -1077,6 +1082,7 @@ def admin():
 
     return render_template('admin.html', title="Admin", user_lst=user_lst, form=form, choose_form = form)
 
+#56
 @app.route('/delete_user', methods=['POST'])
 def delete_user():
     form = ChooseForm()
@@ -1096,6 +1102,7 @@ def delete_user():
             db.session.commit()
     return redirect(url_for('admin'))
 
+#57
 @app.route('/invitation_code/<int:id>', methods=['POST', 'GET'])
 def invitation_code(id):
     form = ChooseForm()
@@ -1109,7 +1116,7 @@ def invitation_code(id):
     db.session.commit()
     return render_template("admin.html", title = "Admin", user_lst = user_lst, form = form)
 
-
+#58
 @app.route('/edit_emperor/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def edit_emperor(id):
@@ -1151,7 +1158,7 @@ def edit_emperor(id):
 
 #Wars
 
-
+#59!!
 @app.route("/add_new_war_1", methods = ['POST', 'GET'])
 @login_required
 def add_new_war_1():
@@ -1209,7 +1216,7 @@ def add_new_war_1():
 
 
 
-
+#60!!
 @app.route("/add_new_war_2", methods = ['POST', 'GET'])
 @login_required
 def add_new_war_2():
@@ -1267,7 +1274,7 @@ def add_new_war_2():
 
 
 
-
+#61
 @app.route('/edit_war/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def edit_war(id):
@@ -1317,7 +1324,7 @@ def edit_war(id):
 
 
 
-
+#62
 @app.route('/edit_wars_users/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def edit_wars_users(id):
@@ -1339,7 +1346,7 @@ def edit_wars_users(id):
         return redirect(url_for('war_info_edit_user', id=war_first.id))
     return render_template("war_info_edit_user.html", war = war_first, new_form = form, form_open = True, title = "Editing requests")
 
-
+#63!!
 @app.route("/approve_war_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_war_edit(id):
@@ -1379,7 +1386,7 @@ def approve_war_edit(id):
     except Exception as e:
         flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
-
+#64!!
 @app.route("/approve_war_add/<int:id>", methods=['GET', 'POST'])
 @admin_only
 def approve_war_add(id):
@@ -1409,7 +1416,7 @@ def approve_war_add(id):
     to_csv_overwrite(current_user.username)
     return redirect(url_for('manage_additions'))
 
-
+#65
 @app.route("/reject_war_add/<int:id>", methods = ['GET', 'POST'])
 def reject_war_add(id):
     add_war = db.session.get(TemporaryWar, id)
@@ -1418,7 +1425,7 @@ def reject_war_add(id):
     rejection_email(user_email=user.email, emperor_title=add_war.title)
     db.session.commit()
     return redirect(url_for('manage_additions'))
-
+#66
 @app.route("/reject_war_edit/<int:id>", methods=['GET', 'POST'])
 def reject_war_edit(id):
     add_war = db.session.get(TemporaryWar, id)
@@ -1430,7 +1437,7 @@ def reject_war_edit(id):
 
 
 
-
+#67!!
 @app.route("/admin_delete_war_1/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_war_1(id):
     delete_war_temporary = db.session.get(TemporaryWar, id)
@@ -1443,7 +1450,7 @@ def admin_delete_war_1(id):
 
 
 
-
+#68!!
 @app.route("/admin_delete_war_2/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_war_2(id):
     delete_war_temporary = db.session.get(TemporaryWar, id)
@@ -1460,7 +1467,7 @@ def admin_delete_war_2(id):
 
 
 
-
+#69
 @app.route("/admin_delete_emperor_1/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_emperor_1(id):
     delete_emperor_temporary = db.session.get(TemporaryEmperor, id)
@@ -1477,7 +1484,7 @@ def admin_delete_emperor_1(id):
 #architecture
 
 
-
+#70
 @app.route('/art_selection/architecture_info', methods= ['GET', 'POST'])
 def architecture_info():
     form = ArchitectureForm()
@@ -1504,7 +1511,7 @@ def architecture_info():
     return render_template('architecture_info.html', title = "Architecture", buildings_lst = buildings_lst, architecture_html =Markup(building_html) , new_form = form, form_open = False)
 
 
-
+#71!!
 @app.route('/art_selection/architecture_info/architecture_info_detail/<int:id>', methods= ['GET', 'POST'])
 def architecture_info_detail(id):
     form = ArchitectureForm()
@@ -1531,7 +1538,7 @@ def architecture_info_detail(id):
 
 
 
-
+#72
 @app.route("/add_new_architecture", methods = ['POST', 'GET'])
 @login_required
 def add_new_architecture():
@@ -1593,7 +1600,7 @@ def add_new_architecture():
 
 
 
-
+#73
 @app.route('/edit_architecture/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def edit_architecture(id):
@@ -1637,7 +1644,7 @@ def edit_architecture(id):
 
 
 
-
+#74
 @app.route('/edit_architecture_users/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def edit_architecture_users(id):
@@ -1663,7 +1670,7 @@ def edit_architecture_users(id):
 
 
 
-
+#75!!
 @app.route("/approve_architecture_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_architecture_edit(id):
@@ -1696,7 +1703,7 @@ def approve_architecture_edit(id):
         flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
 
-
+#76!!
 @app.route("/approve_architecture_add/<int:id>", methods=['GET', 'POST'])
 @admin_only
 def approve_architecture_add(id):
@@ -1724,7 +1731,7 @@ def approve_architecture_add(id):
     return redirect(url_for('manage_additions'))
 
 
-
+#77
 @app.route("/reject_architecture_add/<int:id>", methods = ['GET', 'POST'])
 def reject_architecture_add(id):
     add_architecture = db.session.get(TemporaryArchitecture, id)
@@ -1733,7 +1740,7 @@ def reject_architecture_add(id):
     rejection_email(user_email=user.email, emperor_title=add_architecture.title)
     db.session.commit()
     return redirect(url_for('manage_additions'))
-
+#78
 @app.route("/reject_architecture_edit/<int:id>", methods=['GET', 'POST'])
 def reject_architecture_edit(id):
     add_architecture = db.session.get(TemporaryArchitecture, id)
@@ -1745,7 +1752,7 @@ def reject_architecture_edit(id):
 
 
 
-
+#79
 @app.route("/admin_delete_architecture_1/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_architecture_1(id):
     delete_architecture_temporary = db.session.get(TemporaryArchitecture, id)
@@ -1757,8 +1764,9 @@ def admin_delete_architecture_1(id):
     return redirect(url_for('manage_edits'))
 
 
-
+#80
 @app.route("/admin_delete_architecture_2/<int:id>", methods = ['GET', 'POST'])
+@admin_only
 def admin_delete_architecture_2(id):
     delete_architecture_temporary = db.session.get(TemporaryArchitecture, id)
     if delete_architecture_temporary.temporary_images:
@@ -1768,6 +1776,7 @@ def admin_delete_architecture_2(id):
     db.session.commit()
     return redirect(url_for('manage_additions'))
 
+#81!!
 @app.route("/edit_an_image/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def edit_an_image(id):
@@ -1838,7 +1847,7 @@ def edit_an_image(id):
     return redirect(request.referrer)
 
 
-
+#82!!
 @app.route('/add_an_image/<int:id>', methods = ['GET', 'POST'])
 @login_required
 def add_an_image(id):
@@ -1872,7 +1881,7 @@ def add_an_image(id):
     return redirect(url_for('architecture_info_detail', id=id))
 
 
-
+#83
 @app.route("/manage_edits_additions_users/architecture_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def architecture_info_edit_user(id):
@@ -1888,14 +1897,14 @@ def architecture_info_edit_user(id):
 #literature
 
 
-
+#84
 @app.route('/art_selection/literature_info', methods= ['GET', 'POST'])
 def literature_info():
     form = LiteratureForm()
     literature_lst = db.session.query(Literature).all()
     return render_template('literature_info.html', title = "Literature",literature_lst = literature_lst, new_form = form, form_open = False)
 
-
+#85!!
 @app.route('/art_selection/literature_info/literature_info_detail/<int:id>', methods= ['GET', 'POST'])
 def literature_info_detail(id):
     form = LiteratureForm()
@@ -1918,7 +1927,7 @@ def literature_info_detail(id):
 
 
 
-
+#86
 @app.route("/add_new_literature", methods = ['POST', 'GET'])
 @login_required
 def add_new_literature():
@@ -1960,7 +1969,7 @@ def add_new_literature():
 
 
 
-
+#87
 @app.route('/edit_literature/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def edit_literature(id):
@@ -2001,7 +2010,7 @@ def edit_literature(id):
 
 
 
-
+#88
 @app.route('/edit_literature_users/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def edit_literature_users(id):
@@ -2027,7 +2036,7 @@ def edit_literature_users(id):
 
 
 
-
+#89!!
 @app.route("/approve_literature_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_literature_edit(id):
@@ -2059,7 +2068,7 @@ def approve_literature_edit(id):
 
 
 
-
+#90!!
 @app.route("/approve_literature_add/<int:id>", methods=['GET', 'POST'])
 @admin_only
 def approve_literature_add(id):
@@ -2088,7 +2097,7 @@ def approve_literature_add(id):
 
 
 
-
+#91
 @app.route("/reject_literature_add/<int:id>", methods = ['GET', 'POST'])
 def reject_literature_add(id):
     add_literature = db.session.get(TemporaryLiterature, id)
@@ -2097,7 +2106,7 @@ def reject_literature_add(id):
     rejection_email(user_email=user.email, emperor_title=add_literature.title)
     db.session.commit()
     return redirect(url_for('manage_additions'))
-
+#92
 @app.route("/reject_literature_edit/<int:id>", methods=['GET', 'POST'])
 def reject_literature_edit(id):
     add_literature = db.session.get(TemporaryLiterature, id)
@@ -2108,7 +2117,7 @@ def reject_literature_edit(id):
     return redirect(url_for('manage_edits'))
 
 
-
+#93
 @app.route("/admin_delete_literature_1/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_literature_1(id):
     delete_literature_temporary = db.session.get(TemporaryLiterature, id)
@@ -2120,7 +2129,7 @@ def admin_delete_literature_1(id):
     return redirect(url_for('manage_edits'))
 
 
-
+#94
 @app.route("/admin_delete_literature_2/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_literature_2(id):
     delete_literature_temporary = db.session.get(TemporaryLiterature, id)
@@ -2132,7 +2141,7 @@ def admin_delete_literature_2(id):
     return redirect(url_for('manage_additions'))
 
 
-
+#95
 @app.route("/manage_edits_additions_users/literature_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def literature_info_edit_user(id):
@@ -2144,7 +2153,7 @@ def literature_info_edit_user(id):
 
 
 
-
+#96!!
 @app.route('/add_an_image_1/<int:id>', methods = ['GET', 'POST'])
 @login_required
 def add_an_image_1(id):
@@ -2182,14 +2191,14 @@ def add_an_image_1(id):
 #artifact
 
 
-
+#97
 @app.route('/art_selection/artifact_info', methods= ['GET', 'POST'])
 def artifact_info():
     form = ArtifactForm()
     artifact_lst = db.session.query(Artifact).all()
     return render_template('artifact_info.html', title = "Artifact",artifact_lst = artifact_lst, new_form = form, form_open = False)
 
-
+#98!!
 @app.route('/art_selection/artifact_info/artifact_info_detail/<int:id>', methods= ['GET', 'POST'])
 def artifact_info_detail(id):
     form = ArtifactForm()
@@ -2208,7 +2217,7 @@ def artifact_info_detail(id):
 
 
 
-
+#99
 @app.route('/toggle_user_type', methods=['POST'])
 def toggle_user_type():
     form = ChooseForm()
@@ -2222,7 +2231,7 @@ def toggle_user_type():
     return redirect(url_for('admin'))
 
 
-
+#100
 @app.route("/add_new_artifact", methods = ['POST', 'GET'])
 @login_required
 def add_new_artifact():
@@ -2264,7 +2273,7 @@ def add_new_artifact():
 
 
 
-
+#101
 @app.route('/edit_artifact/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def edit_artifact(id):
@@ -2306,7 +2315,7 @@ def edit_artifact(id):
 
 
 
-
+#102
 @app.route('/edit_artifact_users/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def edit_artifact_users(id):
@@ -2333,7 +2342,7 @@ def edit_artifact_users(id):
 
 
 
-
+#103!!
 @app.route("/approve_artifact_edit/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def approve_artifact_edit(id):
@@ -2361,7 +2370,7 @@ def approve_artifact_edit(id):
         flash("Article no longe available due to version change!", "warning")
     return redirect(url_for('manage_edits'))
 
-
+#104!!
 @app.route("/approve_artifact_add/<int:id>", methods=['GET', 'POST'])
 @admin_only
 def approve_artifact_add(id):
@@ -2393,7 +2402,7 @@ def approve_artifact_add(id):
     return redirect(url_for('manage_additions'))
 
 
-
+#105
 @app.route("/reject_artifact_add/<int:id>", methods = ['GET', 'POST'])
 def reject_artifact_add(id):
     add_artifact = db.session.get(TemporaryArtifact, id)
@@ -2403,6 +2412,7 @@ def reject_artifact_add(id):
     db.session.commit()
     return redirect(url_for('manage_additions'))
 
+#106
 @app.route("/reject_artifact_edit/<int:id>", methods=['GET', 'POST'])
 def reject_artifact_edit(id):
     add_artifact = db.session.get(TemporaryArtifact, id)
@@ -2415,7 +2425,7 @@ def reject_artifact_edit(id):
 
 
 
-
+#107
 @app.route("/admin_delete_artifact_1/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_artifact_1(id):
     delete_artifact_temporary = db.session.get(TemporaryArtifact, id)
@@ -2427,7 +2437,7 @@ def admin_delete_artifact_1(id):
     return redirect(url_for('manage_edits'))
 
 
-
+#108
 @app.route("/admin_delete_artifact_2/<int:id>", methods = ['GET', 'POST'])
 def admin_delete_artifact_2(id):
     delete_artifact_temporary = db.session.get(TemporaryArtifact, id)
@@ -2439,7 +2449,7 @@ def admin_delete_artifact_2(id):
     return redirect(url_for('manage_additions'))
 
 
-
+#109
 @app.route("/manage_edits_additions_users/artifact_info_edit_user/<int:id>", methods = ['GET', 'POST'])
 @login_required
 def artifact_info_edit_user(id):
@@ -2454,7 +2464,7 @@ def artifact_info_edit_user(id):
 
 
 
-
+#110!!
 @app.route('/add_an_image_2/<int:id>', methods = ['GET', 'POST'])
 @login_required
 def add_an_image_2(id):
@@ -2497,7 +2507,7 @@ def add_an_image_2(id):
 
 
 
-
+#111
 @app.route('/admin/de_admin/<int:id>', methods=['POST', 'GET'])
 @admin_only
 @login_required
@@ -2522,7 +2532,7 @@ def de_admin(id):
 
 
 
-
+#112
 @app.route("/change_pw",methods=['POST','GET'])
 def change_pw():
     form = ChangePasswordForm()
@@ -2533,6 +2543,7 @@ def change_pw():
         return redirect(url_for('account'))
     return render_template('generic_form.html',title='Change Password', form=form)
 
+#113
 @app.route("/change_email",methods=['POST','GET'])
 def change_email():
     form = ChangeEmailForm()
@@ -2544,6 +2555,7 @@ def change_email():
     return render_template('generic_form.html',title='Change Email', form=form)
 
 
+#114
 @app.route("/register_verify",methods=['POST','GET'])
 def register_verify():
     if current_user.is_authenticated:
@@ -2566,7 +2578,7 @@ def register_verify():
                 flash("Verification code is not correct!", 'danger')
                 return redirect(url_for('register_verify'))
     return render_template('generic_form.html', title='Verify',form=form)
-
+#115
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -2600,6 +2612,7 @@ def login():
         return redirect(next_page)
     return render_template('generic_form.html', title='Sign In', form=form)
 
+
 @app.before_request
 def only_one_device_allowed_at_one_time():
     if current_user.is_authenticated:
@@ -2627,7 +2640,7 @@ def prevent_frequent_requests():
         session["last_request_time"] = current_time
     return None
 
-
+#116
 @app.route('/logout')
 def logout():
     current_user.active_session = None
