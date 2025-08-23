@@ -1866,7 +1866,7 @@ def approve_artifact_edit(id):
         to_csv(current_user.username)
         artifact_first = db.session.get(TemporaryArtifact, id)
         new_artifact = db.session.get(Artifact, int(artifact_first.old_id))
-        column_names = [column.name for column in Architecture.__table__.columns if column.name not in ("id", "old_id")]
+        column_names = [column.name for column in Artifact.__table__.columns if column.name not in ("id", "old_id")]
         for column in column_names:
             setattr(new_artifact, column, getattr(artifact_first, column))
         user = db.session.query(User).filter_by(username=artifact_first.username).first()
