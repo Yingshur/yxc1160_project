@@ -193,7 +193,7 @@
     <thead>
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">status</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Status</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Title</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Title in Greek</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Born</th>
@@ -210,22 +210,22 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ addition.birth }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ addition.death }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ addition.reign }}</td>
-            <td> <form action="{{ url_for('add_info_emperor', id=addition.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('emperor_bp.add_info_emperor', id=addition.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('approve_emperor_add', id=addition.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('emperor_bp.approve_emperor_add', id=addition.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Approve" style="font-size: 1.8rem;">
                             <i class="bi bi-check-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('reject_emperor_add_edit', id=addition.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('emperor_bp.reject_emperor_add_edit', id=addition.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Reject" style="font-size: 1.8rem;">
                             <i class="bi bi-x-circle-fill"></i>
                     </button>
                  </form></td>
-             <td> <form action="{{ url_for('admin_delete_emperor', id=addition.id) }}" method="get" style="display:inline;">
+             <td> <form action="{{ url_for('emperor_bp.admin_delete_emperor', id=addition.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
                             <i class="bi bi-trash-fill"></i>
                     </button>
@@ -241,7 +241,7 @@
     <thead>
            <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
-            <th class="latin-heading_2" style="font-size: 1.5rem">status</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Status</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Battle Name</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">War Name</th>
                <th class="latin-heading_2" style="font-size: 1.5rem">Result</th>
@@ -254,22 +254,22 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ war.title }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ war.war_name }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ war.result }}</td>
-            <td> <form action="{{ url_for('add_info_war', id=war.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('war_bp.add_info_war', id=war.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('approve_war_add', id=war.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('war_bp.approve_war_add', id=war.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Approve" style="font-size: 1.8rem;">
                             <i class="bi bi-check-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('reject_war_add_edit', id=war.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('war_bp.reject_war_add_edit', id=war.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Reject" style="font-size: 1.8rem;">
                             <i class="bi bi-x-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('admin_delete_war', id=war.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('war_bp.admin_delete_war', id=war.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
                             <i class="bi bi-trash-fill"></i>
                     </button>
@@ -286,7 +286,7 @@
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Name</th>
-            <td class="latin-heading_2" style="font-size: 1.5rem">Status</td>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Status</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Location</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Type</th>
@@ -300,22 +300,22 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.construction_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.location }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.building_type }}</td>
-            <td> <form action="{{ url_for('add_info_architecture', id=building.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('architecture_bp.add_info_architecture', id=building.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('approve_architecture_add', id=building.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('architecture_bp.approve_architecture_add', id=building.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Approve" style="font-size: 1.8rem;">
                             <i class="bi bi-check-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('reject_architecture_add_edit', id=building.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('architecture_bp.reject_architecture_add_edit', id=building.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Reject" style="font-size: 1.8rem;">
                             <i class="bi bi-x-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('admin_delete_architecture', id=building.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('architecture_bp.admin_delete_architecture', id=building.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
                             <i class="bi bi-trash-fill"></i>
                     </button>
@@ -332,7 +332,7 @@
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
             <th class="latin-heading_2" style="font-size: 1.5rem"> Name</th>
-            <td class="latin-heading_2" style="font-size: 1.5rem">Status</td>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Status</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Genre</th>
 
@@ -345,22 +345,22 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.year_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.genre }}</td>
-            <td> <form action="{{ url_for('add_info_literature', id=book.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('literature_bp.add_info_literature', id=book.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('approve_literature_add', id=book.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('literature_bp.approve_literature_add', id=book.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Approve" style="font-size: 1.8rem;">
                             <i class="bi bi-check-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('reject_literature_add_edit', id=book.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('literature_bp.reject_literature_add_edit', id=book.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Reject" style="font-size: 1.8rem;">
                             <i class="bi bi-x-circle-fill"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('admin_delete_literature', id=book.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('literature_bp.admin_delete_literature', id=book.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
                             <i class="bi bi-trash-fill"></i>
                     </button>
@@ -380,7 +380,7 @@
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
             <th class="latin-heading_2" style="font-size: 1.5rem"> Name</th>
-            <td class="latin-heading_2" style="font-size: 1.5rem">Status</td>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Status</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Year Completed</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Current Location</th>
 
@@ -393,23 +393,23 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.year_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.current_location }}</td>
-            <td> <form action="{{ url_for('add_info_artifact', id=artifact.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('artifact_bp.add_info_artifact', id=artifact.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>
                  </form></td>
-            <td> <form action="{{ url_for('approve_artifact_add', id=artifact.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('artifact_bp.approve_artifact_add', id=artifact.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Approve" style="font-size: 1.8rem;">
                             <i class="bi bi-check-circle-fill"></i>
                     </button>
                  </form>
-            <td> <form action="{{ url_for('reject_artifact_add_edit', id=artifact.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('artifact_bp.reject_artifact_add_edit', id=artifact.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Reject" style="font-size: 1.8rem;">
                             <i class="bi bi-x-circle-fill"></i>
                     </button>
                  </form>
 
-            <td> <form action="{{ url_for('admin_delete_artifact', id=artifact.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('artifact_bp.admin_delete_artifact', id=artifact.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
                             <i class="bi bi-trash-fill"></i>
                     </button>

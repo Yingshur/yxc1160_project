@@ -1,0 +1,138 @@
+import glob
+import time
+import re
+from flask import abort
+from itertools import cycle
+import uuid
+from functools import wraps
+from random import randint
+from sqlalchemy import text
+import threading
+from folium.plugins import MarkerCluster
+from markupsafe import Markup
+from app.decorators.management_functions import admin_only
+from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
+from app.mixed.emails import verification_email, confirmation_email, approval_email, new_confirmation_email, rejection_email
+import folium
+from app.models import User, Emperor, \
+    Verification, Invitation, Image, TemporaryEmperor, TemporaryImage, War, TemporaryWar, Architecture, TemporaryArchitecture, Literature, TemporaryLiterature, Artifact, TemporaryArtifact, LogBook, Deletion, Version, CurrentVersion, NewVersion
+from app.forms import ChooseForm, LoginForm, ChangePasswordForm, ChangeEmailForm, RegisterForm, RegisterEmail, \
+    AdminCodeForm, InvitationCodeForm, AllEmperorForm, WarForm, ArchitectureForm, ImageEditForm, ImageUploadForm, LiteratureForm, ArtifactForm, DeleteForm, ChatForm
+from flask_login import current_user, login_user, logout_user, login_required, fresh_login_required
+import sqlalchemy as sa
+from app.new_file import db
+from urllib.parse import urlsplit
+from sqlalchemy import or_, and_
+from app import app
+import csv
+from huggingface_hub import InferenceClient
+from app.mixed.version_control import to_csv_function_1, to_csv_function_overwrite, to_csv, to_csv_overwrite
+from app.mixed.images_handling import save_uploaded_images, approval_add_image, gallery_upload, gallery_upload_addition
+from flask import Blueprint
+import os
+from app.mixed.delete_unused_images import delete_unused_images
+
+version_control_bp = Blueprint("version_control_bp", __name__)
+
+#TTT
+@version_control_bp.route('/versions_', methods = ["GET", "POST"], endpoint="versions_")
+@login_required
+@admin_only
+def versions_():
+    versions = db.session.query(Version).order_by(Version.id.desc()).all()
+    current_versions = db.session.query(CurrentVersion).all()
+    new_version = db.session.query(NewVersion).all()
+    return render_template("version_control.html", title = "Version control", versions = versions, current_versions = current_versions, new_version = new_version)
+
+#TTT
+@version_control_bp.route('/versions_control_/<int:id>', methods = ["GET", "POST"], endpoint = "version_control_")
+@login_required
+@admin_only
+def version_control_(id):
+    version = db.session.get(Version, id)
+    versions = db.session.query(Version).order_by(Version.id.desc()).all()
+    first_version = versions[-1]
+    unique_number_ = version.unique
+    models = [Image, Architecture, Emperor, War, Literature, Artifact]
+    with db.engine.begin() as context:
+        context.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
+        for each in models:
+            each.__table__.drop(context, checkfirst= True)
+        for each in models:
+            each.__table__.create(context, checkfirst= True)
+        context.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
+    model_table_names = {model.__tablename__: model for model in models}
+    dir_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "old_versions"))
+    os.makedirs(dir_versions, exist_ok=True)
+    for path_of_file in glob.glob(os.path.join(dir_versions, "*.csv")):
+        name_of_table_full = os.path.splitext(os.path.basename(path_of_file))[0]
+        actual_table_name = name_of_table_full[:-33]
+
+        if name_of_table_full[-32:] == unique_number_ and actual_table_name in model_table_names:
+            with open(path_of_file, "r", encoding="utf-8-sig") as csv_file:
+                dictionary_reader = csv.DictReader(csv_file)
+                table_dictionary = [dict(row) for row in dictionary_reader]
+                for item in table_dictionary:
+                    for a, b in item.items():
+                        if b in ("", ',', None, ''):
+                            item[a] = None
+                    item.pop("id", None)
+                add_data = [model_table_names[actual_table_name](**row) for row in table_dictionary]
+                db.session.add_all(add_data)
+    #db.session.delete(version)
+    current_version = db.session.query(CurrentVersion).first()
+    if current_version:
+        if id == first_version.id:
+            current_version.username = current_user.username
+            current_version.time_version = "-"
+        else:
+            current_version.username = version.username
+            latest_edit = db.session.query(Version).filter(Version.id < id).order_by(Version.id.desc()).first()
+            current_version.time_version = latest_edit.created_at
+    db.session.commit()
+    return redirect(url_for("version_control_bp.versions_"))
+
+#TTT
+@version_control_bp.route('/versions_control_overwrite/<int:id>', methods = ["GET", "POST"], endpoint = "version_control_overwrite")
+@login_required
+@admin_only
+def version_control_overwrite(id):
+    version = db.session.get(NewVersion, id)
+    with db.engine.begin() as context:
+        context.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
+        models = [Image, Architecture, Emperor, War, Literature, Artifact]
+        for each in models:
+            each.__table__.drop(context, checkfirst=True)
+        for each in models:
+            each.__table__.create(context, checkfirst=True)
+        context.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
+    dir_versions = os.environ.get("BACKUP_DIR", os.path.join(os.getcwd(), "new_versions"))
+    os.makedirs(dir_versions, exist_ok=True)
+    model_table_names = {model.__tablename__: model for model in models}
+    for path_of_file in glob.glob(
+            os.path.join(dir_versions, "*.csv")):
+        actual_table_name = os.path.splitext(os.path.basename(path_of_file))[0]
+        with open(path_of_file, "r", encoding="utf-8-sig") as csv_file:
+                dictionary_reader = csv.DictReader(csv_file)
+                table_dictionary = [dict(row) for row in dictionary_reader]
+                for item in table_dictionary:
+                    for a, b in item.items():
+                        if b in ("", ',', None, ''):
+                            item[a] = None
+                    item.pop("id", None)
+                add_data = [model_table_names[actual_table_name](**row) for row in table_dictionary]
+                db.session.add_all(add_data)
+    #db.session.delete(version)
+    current_version = db.session.query(CurrentVersion).first()
+    if current_version:
+        current_version.username = version.username
+        current_version.time_version = version.time_version
+    db.session.commit()
+    return redirect(url_for("version_control_bp.versions_"))
+
+#TTT
+@version_control_bp.route("/logbook", methods=["GET", "POST"], endpoint = "logbook")
+@login_required
+def logbook():
+    logbook = db.session.query(LogBook).all()
+    return render_template('logbook.html', title = "Logbook", logbook =logbook)

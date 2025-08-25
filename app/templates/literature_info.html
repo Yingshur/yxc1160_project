@@ -274,13 +274,13 @@ padding:0 !important;
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.current_location }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.author }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.genre }}</td>
-            <td> <form action="{{ url_for('literature_info_detail', id=book.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('literature_bp.literature_info_detail', id=book.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>
                  </form></td>
             {% if current_user.is_authenticated and current_user.role == "Admin" %}
-            <td> <form action="{{ url_for('delete_literature_', id=book.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('literature_bp.delete_literature_', id=book.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Delete" style="font-size: 1.8rem;">
                             <i class="bi bi-trash-fill"></i>
                     </button>
@@ -298,7 +298,7 @@ padding:0 !important;
     </button>
 
     <div id = 'admin-form' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem;">
-<form method="post" action="{{ url_for('add_new_literature') }}" enctype="multipart/form-data" novalidate>
+<form method="post" action="{{ url_for('literature_bp.add_new_literature') }}" enctype="multipart/form-data" novalidate>
                     {{ wtf.quick_form(new_form, novalidate=True, autofocus=False) }}
             </form>
     </div>

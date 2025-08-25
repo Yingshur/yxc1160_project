@@ -281,7 +281,7 @@
     </button>
 
     <div id = 'edit-form' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open %} display: block; {% else %} display: none; {% endif %}; margin-bottom: 1rem;">
-        <form method="post" action="{{ url_for('edit_architecture', id = building.id) }}" enctype="multipart/form-data" novalidate>
+        <form method="post" action="{{ url_for('architecture_bp.edit_architecture', id = building.id) }}" enctype="multipart/form-data" novalidate>
                                {{ wtf.quick_form(new_form, novalidate=True, autofocus=False) }}
             </form>
     </div>
@@ -298,7 +298,7 @@
         <img src="{{image.url}}" alt="{{image.filename}}"> <figcaption>
          {{image.caption}} <br> ID number: {{image.id}} <br>
             {% if current_user.role == "Admin" %}
-        <form action="{{ url_for('delete_image', id=image.id) }}" method="POST" style="display:inline;">
+        <form action="{{ url_for('image_bp.delete_image', id=image.id) }}" method="POST" style="display:inline;">
             <button type="submit" class="btn" title="delete" style="font-size: 1.2rem;">
                 <i class="bi bi-trash2"></i>
             </button>
@@ -316,7 +316,7 @@
     </button>
 
     <div id = 'edit-form-1' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open_1 %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem; ">
-        <form method="post" action="{{ url_for('edit_an_image', id = building.id) }}" enctype="multipart/form-data" novalidate>
+        <form method="post" action="{{ url_for('image_bp.edit_an_image', id = building.id) }}" enctype="multipart/form-data" novalidate>
                                {{ wtf.quick_form(new_form_2, novalidate=True, autofocus=False) }}
             </form>
     </div>
@@ -329,7 +329,7 @@
     </button>
 
     <div id = 'edit-form-2' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open_2 %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem;">
-        <form method="post" action="{{ url_for('add_an_image', id = building.id, category='architecture') }}" enctype="multipart/form-data" novalidate>
+        <form method="post" action="{{ url_for('image_bp.add_an_image', id = building.id, category='architecture') }}" enctype="multipart/form-data" novalidate>
                                {{ wtf.quick_form(new_form_1, novalidate=True, autofocus=False) }}
             </form>
     </div>

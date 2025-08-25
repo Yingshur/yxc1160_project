@@ -83,7 +83,7 @@
 <body>
 <nav class="navbar navbar-expand-xl py-0" style="background-color: #702963; margin-bottom: 0;" data-bs-theme="dark">
     <div class="container-fluid px-0">
-        <a class="navbar-brand" href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='images/Consantinople_Ball.png') }}" alt="Home" height="80"></a>
+        <a class="navbar-brand" href="{{ url_for('home_bp.home') }}"><img src="{{ url_for('static', filename='images/Consantinople_Ball.png') }}" alt="Home" height="80"></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -94,37 +94,37 @@
             </ul>
             <ul class="navbar-nav mb-0">
                 <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('chatbot') }}">Chatbot</a>
+                    <a class="nav-link" aria-current="page" href="{{ url_for('chatbot_bp.chatbot') }}">Chatbot</a>
                 </li>
                 {% if current_user.is_anonymous %}
                 <li class="nav-item">
                     <a class="nav-link" aria-current="page" href="https://docs.google.com/forms/d/e/1FAIpQLSchRiG_ZYDuvYIrWltSb1kEee0P51tydTD-Y_IJ8rnrhaw5oA/viewform?usp=dialog">Feedback</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('login') }}">Login</a>
+                    <a class="nav-link" aria-current="page" href="{{ url_for('login_logout_bp.login') }}">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('register_emails_') }}">Register</a>
+                    <a class="nav-link" aria-current="page" href="{{ url_for('login_logout_bp.register_emails_') }}">Register</a>
                 </li>
                 {% else %}
                  <li class="nav-item">
                     <a class="nav-link" aria-current="page" href="https://docs.google.com/forms/d/e/1FAIpQLSchRiG_ZYDuvYIrWltSb1kEee0P51tydTD-Y_IJ8rnrhaw5oA/viewform?usp=dialog">Feedback</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('logout') }}">Logout {{ current_user.username }}</a>
+                    <a class="nav-link" aria-current="page" href="{{ url_for('login_logout_bp.logout') }}">Logout {{ current_user.username }}</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('account') }}">Account</a>
+                    <a class="nav-link" aria-current="page" href="{{ url_for('home_bp.account') }}">Account</a>
                 </li>
                 {% if current_user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('logbook') }}">Logbook</a>
+                    <a class="nav-link" aria-current="page" href="{{ url_for('version_control_bp.logbook') }}">Logbook</a>
                 </li>
                 {% endif %}
                 {% if current_user.is_authenticated and current_user.role == "Admin" %}
                 <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('admin') }}">Admin</a>
+                    <a class="nav-link" aria-current="page" href="{{ url_for('admin_bp.admin') }}">Admin</a>
                 </li>
                 {% endif %}
                 {% if current_user.is_authenticated and current_user.role == "Organiser" %}

@@ -86,19 +86,19 @@
 
     <h3 class="mt-5 latin-heading_new" style="font-size: 1.5rem;">Manage account</h3>
     <ul>
-        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('change_pw') }}">Change Password</a></li>
-        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('change_email') }}">Update Email</a></li>
+        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('home_bp.change_pw') }}">Change Password</a></li>
+        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('home_bp.change_email') }}">Update Email</a></li>
     </ul>
             {% if current_user.role == "Normal" %}
     <h3 class="mt-5 latin-heading_new" style="font-size: 1.5rem;">Manage requests</h3>
     <ul>
-        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('manage_edits_additions_users') }}">Manage edits and additions</a></li>
+        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('home_bp.manage_edits_additions_users') }}">Manage edits and additions</a></li>
     </ul>
 
     <h3 class="mt-3 latin-heading_new" style="font-size: 1.5rem;">Change to Admin role</h3>
 
 <div class="latin-heading_new" style="font-size: 1.2rem;">
-        {{ wtf.quick_form(new_form, action=url_for('change_to_admin'), method="post", id="", novalidate=True, autofocus=False) }}
+        {{ wtf.quick_form(new_form, action=url_for('home_bp.change_to_admin'), method="post", id="", novalidate=True, autofocus=False) }}
     </div>
     <h3 class="mt-3 latin-heading_new" style="font-size: 1.5rem;">Invitation Code</h3>
 <div class="col-lg-9" style="background-color: transparent;">
@@ -110,12 +110,12 @@
 </div>
                 {% endif %}
 
-<a href="{{url_for('account_deletion_code')}}" class="btn btn-dark" style="background-color: transparent;">Deletion Code</a>
+<a href="{{url_for('home_bp.account_deletion_code')}}" class="btn btn-dark" style="background-color: transparent;">Deletion Code</a>
 
 <h3 class="mt-3 latin-heading_new" style="font-size: 1.5rem; background-color: transparent;">Delete Account</h3>
 
 <div class="latin-heading_new" style="font-size: 1.2rem; background-color: transparent;">
-        {{ wtf.quick_form(delete_form, action=url_for('account_deletion'), method="post", id="", novalidate=True, autofocus=False) }}
+        {{ wtf.quick_form(delete_form, action=url_for('home_bp.account_deletion'), method="post", id="", novalidate=True, autofocus=False) }}
     </div>
         </div>
 

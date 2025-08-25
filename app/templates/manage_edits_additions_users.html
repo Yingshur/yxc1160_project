@@ -210,7 +210,7 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ each.birth }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ each.death }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ each.reign }}</td>
-            <td> <form action="{{ url_for('user_editing', id=each.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('emperor_bp.user_editing', id=each.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>
@@ -240,7 +240,7 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ war.title }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ war.war_name }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ war.result }}</td>
-            <td> <form action="{{ url_for('war_info_edit_user', id=war.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('war_bp.war_info_edit_user', id=war.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>
@@ -273,7 +273,7 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.construction_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.location }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.building_type }}</td>
-            <td> <form action="{{ url_for('architecture_info_edit_user', id=building.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('architecture_bp.architecture_info_edit_user', id=building.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>
@@ -305,7 +305,7 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.year_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ book.genre }}</td>
-            <td> <form action="{{ url_for('literature_info_edit_user', id=book.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('literature_bp.literature_info_edit_user', id=book.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>
@@ -338,7 +338,7 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.year_completed }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ artifact.current_location }}</td>
-            <td> <form action="{{ url_for('artifact_info_edit_user', id=artifact.id) }}" method="get" style="display:inline;">
+            <td> <form action="{{ url_for('artifact_bp.artifact_info_edit_user', id=artifact.id) }}" method="get" style="display:inline;">
                        <button type="submit" class="btn" title="Info" style="font-size: 1.8rem;">
                             <i class="bi bi-info-square"></i>
                     </button>

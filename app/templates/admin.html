@@ -100,13 +100,13 @@
 
     <td>
         {% if current_user.user_type == "Autocrat" and user.user_type != "Autocrat" %}
-        <form action="{{ url_for('delete_user') }}" method="post">
+        <form action="{{ url_for('admin_bp.delete_user') }}" method="post">
             {{ form.csrf_token() }}
             {{ form.choice(value=user.id) }}
             <button class="btn" type="submit"><i class="bi bi-trash"></i></button>
         </form>
         {% elif current_user.user_type != "Autocrat" and user.role == "Normal" %}
-        <form action="{{ url_for('delete_user') }}" method="post">
+        <form action="{{ url_for('admin_bp.delete_user') }}" method="post">
             {{ form.csrf_token() }}
             {{ form.choice(value=user.id) }}
             <button class="btn" type="submit"><i class="bi bi-trash"></i></button>
@@ -116,7 +116,7 @@
 
     <td>
         {% if user.role == "Normal" %}
-        <form action="{{ url_for('toggle_user_type') }}" method="post">
+        <form action="{{ url_for('admin_bp.toggle_user_type') }}" method="post">
             {{ form.csrf_token() }}
             {{ form.choice(value=user.id) }}
             <button class="btn" type="submit">
@@ -132,7 +132,7 @@
 
     <td>
         {% if user.role == "Normal" %}
-        <form action="{{ url_for('invitation_code', id=user.id) }}" method="get" style="display:inline;">
+        <form action="{{ url_for('admin_bp.invitation_code', id=user.id) }}" method="get" style="display:inline;">
             <button type="submit" class="btn" title="invitation code">
                 <i class="bi bi-arrow-up-circle-fill"></i>
             </button>
@@ -142,7 +142,7 @@
 
     <td>
         {% if user.role == "Admin" and user.id != current_user.id and current_user.user_type == "Autocrat" %}
-        <form action="{{ url_for('de_admin', id=user.id) }}" method="get" style="display:inline;">
+        <form action="{{ url_for('admin_bp.de_admin', id=user.id) }}" method="get" style="display:inline;">
             <button type="submit" class="btn" title="demote">
                 <i class="bi bi-arrow-down-circle-fill"></i>
             </button>
@@ -157,18 +157,18 @@
                 </div>
     <h3 class="mt-5 latin-heading_new" style="font-size: 1.5rem;">Manage account</h3>
     <ul>
-        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('manage_edits') }}">Manage Edits</a></li>
+        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('admin_bp.manage_edits') }}">Manage Edits</a></li>
     </ul>
     <ul>
-        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('manage_additions') }}">Manage Additions</a></li>
+        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('admin_bp.manage_additions') }}">Manage Additions</a></li>
     </ul>
     <ul>
-        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('versions_') }}">Version Control</a></li>
+        <li class="latin-heading_new" style="font-size: 1.5rem;"><a href="{{ url_for('version_control_bp.versions_') }}">Version Control</a></li>
     </ul>
     <h3 class="mt-3 latin-heading_new" style="font-size: 1.5rem;">Delete unneeded images</h3>
 
     <div style="text-align: left;">
-    <a href="{{url_for('delete_unused_images_')}}" class="btn btn-dark" style="background-color: transparent">Delete Redundant Images </a>
+    <a href="{{url_for('admin_bp.delete_unused_images_')}}" class="btn btn-dark" style="background-color: transparent">Delete Redundant Images </a>
         </div>
 </div>
 </div>

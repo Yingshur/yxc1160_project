@@ -208,7 +208,7 @@
     </div>
     {% if new_version %}
     <div style="text-align: left;">
-    <a href="{{url_for('version_control_overwrite', id = new_version[0].id)}}" class="btn btn-dark" style="background-color: transparent"> Latest Version </a>
+    <a href="{{url_for('version_control_bp.version_control_overwrite', id = new_version[0].id)}}" class="btn btn-dark" style="background-color: transparent"> Latest Version </a>
         </div>
     <h1 class="latin-heading_3">Version Control</h1>
     {% endif %}
@@ -229,7 +229,7 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ version.id }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ version.username }}</td>
             <td class="greek-heading_2" style="font-size: 1rem">{{ version.created_at }}</td>
-                <td>    <a href="{{ url_for('version_control_', id=version.id) }}" class="btn btn-dark" style="background-color: transparent"> Go back to this version </a>
+                <td>    <a href="{{ url_for('version_control_bp.version_control_', id=version.id) }}" class="btn btn-dark" style="background-color: transparent"> Go back to this version </a>
                 </td>
         </tr>
     {% endfor %}

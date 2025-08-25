@@ -6,7 +6,7 @@ import csv
 from app import app
 from app.new_file import db
 import uuid
-
+import threading
 
 def to_csv_function_1(user_name):
     #dir_old_version = os.path.join(os.getcwd(), "old_versions")
@@ -63,3 +63,10 @@ def to_csv_function_overwrite(user_name):
             current_version_1 = NewVersion(username=user_name, time_version=time_)
             db.session.add(current_version_1)
         db.session.commit()
+
+
+def to_csv(username):
+    threading.Thread(target=to_csv_function_1, args=(username,)).start()
+
+def to_csv_overwrite(username):
+    threading.Thread(target=to_csv_function_overwrite, args=(username,)).start()
