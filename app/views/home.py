@@ -30,14 +30,14 @@ from app.views.chatbot import client, model_ready, readiness_test, client_settin
 
 home_bp = Blueprint("home_bp", __name__)
 
-#HHH
+
 @home_bp.route("/", endpoint = "home")
 def home():
     if not readiness_test():
         threading.Thread(target=background_chatbot, daemon=True).start()
     return render_template('home.html', title="Roman Empire")
 
-#HHH
+
 @home_bp.route("/account", endpoint = "account")
 @login_required
 def account():
@@ -48,7 +48,7 @@ def account():
     new_form = AdminCodeForm()
     return render_template('account.html', title="Account", choose_form = choose_form, form = form, new_form = new_form, invitation = invitation, delete_form = delete_form)
 
-#HHH
+
 @home_bp.route("/account/change_to_admin", methods = ['POST'], endpoint = "change_to_admin")
 @login_required
 def change_to_admin():
@@ -72,7 +72,7 @@ def change_to_admin():
 
     return render_template("account.html", new_form = form, title = "Account")
 
-#HHH
+
 @home_bp.route("/account_deletion_code", methods = ['GET','POST'], endpoint = "account_deletion_code")
 @login_required
 def account_deletion_code():
@@ -83,7 +83,7 @@ def account_deletion_code():
     db.session.commit()
     return redirect(url_for('home_bp.account'))
 
-#HHH
+
 @home_bp.route("/account_deletion", methods = ['GET','POST'], endpoint = "account_deletion")
 @login_required
 def account_deletion():
@@ -105,7 +105,7 @@ def account_deletion():
     new_form = AdminCodeForm()
     return render_template('account.html', title="Account", choose_form=choose_form, form=form, new_form=new_form, delete_form = delete_form,
                            invitation=invitation)
-#HHH
+
 @home_bp.route("/change_pw",methods=['POST','GET'], endpoint = "change_pw")
 @login_required
 def change_pw():
@@ -118,7 +118,7 @@ def change_pw():
     return render_template('generic_form.html',title='Change Password', form=form)
 
 
-#HHH
+
 @home_bp.route("/change_email",methods=['POST','GET'], endpoint = "change_email")
 def change_email():
     form = ChangeEmailForm()
@@ -129,7 +129,7 @@ def change_email():
         return redirect(url_for('home_bp.account'))
     return render_template('generic_form.html',title='Change Email', form=form)
 
-#HHH
+
 @home_bp.route("/manage_edits_additions_users", methods = ['GET', 'POST'], endpoint = "manage_edits_additions_users")
 @login_required
 def manage_edits_additions_users():

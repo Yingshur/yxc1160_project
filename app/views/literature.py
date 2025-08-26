@@ -36,7 +36,7 @@ from app.mixed.delete_unused_images import delete_unused_images
 
 literature_bp = Blueprint("literature_bp", __name__)
 
-#__
+
 @literature_bp.route("/admin/manage_additions/edit_info_literature/<int:id>", methods = ['GET', 'POST'], endpoint = "edit_info_literature")
 @admin_only
 @login_required
@@ -44,7 +44,7 @@ def edit_info_literature(id):
     literature_edit = db.session.get(TemporaryLiterature, id)
     return render_template("edit_add_info_literature.html", book = literature_edit , title = "Preview")
 
-#__
+
 @literature_bp.route("/admin/manage_additions/add_info_literature/<int:id>", methods = ['GET', 'POST'], endpoint = "add_info_literature")
 @admin_only
 @login_required
@@ -53,7 +53,7 @@ def add_info_literature(id):
     return render_template("edit_add_info_literature.html", book = literature_add, title = "Preview")
 
 
-#__
+
 @literature_bp.route("/delete_literature_/<int:id>", methods = ['GET', 'POST'], endpoint = "delete_literature_")
 @admin_only
 def delete_literature_(id):
@@ -66,14 +66,14 @@ def delete_literature_(id):
     db.session.commit()
     return redirect(url_for('literature_bp.literature_info'))
 
-#__
+
 @literature_bp.route('/art_selection/literature_info', methods= ['GET', 'POST'], endpoint = "literature_info")
 def literature_info():
     form = LiteratureForm()
     literature_lst = db.session.query(Literature).all()
     return render_template('literature_info.html', title = "Literature",literature_lst = literature_lst, new_form = form, form_open = False)
 
-#__
+
 @literature_bp.route('/art_selection/literature_info/literature_info_detail/<int:id>', methods= ['GET', 'POST'], endpoint = "literature_info_detail")
 def literature_info_detail(id):
     literature_first = db.session.get(Literature, id)
@@ -84,7 +84,7 @@ def literature_info_detail(id):
     form.edit.data = literature_first.id
     return render_template('literature_info_detail.html', title = "Literature information",book = literature_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2, images =images, form_open = False, form_open_1 = False, form_open_2 = False)
 
-#__
+
 @literature_bp.route("/add_new_literature", methods = ['POST', 'GET'], endpoint = "add_new_literature")
 @login_required
 def add_new_literature():
@@ -123,7 +123,7 @@ def add_new_literature():
             return redirect(url_for("literature_bp.literature_info"))
     return render_template('literature_info.html', title = "Literature", literature_lst = literature_lst , form_open = True, new_form = form )
 
-#__
+
 @literature_bp.route('/edit_literature/<int:id>', methods = ['POST', 'GET'], endpoint = "edit_literature")
 @login_required
 def edit_literature(id):
@@ -162,7 +162,7 @@ def edit_literature(id):
     return render_template("literature_bp.literature_info_detail.html", id=literature_first.id, form_open = True, form_1 = False, form_2 = False,book = literature_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2,title = "Literature information", images = images)
     #return render_template("war_info.html", war = war, title = "Battle information")
 
-#__
+
 @literature_bp.route('/edit_literature_users/<int:id>', methods = ['POST', 'GET'], endpoint = "edit_literature_users")
 @login_required
 def edit_literature_users(id):
@@ -183,7 +183,7 @@ def edit_literature_users(id):
         return redirect(url_for('literature_info_edit_user', id=literature_first.id))
     return render_template("literature_info_edit_user.html", book = literature_first, new_form = form, form_open = True, title = "Editing requests")
 
-#__
+
 @literature_bp.route("/approve_literature_edit/<int:id>", methods = ['GET', 'POST'], endpoint = "approve_literature_edit")
 @admin_only
 def approve_literature_edit(id):
@@ -208,7 +208,7 @@ def approve_literature_edit(id):
         flash("Article no longer available due to version change!", "warning")
     return redirect(url_for('admin_bp.manage_edits'))
 
-#__
+
 @literature_bp.route("/approve_literature_add/<int:id>", methods=['GET', 'POST'], endpoint = "approve_literature_add")
 @admin_only
 def approve_literature_add(id):
@@ -231,7 +231,7 @@ def approve_literature_add(id):
     to_csv_overwrite(current_user.username)
     return redirect(url_for('admin_bp.manage_additions'))
 
-#__
+
 @literature_bp.route("/reject_literature_add_edit/<int:id>", methods = ['GET', 'POST'], endpoint = "reject_literature_add_edit")
 @admin_only
 def reject_literature_add_edit(id):
@@ -242,7 +242,7 @@ def reject_literature_add_edit(id):
     db.session.commit()
     return redirect(request.referrer)
 
-#__
+
 @literature_bp.route("/admin_delete_literature/<int:id>", methods = ['GET', 'POST'], endpoint = "admin_delete_literature")
 @admin_only
 def admin_delete_literature(id):
@@ -256,7 +256,7 @@ def admin_delete_literature(id):
     to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
 
-#__
+
 @literature_bp.route("/manage_edits_additions_users/literature_info_edit_user/<int:id>", methods = ['GET', 'POST'], endpoint = "literature_info_edit_user")
 @login_required
 def literature_info_edit_user(id):

@@ -1,41 +1,21 @@
-import glob
-import time
-import re
-from flask import abort
-from itertools import cycle
-import uuid
-from functools import wraps
-from random import randint
-from sqlalchemy import text
-import threading
-from folium.plugins import MarkerCluster
-from markupsafe import Markup
 from app.decorators.management_functions import admin_only
-from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
-from app.mixed.emails import verification_email, confirmation_email, approval_email, new_confirmation_email, rejection_email
-import folium
+from flask import render_template, redirect, url_for, flash, request
+from app.mixed.emails import confirmation_email, approval_email, rejection_email
 from app.models import User, Emperor, \
-    Verification, Invitation, Image, TemporaryEmperor, TemporaryImage, War, TemporaryWar, Architecture, TemporaryArchitecture, Literature, TemporaryLiterature, Artifact, TemporaryArtifact, LogBook, Deletion, Version, CurrentVersion, NewVersion
-from app.forms import ChooseForm, LoginForm, ChangePasswordForm, ChangeEmailForm, RegisterForm, RegisterEmail, \
-    AdminCodeForm, InvitationCodeForm, AllEmperorForm, WarForm, ArchitectureForm, ImageEditForm, ImageUploadForm, LiteratureForm, ArtifactForm, DeleteForm, ChatForm
-from flask_login import current_user, login_user, logout_user, login_required, fresh_login_required
-import sqlalchemy as sa
+Image, TemporaryEmperor, TemporaryImage, LogBook
+from app.forms import AllEmperorForm
+from flask_login import current_user, login_required
 from app.new_file import db
-from urllib.parse import urlsplit
-from sqlalchemy import or_, and_
-from app import app
-import csv
-from huggingface_hub import InferenceClient
-from app.mixed.version_control import to_csv_function_1, to_csv_function_overwrite, to_csv, to_csv_overwrite
+
+from app.mixed.version_control import to_csv, to_csv_overwrite
 from app.mixed.images_handling import save_uploaded_images, approval_add_image, gallery_upload, gallery_upload_addition
 from flask import Blueprint
 import os
 from app.mixed.delete_unused_images import delete_unused_images
 
-
 emperor_bp = Blueprint("emperor_bp", __name__)
 
-##
+
 @emperor_bp.route("/manage_edits_additions_users/<int:id>", methods = ['GET', 'POST'], endpoint = "user_editing")
 @login_required
 def user_editing(id):
@@ -44,11 +24,11 @@ def user_editing(id):
     form.edit.data = emperors_edit_additions.id
     return render_template("user_info.html", emperors_edit_additions=emperors_edit_additions, form_open = False, title="Macedonian dynasty", new_form=form)
 
-##
+
 @emperor_bp.route("/dynasties", endpoint ="dynasties")
 def dynasties():
     return render_template('dynasties.html', title = "Dynasties")
-##
+
 @emperor_bp.route("/dynasties/macedonians", methods=['GET','POST'], endpoint = "macedonians")
 def macedonians():
     form = AllEmperorForm()
@@ -58,7 +38,7 @@ def macedonians():
     #, form_open = False
     return render_template('macedonians.html', title = "Macedonian dynasty", macedonian_lst = macedonian_lst, form_open = False ,new_form = form, article_title = "Macedonian Dynasty (867-1056)")
 
-##
+
 @emperor_bp.route("/dynasties/doukas", methods=['GET','POST'], endpoint = "doukas")
 def doukas():
     form = AllEmperorForm()
@@ -68,7 +48,7 @@ def doukas():
     #, form_open = False
     return render_template('doukas.html', title = "Doukas dynasty", macedonian_lst = macedonian_lst, form_open = False ,new_form = form, article_title = "Doukas Dynasty (1059-1081)")
 
-##
+
 @emperor_bp.route("/dynasties/komnenos", methods=['GET','POST'], endpoint = "komnenos")
 def komnenos():
     form = AllEmperorForm()
@@ -78,7 +58,7 @@ def komnenos():
     #, form_open = False
     return render_template('komnenos.html', title = "Komnenos dynasty", macedonian_lst = macedonian_lst, form_open = False ,new_form = form, article_title = "Komnenos Dynasty (1081-1185)")
 
-##
+
 @emperor_bp.route("/dynasties/angelos", methods=['GET','POST'], endpoint = "angelos")
 def angelos():
     form = AllEmperorForm()
@@ -88,7 +68,7 @@ def angelos():
     #, form_open = False
     return render_template('angelos.html', title = "Angelos dynasty", macedonian_lst = macedonian_lst, form_open = False ,new_form = form, article_title = "Angelos Dynasty (1185-1204)")
 
-##
+
 @emperor_bp.route("/dynasties/palaiologos", methods=['GET','POST'], endpoint = "palaiologos")
 def palaiologos():
     form = AllEmperorForm()
@@ -98,7 +78,7 @@ def palaiologos():
     #, form_open = False
     return render_template('palaiologos.html', title = "Palaiologos dynasty", macedonian_lst = macedonian_lst, form_open = False ,new_form = form, article_title = "Palaiologos Dynasty (1259-1453)")
 
-##
+
 @emperor_bp.route('/edit_emperor_users/<int:id>', methods = ['POST', 'GET'], endpoint = "edit_emperor_users")
 @login_required
 def edit_emperor_users(id):
@@ -120,7 +100,7 @@ def edit_emperor_users(id):
             return redirect(url_for('emperor_bp.user_editing', id=emperor_first_users.id))
     return render_template("user_info.html", emperors_edit_additions = emperor_first_users, new_form = form, form_open = True, title = "Editing requests")
 
-##
+
 @emperor_bp.route("/manage_edits/edit_info_emperor/<int:id>", methods = ['GET', 'POST'], endpoint = "edit_info_emperor")
 @admin_only
 @login_required
@@ -128,7 +108,7 @@ def edit_info_emperor(id):
     emperor_edit = db.session.get(TemporaryEmperor, id)
     return render_template("edit_info_emperor.html", emperor_edit = emperor_edit, title = "Preview")
 
-##
+
 @emperor_bp.route("/manage_additions/add_info_emperor/<int:id>", methods = ['GET', 'POST'], endpoint = "add_info_emperor")
 @admin_only
 @login_required
@@ -137,7 +117,7 @@ def add_info_emperor(id):
     return render_template("add_info_emperor.html", emperor_add = emperor_add, title = "Preview")
 
 
-##
+
 @emperor_bp.route("/approve_emperor_add/<int:id>", methods = ['GET', 'POST'], endpoint = "approve_emperor_add")
 @admin_only
 def approve_emperor_add(id):
@@ -159,7 +139,7 @@ def approve_emperor_add(id):
     to_csv_overwrite(current_user.username)
     return redirect(url_for('admin_bp.manage_additions'))
 
-##
+
 @emperor_bp.route("/reject_emperor_add_edit/<int:id>", methods = ['GET', 'POST'], endpoint = "reject_emperor_add_edit")
 def reject_emperor_add_edit(id):
     add_emperor = db.session.get(TemporaryEmperor, id)
@@ -169,7 +149,7 @@ def reject_emperor_add_edit(id):
     db.session.commit()
     return redirect(request.referrer)
 
-##
+
 @emperor_bp.route("/approve_emperor_edit/<int:id>", methods = ['GET', 'POST'], endpoint = "approve_emperor_edit")
 @admin_only
 def approve_emperor_edit(id):
@@ -194,7 +174,7 @@ def approve_emperor_edit(id):
         flash("Article no longer available due to version change!", "warning")
     return redirect(url_for('admin_bp.manage_edits'))
 
-##
+
 @emperor_bp.route("/delete_emperors_/<int:id>", methods = ['GET', 'POST'], endpoint = "delete_emperors_")
 @admin_only
 def delete_emperors_(id):
@@ -206,7 +186,7 @@ def delete_emperors_(id):
     db.session.commit()
     return redirect(request.referrer)
 
-##
+
 @emperor_bp.route("/dynasties/macedonians/<int:id>", methods=['GET','POST'], endpoint = "macedonian_emperors")
 def macedonian_emperors(id):
     #m_e = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
@@ -230,7 +210,7 @@ def macedonian_emperors(id):
         return redirect(request.referrer)
 
 
-##
+
 @emperor_bp.route("/add_new_emperor/<string:dynasty>", methods = ['POST'], endpoint = "add_new_emperor")
 @login_required
 def add_new_emperor(dynasty):
@@ -309,7 +289,7 @@ def add_new_emperor(dynasty):
     return render_template(template, title = page_title, macedonian_lst = macedonian_lst, new_form = form, form_open = True, article_title = article_title)
 
 
-##
+
 @emperor_bp.route('/edit_emperor/<int:id>', methods = ['POST', 'GET'], endpoint = "edit_emperor")
 @login_required
 def edit_emperor(id):
@@ -349,7 +329,7 @@ def edit_emperor(id):
             return redirect(url_for('emperor_bp.macedonian_emperors', id=emperor_first.id))
     return render_template("macedonian_emperors.html", id=emperor_first.id, form_open = True, m_e = emperor_first, new_form = form, title = "Dynasties")
 
-##
+
 @emperor_bp.route("/admin_delete_emperor/<int:id>", methods = ['GET', 'POST'], endpoint = "admin_delete_emperor")
 @admin_only
 def admin_delete_emperor(id):

@@ -34,7 +34,7 @@ from app.mixed.delete_unused_images import delete_unused_images
 
 login_logout_bp = Blueprint("login_logout_bp", __name__)
 
-#LLL
+
 @login_logout_bp.route("/register_emails_", methods = ['GET', 'POST'], endpoint = "register_emails_")
 def register_emails_():
     form = RegisterEmail()
@@ -49,7 +49,7 @@ def register_emails_():
             return redirect(url_for('login_logout_bp.register_emails_'))
     return render_template('register_form.html', title = "Register", form = form)
 
-#LLL
+
 @login_logout_bp.route("/register_verify",methods=['POST','GET'], endpoint = "register_verify")
 def register_verify():
     if current_user.is_authenticated:
@@ -73,7 +73,7 @@ def register_verify():
                 return redirect(url_for('login_logout_bp.register_verify'))
     return render_template('generic_form.html', title='Verify',form=form)
 
-#LLL
+
 @login_logout_bp.route('/login', methods=['GET', 'POST'], endpoint = "login")
 def login():
     if current_user.is_authenticated:
@@ -107,7 +107,7 @@ def login():
         return redirect(next_page)
     return render_template('generic_form.html', title='Sign In', form=form)
 
-#LLL
+
 @login_logout_bp.route('/logout', endpoint = "logout")
 def logout():
     current_user.active_session = None

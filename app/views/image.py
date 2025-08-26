@@ -34,7 +34,7 @@ from app.mixed.delete_unused_images import delete_unused_images
 
 image_bp = Blueprint("image_bp", __name__)
 
-#III
+
 @image_bp.route("/edit_an_image/<int:id>", methods = ['GET', 'POST'], endpoint = "edit_an_image")
 @login_required
 def edit_an_image(id):
@@ -70,7 +70,7 @@ def edit_an_image(id):
     flash("Invalid details, please resubmit the form", "warning")
     return redirect(request.referrer)
 
-#III
+
 @image_bp.route('/add_an_image/<int:id>/<string:category>/', methods = ['GET', 'POST'], endpoint = "add_an_image")
 @login_required
 def add_an_image(id, category):
@@ -98,7 +98,7 @@ def add_an_image(id, category):
     flash("Invalid details, please resubmit the form", "warning")
     return redirect(request.referrer)
 
-#III
+
 @image_bp.route("/delete_image/<int:id>", methods = ["POST"], endpoint ="delete_image")
 @admin_only
 def delete_image(id):

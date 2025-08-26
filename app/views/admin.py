@@ -34,7 +34,7 @@ from app.mixed.delete_unused_images import delete_unused_images
 
 admin_bp = Blueprint("admin_bp", __name__)
 
-#<<
+
 @admin_bp.route("/admin", endpoint = "admin")
 @login_required
 @admin_only
@@ -48,7 +48,7 @@ def admin():
 
     return render_template('admin.html', title="Admin", user_lst=user_lst, form=form, choose_form = form)
 
-#<<
+
 @admin_bp.route("/admin/manage_additions", methods = ['GET', 'POST'], endpoint = "manage_additions")
 @admin_only
 @login_required
@@ -61,7 +61,7 @@ def manage_additions():
     return render_template('manage_additions.html', title = "Manage additions", add_list = add_list, add_list_1 = add_list_1, add_list_2 = add_list_2, add_list_3 = add_list_3, add_list_4 = add_list_4)
 
 
-#<<
+
 @admin_bp.route("/admin/manage_edits", methods = ['GET', 'POST'], endpoint = "manage_edits")
 @admin_only
 @login_required
@@ -73,7 +73,7 @@ def manage_edits():
     edit_list_4 = db.session.query(TemporaryArtifact).filter(TemporaryArtifact.old_id != -1).all()
     return render_template('manage_edits.html', title = "Manage edits", edit_list = edit_list, edit_list_1 = edit_list_1, edit_list_2 = edit_list_2, edit_list_3 = edit_list_3, edit_list_4 = edit_list_4)
 
-#<<
+
 @admin_bp.route('/delete_user', methods=['POST'], endpoint = "delete_user")
 @admin_only
 def delete_user():
@@ -95,7 +95,7 @@ def delete_user():
     return redirect(url_for('admin_bp.admin'))
 
 
-#<<
+
 @admin_bp.route('/invitation_code/<int:id>', methods=['POST', 'GET'], endpoint = "invitation_code")
 @admin_only
 def invitation_code(id):
@@ -111,7 +111,7 @@ def invitation_code(id):
     return render_template("admin.html", title = "Admin", user_lst = user_lst, form = form)
 
 
-#<<
+
 @admin_bp.route('/toggle_user_type', methods=['POST'], endpoint = "toggle_user_type")
 @admin_only
 def toggle_user_type():
@@ -125,7 +125,7 @@ def toggle_user_type():
         db.session.commit()
     return redirect(url_for('admin_bp.admin'))
 
-#<<
+
 @admin_bp.route('/admin/de_admin/<int:id>', methods=['POST', 'GET'], endpoint = "de_admin")
 @admin_only
 @login_required
@@ -143,7 +143,7 @@ def de_admin(id):
     return redirect(url_for('admin_bp.admin'))
     #return render_template("admin.html", title = "Admin", user_lst = user_lst, form = form)
 
-#<<
+
 @admin_bp.route("/delete_unused_images_/", methods = ["GET", "POST"], endpoint = "delete_unused_images_")
 @admin_only
 def delete_unused_images_():

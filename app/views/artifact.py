@@ -34,7 +34,7 @@ from app.mixed.delete_unused_images import delete_unused_images
 
 artifact_bp = Blueprint("artifact_bp", __name__)
 
-#{{
+
 @artifact_bp.route("/admin/manage_additions/edit_info_artifact/<int:id>", methods = ['GET', 'POST'], endpoint = "edit_info_artifact")
 @admin_only
 @login_required
@@ -42,7 +42,7 @@ def edit_info_artifact(id):
     artifact_edit = db.session.get(TemporaryArtifact, id)
     return render_template("edit_add_info_artifact.html", artifact = artifact_edit , title = "Preview")
 
-#{{
+
 @artifact_bp.route("/admin/manage_additions/add_info_artifact/<int:id>", methods = ['GET', 'POST'], endpoint = "add_info_artifact")
 @admin_only
 @login_required
@@ -50,7 +50,7 @@ def add_info_artifact(id):
     artifact_add = db.session.get(TemporaryArtifact, id)
     return render_template("edit_add_info_artifact.html", artifact = artifact_add, title = "Preview")
 
-#{{
+
 @artifact_bp.route("/delete_artifacts_/<int:id>", methods = ['GET', 'POST'], endpoint="delete_artifacts_")
 @admin_only
 def delete_artifacts_(id):
@@ -63,14 +63,14 @@ def delete_artifacts_(id):
     db.session.commit()
     return redirect(url_for('artifact_bp.artifact_info'))
 
-#{{
+
 @artifact_bp.route('/art_selection/artifact_info', methods= ['GET', 'POST'], endpoint = "artifact_info")
 def artifact_info():
     form = ArtifactForm()
     artifact_lst = db.session.query(Artifact).all()
     return render_template('artifact_info.html', title = "Artifact",artifact_lst = artifact_lst, new_form = form, form_open = False)
 
-#{{
+
 @artifact_bp.route('/art_selection/artifact_info/artifact_info_detail/<int:id>', methods= ['GET', 'POST'], endpoint = "artifact_info_detail")
 def artifact_info_detail(id):
     artifact_first = db.session.get(Artifact, id)
@@ -81,7 +81,7 @@ def artifact_info_detail(id):
     form.edit.data = artifact_first.id
     return render_template('artifact_info_detail.html', title = "Artifact information",artifact = artifact_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2, images =images, form_open = False, form_open_1 = False, form_open_2 = False)
 
-#{{
+
 @artifact_bp.route("/add_new_artifact", methods = ['POST', 'GET'], endpoint = "add_new_artifact")
 @login_required
 def add_new_artifact():
@@ -118,7 +118,7 @@ def add_new_artifact():
     return render_template('artifact_info.html', title = "Artifact", artifact_lst = artifact_lst , form_open = True, new_form = form )
 
 
-#{{
+
 @artifact_bp.route('/edit_artifact/<int:id>', methods = ['POST', 'GET'], endpoint = "edit_artifact")
 @login_required
 def edit_artifact(id):
@@ -156,7 +156,7 @@ def edit_artifact(id):
     return render_template("artifact_info_detail.html", id=artifact_first.id, form_open = True, form_1 = False, form_2 = False,artifact = artifact_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2,title = "Artifact information", images = images)
     #return render_template("war_info.html", war = war, title = "Battle information")
 
-#{{
+
 @artifact_bp.route('/edit_artifact_users/<int:id>', methods = ['POST', 'GET'], endpoint = "edit_artifact_users")
 @login_required
 def edit_artifact_users(id):
@@ -178,7 +178,7 @@ def edit_artifact_users(id):
     return render_template("artifact_info_edit_user.html", artifact = artifact_first, new_form = form, form_open = True, title = "Editing requests")
 
 
-#{{
+
 @artifact_bp.route("/approve_artifact_edit/<int:id>", methods = ['GET', 'POST'], endpoint = "approve_artifact_edit")
 @admin_only
 def approve_artifact_edit(id):
@@ -203,7 +203,7 @@ def approve_artifact_edit(id):
         flash("Article no longer available due to version change!", "warning")
     return redirect(url_for('admin_bp.manage_edits'))
 
-#{{
+
 @artifact_bp.route("/approve_artifact_add/<int:id>", methods=['GET', 'POST'], endpoint = "approve_artifact_add")
 @admin_only
 def approve_artifact_add(id):
@@ -227,7 +227,7 @@ def approve_artifact_add(id):
     to_csv_overwrite(current_user.username)
     return redirect(url_for('admin_bp.manage_additions'))
 
-#{{
+
 @artifact_bp.route("/reject_artifact_add_edit/<int:id>", methods = ['GET', 'POST'], endpoint = "reject_artifact_add_edit")
 @admin_only
 def reject_artifact_add_edit(id):
@@ -238,7 +238,7 @@ def reject_artifact_add_edit(id):
     db.session.commit()
     return redirect(request.referrer)
 
-#{{
+
 @artifact_bp.route("/admin_delete_artifact/<int:id>", methods = ['GET', 'POST'], endpoint ="admin_delete_artifact")
 @admin_only
 def admin_delete_artifact(id):
@@ -252,7 +252,7 @@ def admin_delete_artifact(id):
     to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
 
-#{{
+
 @artifact_bp.route("/manage_edits_additions_users/artifact_info_edit_user/<int:id>", methods = ['GET', 'POST'], endpoint = "artifact_info_edit_user")
 @login_required
 def artifact_info_edit_user(id):

@@ -1,19 +1,7 @@
 import glob
-import time
-import re
-from flask import abort
-from itertools import cycle
-import uuid
-from functools import wraps
-from random import randint
 from sqlalchemy import text
-import threading
-from folium.plugins import MarkerCluster
-from markupsafe import Markup
 from app.decorators.management_functions import admin_only
-from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
-from app.mixed.emails import verification_email, confirmation_email, approval_email, new_confirmation_email, rejection_email
-import folium
+from flask import render_template, redirect, url_for
 from app.models import User, Emperor, \
     Verification, Invitation, Image, TemporaryEmperor, TemporaryImage, War, TemporaryWar, Architecture, TemporaryArchitecture, Literature, TemporaryLiterature, Artifact, TemporaryArtifact, LogBook, Deletion, Version, CurrentVersion, NewVersion
 from app.forms import ChooseForm, LoginForm, ChangePasswordForm, ChangeEmailForm, RegisterForm, RegisterEmail, \
@@ -34,7 +22,7 @@ from app.mixed.delete_unused_images import delete_unused_images
 
 version_control_bp = Blueprint("version_control_bp", __name__)
 
-#TTT
+
 @version_control_bp.route('/versions_', methods = ["GET", "POST"], endpoint="versions_")
 @login_required
 @admin_only
@@ -44,7 +32,7 @@ def versions_():
     new_version = db.session.query(NewVersion).all()
     return render_template("version_control.html", title = "Version control", versions = versions, current_versions = current_versions, new_version = new_version)
 
-#TTT
+
 @version_control_bp.route('/versions_control_/<int:id>', methods = ["GET", "POST"], endpoint = "version_control_")
 @login_required
 @admin_only
@@ -92,7 +80,7 @@ def version_control_(id):
     db.session.commit()
     return redirect(url_for("version_control_bp.versions_"))
 
-#TTT
+
 @version_control_bp.route('/versions_control_overwrite/<int:id>', methods = ["GET", "POST"], endpoint = "version_control_overwrite")
 @login_required
 @admin_only
@@ -130,7 +118,7 @@ def version_control_overwrite(id):
     db.session.commit()
     return redirect(url_for("version_control_bp.versions_"))
 
-#TTT
+
 @version_control_bp.route("/logbook", methods=["GET", "POST"], endpoint = "logbook")
 @login_required
 def logbook():

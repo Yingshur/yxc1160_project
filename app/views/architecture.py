@@ -33,12 +33,12 @@ import os
 from app.mixed.delete_unused_images import delete_unused_images
 
 architecture_bp = Blueprint("architecture_bp", __name__)
-#()
+
 @architecture_bp.route('/art_selection', endpoint = "art_selection")
 def art_selection():
     return render_template("art_selection.html", title = "Roman Culture")
 
-#()
+
 @architecture_bp.route("/admin/manage_edits/edit_info_architecture/<int:id>", methods = ['GET', 'POST'], endpoint = "edit_info_architecture")
 @admin_only
 @login_required
@@ -46,14 +46,14 @@ def edit_info_architecture(id):
     architecture_edit = db.session.get(TemporaryArchitecture, id)
     return render_template("edit_add_info_architecture.html", building = architecture_edit, title = "Preview")
 
-#()
+
 @architecture_bp.route("/admin/manage_additions/add_info_architecture/<int:id>", methods = ['GET', 'POST'], endpoint = "add_info_architecture")
 @admin_only
 @login_required
 def add_info_architecture(id):
     architecture_add = db.session.get(TemporaryArchitecture, id)
     return render_template("edit_add_info_architecture.html", building = architecture_add, title = "Preview")
-#()
+
 @architecture_bp.route("/delete_architecture_/<int:id>", methods = ['GET', 'POST'], endpoint = "delete_architecture_")
 @admin_only
 def delete_architecture_(id):
@@ -66,7 +66,7 @@ def delete_architecture_(id):
     db.session.commit()
     return redirect(url_for('architecture_bp.architecture_info'))
 
-#()
+
 @architecture_bp.route('/art_selection/architecture_info', methods= ['GET', 'POST'], endpoint = "architecture_info")
 def architecture_info():
     form = ArchitectureForm()
@@ -93,7 +93,7 @@ def architecture_info():
     return render_template('architecture_info.html', title = "Architecture", buildings_lst = buildings_lst, architecture_html =Markup(building_html) , new_form = form, form_open = False)
 
 
-#()
+
 @architecture_bp.route('/art_selection/architecture_info/architecture_info_detail/<int:id>', methods= ['GET', 'POST'], endpoint = "architecture_info_detail")
 def architecture_info_detail(id):
     form_1 = ImageUploadForm()
@@ -104,7 +104,7 @@ def architecture_info_detail(id):
     form.edit.data = architecture_first.id
     return render_template('architecture_info_detail.html', title = "Architecture Info", new_form = form, new_form_1 = form_1, new_form_2 = form_2,form_open = False ,form_open_1 = False,form_open_2 = False ,building = architecture_first, images = images)
 
-#()
+
 @architecture_bp.route("/add_new_architecture", methods = ['POST', 'GET'], endpoint = "add_new_architecture")
 @login_required
 def add_new_architecture():
@@ -162,7 +162,7 @@ def add_new_architecture():
             return redirect(url_for("architecture_bp.architecture_info"))
     return render_template('architecture_info.html', title = "Architecture", buildings_lst = buildings_lst , architecture_html =Markup(building_html), form_open = True, new_form = form )
 
-#()
+
 @architecture_bp.route('/edit_architecture/<int:id>', methods = ['POST', 'GET'], endpoint = "edit_architecture")
 @login_required
 def edit_architecture(id):
@@ -202,7 +202,7 @@ def edit_architecture(id):
     return render_template("architecture_info_detail.html", id=architecture_first.id, form_open = True, building = architecture_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2,title = "Architecture information", form_open_1 = False, form_open_2 = False, images = images)
     #return render_template("war_info.html", war = war, title = "Battle information")
 
-#()
+
 @architecture_bp.route('/edit_architecture_users/<int:id>', methods = ['POST', 'GET'], endpoint = "edit_architecture_users")
 @login_required
 def edit_architecture_users(id):
@@ -224,7 +224,7 @@ def edit_architecture_users(id):
         return redirect(url_for('architecture_bp.architecture_info_edit_user', id=architecture_first.id))
     return render_template("architecture_info_edit_user.html", building = architecture_first, new_form = form, form_open = True, title = "Editing requests")
 
-#()
+
 @architecture_bp.route("/approve_architecture_edit/<int:id>", methods = ['GET', 'POST'], endpoint = "approve_architecture_edit")
 @admin_only
 def approve_architecture_edit(id):
@@ -249,7 +249,7 @@ def approve_architecture_edit(id):
         flash("Article no longer available due to version change!", "warning")
     return redirect(url_for('admin_bp.manage_edits'))
 
-#()
+
 @architecture_bp.route("/approve_architecture_add/<int:id>", methods=['GET', 'POST'], endpoint = "approve_architecture_add")
 @admin_only
 def approve_architecture_add(id):
@@ -273,7 +273,7 @@ def approve_architecture_add(id):
     return redirect(url_for('admin_bp.manage_additions'))
 
 
-#()
+
 @architecture_bp.route("/reject_architecture_add_edit/<int:id>", methods = ['GET', 'POST'], endpoint = "reject_architecture_add_edit")
 @admin_only
 def reject_architecture_add_edit(id):
@@ -284,7 +284,7 @@ def reject_architecture_add_edit(id):
     db.session.commit()
     return redirect(request.referrer)
 
-#()
+
 @architecture_bp.route("/admin_delete_architecture/<int:id>", methods = ['GET', 'POST'], endpoint = "admin_delete_architecture")
 @admin_only
 def admin_delete_architecture(id):
@@ -298,7 +298,7 @@ def admin_delete_architecture(id):
     to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
 
-#()
+
 @architecture_bp.route("/manage_edits_additions_users/architecture_info_edit_user/<int:id>", methods = ['GET', 'POST'], endpoint = "architecture_info_edit_user")
 @login_required
 def architecture_info_edit_user(id):

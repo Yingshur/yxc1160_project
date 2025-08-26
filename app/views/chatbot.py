@@ -57,7 +57,7 @@ def background_chatbot():
     except Exception as exception_:
         print(f"Not working, Error: {exception_}")
 
-#__
+
 @chatbot_bp.route('/chatbot', methods = ["GET", "POST"], endpoint = "chatbot")
 def chatbot():
     global client, model_ready

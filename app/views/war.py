@@ -32,12 +32,12 @@ from flask import Blueprint
 
 war_bp = Blueprint("war_bp", __name__)
 
-#!!
+
 @war_bp.route('/wars_selection', endpoint = "wars_selection")
 def wars_selection():
     return render_template("wars-selection.html", title = "Type of Wars")
 
-#!!
+
 @war_bp.route('/wars_selection/foreign_wars', methods= ['GET', 'POST'], endpoint = "foreign_wars_1")
 def foreign_wars_1():
     form = WarForm()
@@ -63,7 +63,7 @@ def foreign_wars_1():
 
     return render_template('foreign_war_1.html', title = "Foreign Wars", wars_lst = wars_lst, war_html =Markup(war_html) , form_open = False, new_form = form)
 
-#!!
+
 @war_bp.route('/wars_selection/civil_wars', methods= ['GET', 'POST'], endpoint = "civil_wars")
 def civil_wars():
     form = WarForm()
@@ -88,7 +88,7 @@ def civil_wars():
     war_html = war_map._repr_html_()
     return render_template('civil_wars.html', title = "Civil Wars", wars_lst = wars_lst, war_html =Markup(war_html) , form_open = False, new_form = form)
 
-#!!
+
 @war_bp.route("/admin/manage_additions/add_info_war/<int:id>", methods = ['GET', 'POST'], endpoint = "add_info_war")
 @admin_only
 @login_required
@@ -96,7 +96,7 @@ def add_info_war(id):
     war_add = db.session.get(TemporaryWar, id)
     return render_template("edit_add_info_war.html", war = war_add, title = "Preview")
 
-#!!
+
 @war_bp.route("/manage_edits_additions_users/war_info_edit_user/<int:id>", methods = ['GET', 'POST'], endpoint = "war_info_edit_user")
 @login_required
 def war_info_edit_user(id):
@@ -106,7 +106,7 @@ def war_info_edit_user(id):
     return render_template("war_info_edit_user.html",war = war_first, form_open = False, title="War edit/addition information", new_form=form)
 
 
-#!!
+
 @war_bp.route("/admin/manage_edits/edit_info_war/<int:id>", methods = ['GET', 'POST'], endpoint = "edit_info_war")
 @admin_only
 @login_required
@@ -114,7 +114,7 @@ def edit_info_war(id):
     war_edit = db.session.get(TemporaryWar, id)
     return render_template("edit_add_info_war.html", war = war_edit, title = "Preview")
 
-#!!
+
 @war_bp.route("/delete_wars_/<int:id>", methods = ['GET', 'POST'], endpoint = "delete_wars_")
 @admin_only
 def delete_wars_(id):
@@ -132,7 +132,7 @@ def delete_wars_(id):
         return redirect(url_for("war_bp.foreign_wars_1"))
     return redirect(request.referrer)
 
-#!!
+
 @war_bp.route("/wars_selection/war_info/<int:id>", methods=['GET','POST'], endpoint = "war_info_foreign_1")
 def war_info_foreign_1(id):
     #m_e = db.session.query(Emperor).filter_by(dynasty = 'Macedonian').all()
@@ -141,7 +141,7 @@ def war_info_foreign_1(id):
     form.edit.data = war_first.id
     return render_template("war_info.html", war = war_first, title = "Battle information", new_form = form, form_open = False)
 
-#!!
+
 @war_bp.route("/add_new_war_1/<string:war_category>", methods = ['POST', 'GET'], endpoint = "add_new_war_1")
 @login_required
 def add_new_war_1(war_category):
@@ -205,7 +205,7 @@ def add_new_war_1(war_category):
             return redirect(url_for(redirect_))
     return render_template(template, title = page_title, wars_lst = wars_lst, war_html =Markup(war_html), form_open = True, new_form = form )
 
-#!!
+
 @war_bp.route('/edit_war/<int:id>', methods = ['POST', 'GET'], endpoint = "edit_war")
 @login_required
 def edit_war(id):
@@ -241,7 +241,7 @@ def edit_war(id):
     war_first = db.session.get(War, id)
     return render_template("war_info.html", id=war_first.id, form_open = True, war = war_first, new_form = form, title = "Battle information")
 
-#!!
+
 @war_bp.route('/edit_wars_users/<int:id>', methods = ['POST', 'GET'], endpoint = "edit_wars_users")
 @login_required
 def edit_wars_users(id):
@@ -263,7 +263,7 @@ def edit_wars_users(id):
         return redirect(url_for('war_bp.war_info_edit_user', id=war_first.id))
     return render_template("war_info_edit_user.html", war = war_first, new_form = form, form_open = True, title = "Editing requests")
 
-#!!
+
 @war_bp.route("/approve_war_edit/<int:id>", methods = ['GET', 'POST'], endpoint = "approve_war_edit")
 @admin_only
 def approve_war_edit(id):
@@ -288,7 +288,7 @@ def approve_war_edit(id):
         flash("Article no longer available due to version change!", "warning")
     return redirect(url_for('admin_bp.manage_edits'))
 
-#!!
+
 @war_bp.route("/approve_war_add/<int:id>", methods=['GET', 'POST'], endpoint = "approve_war_add")
 @admin_only
 def approve_war_add(id):
@@ -310,7 +310,7 @@ def approve_war_add(id):
     to_csv_overwrite(current_user.username)
     return redirect(url_for('admin_bp.manage_additions'))
 
-#!!
+
 @war_bp.route("/reject_war_add_edit/<int:id>", methods = ['GET', 'POST'], endpoint = "reject_war_add_edit")
 def reject_war_add_edit(id):
     add_war = db.session.get(TemporaryWar, id)
@@ -320,7 +320,7 @@ def reject_war_add_edit(id):
     db.session.commit()
     return redirect(request.referrer)
 
-#!!
+
 @war_bp.route("/admin_delete_war/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def admin_delete_war(id):
