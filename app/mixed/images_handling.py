@@ -41,8 +41,9 @@ def save_uploaded_images(file, obj_id, field_name, model, form_data = None, temp
         photo.filename = file_name
         photo.url = url_for("static", filename=f"images/uploaded_photos/{file_name}")
     db.session.commit()
-    new_log_record = LogBook(original_id=photo.id, title=file_name, username=current_user.username)
-    db.session.add(new_log_record)
+    if current_user.role == "Admin":
+        new_log_record = LogBook(original_id=photo.id, title=file_name, username=current_user.username)
+        db.session.add(new_log_record)
     db.session.commit()
     return photo
 

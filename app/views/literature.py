@@ -7,7 +7,6 @@ from app.models import User, Emperor, \
 from app.forms import ChooseForm, LoginForm, ChangePasswordForm, ChangeEmailForm, RegisterForm, RegisterEmail, \
     AdminCodeForm, InvitationCodeForm, AllEmperorForm, WarForm, ArchitectureForm, ImageEditForm, ImageUploadForm, LiteratureForm, ArtifactForm, DeleteForm, ChatForm
 from flask_login import current_user, login_user, logout_user, login_required, fresh_login_required
-import sqlalchemy as sa
 from app.new_file import db
 from app.mixed.version_control import to_csv_function_1, to_csv_function_overwrite, to_csv, to_csv_overwrite
 from app.mixed.images_handling import save_uploaded_images, approval_add_image, gallery_upload, gallery_upload_addition
@@ -161,7 +160,7 @@ def edit_literature_users(id):
             literature_new_edit.status = "Pending"
             confirmation_email(id=literature_first.id)
         db.session.commit()
-        return redirect(url_for('literature_info_edit_user', id=literature_first.id))
+        return redirect(url_for('literature_bp.literature_info_edit_user', id=literature_first.id))
     return render_template("literature_info_edit_user.html", book = literature_first, new_form = form, form_open = True, title = "Editing requests")
 
 
