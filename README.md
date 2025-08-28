@@ -1,3 +1,5 @@
+Project Konstantinopolis: A Website on the History of the Middle to Late Eastern Roman Empire
+
 This is a user contribution-based website documenting the history of middle to late Byzantine Empire:
 
 
@@ -84,6 +86,7 @@ Structure:
     - run.py
     - testing.py
 
+API: Currently, this website only uses one free tier API access token, provided by Hugging Face, it is coded in the .env file.
 
 
 
