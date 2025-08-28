@@ -1,13 +1,4 @@
-import glob
-import time
-import re
-from flask import abort
 from itertools import cycle
-import uuid
-from functools import wraps
-from random import randint
-from sqlalchemy import text
-import threading
 from folium.plugins import MarkerCluster
 from markupsafe import Markup
 from app.decorators.management_functions import admin_only

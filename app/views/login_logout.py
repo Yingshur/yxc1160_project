@@ -1,16 +1,5 @@
-import glob
-import time
-import re
-from flask import abort
-from itertools import cycle
+
 import uuid
-from functools import wraps
-from random import randint
-from sqlalchemy import text
-import threading
-from folium.plugins import MarkerCluster
-from markupsafe import Markup
-from app.decorators.management_functions import admin_only
 from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
 from app.mixed.emails import verification_email, confirmation_email, approval_email, new_confirmation_email, rejection_email
 import folium
@@ -23,14 +12,7 @@ import sqlalchemy as sa
 from app.new_file import db
 from urllib.parse import urlsplit
 from sqlalchemy import or_, and_
-from app import app
-import csv
-from huggingface_hub import InferenceClient
-from app.mixed.version_control import to_csv_function_1, to_csv_function_overwrite, to_csv, to_csv_overwrite
-from app.mixed.images_handling import save_uploaded_images, approval_add_image, gallery_upload, gallery_upload_addition
 from flask import Blueprint
-import os
-from app.mixed.delete_unused_images import delete_unused_images
 
 login_logout_bp = Blueprint("login_logout_bp", __name__)
 

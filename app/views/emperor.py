@@ -10,8 +10,7 @@ from app.new_file import db
 from app.mixed.version_control import to_csv, to_csv_overwrite
 from app.mixed.images_handling import save_uploaded_images, approval_add_image, gallery_upload, gallery_upload_addition
 from flask import Blueprint
-import os
-from app.mixed.delete_unused_images import delete_unused_images
+
 
 emperor_bp = Blueprint("emperor_bp", __name__)
 

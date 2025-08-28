@@ -1,19 +1,7 @@
-import glob
-import time
-import re
 from flask import abort
-from itertools import cycle
-import uuid
-from functools import wraps
 from random import randint
-from sqlalchemy import text
-import threading
-from folium.plugins import MarkerCluster
-from markupsafe import Markup
 from app.decorators.management_functions import admin_only
-from flask import render_template, redirect, url_for, flash, request, send_file, send_from_directory,session, jsonify
-from app.mixed.emails import verification_email, confirmation_email, approval_email, new_confirmation_email, rejection_email
-import folium
+from flask import render_template, redirect, url_for, flash
 from app.models import User, Emperor, \
     Verification, Invitation, Image, TemporaryEmperor, TemporaryImage, War, TemporaryWar, Architecture, TemporaryArchitecture, Literature, TemporaryLiterature, Artifact, TemporaryArtifact, LogBook, Deletion, Version, CurrentVersion, NewVersion
 from app.forms import ChooseForm, LoginForm, ChangePasswordForm, ChangeEmailForm, RegisterForm, RegisterEmail, \
@@ -21,11 +9,6 @@ from app.forms import ChooseForm, LoginForm, ChangePasswordForm, ChangeEmailForm
 from flask_login import current_user, login_user, logout_user, login_required, fresh_login_required
 import sqlalchemy as sa
 from app.new_file import db
-from urllib.parse import urlsplit
-from sqlalchemy import or_, and_
-from app import app
-import csv
-from huggingface_hub import InferenceClient
 from app.mixed.version_control import to_csv_function_1, to_csv_function_overwrite, to_csv, to_csv_overwrite
 from app.mixed.images_handling import save_uploaded_images, approval_add_image, gallery_upload, gallery_upload_addition
 from flask import Blueprint
@@ -79,6 +62,7 @@ def manage_edits():
 def delete_user():
     form = ChooseForm()
     if form.validate_on_submit():
+        to_csv(current_user.username)
         u = db.session.get(User, int(form.choice.data))
         q = db.select(User).where((User.role == "Admin") & (User.id != u.id))
         first = db.session.scalars(q).first()
@@ -88,9 +72,11 @@ def delete_user():
             logout_user()
             db.session.delete(u)
             db.session.commit()
+            to_csv_overwrite(current_user.username)
             return redirect(url_for('home_bp.home'))
         else:
             db.session.delete(u)
+            to_csv_overwrite(current_user.username)
             db.session.commit()
     return redirect(url_for('admin_bp.admin'))
 
@@ -131,6 +117,7 @@ def toggle_user_type():
 @login_required
 def de_admin(id):
     if current_user.user_type == "Autocrat":
+        to_csv(current_user.username)
         form = ChooseForm()
         q = db.select(User)
         user_lst = db.session.scalars(q)
@@ -138,6 +125,7 @@ def de_admin(id):
         user.role = "Normal"
         flash("User role has now been changed to normal", "success")
         db.session.commit()
+        to_csv_overwrite(current_user.username)
     else:
         abort(403)
     return redirect(url_for('admin_bp.admin'))

@@ -73,7 +73,7 @@ def only_one_device_allowed_at_one_time():
 
 @app.before_request
 def prevent_frequent_requests():
-    if request.method == "POST" and request.endpoint == "chatbot":
+    if request.method == "POST" and request.endpoint == "chatbot_bp.chatbot":
         form = ChatForm()
         latest_request_time = session.get("last_request_time", 0)
         current_time = time.time()

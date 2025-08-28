@@ -17,6 +17,4 @@ folium
 APScheduler
 pycparser
 gunicorn
-boto3
-openai
 huggingface_hub
