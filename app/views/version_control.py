@@ -78,6 +78,7 @@ def version_control_(id):
 @admin_only
 def version_control_overwrite(id):
     version = db.session.get(NewVersion, id)
+    latest_edit = db.session.query(Version).order_by(Version.id.desc()).first()
     with db.engine.begin() as context:
         context.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
         models = [Image, Architecture, Emperor, War, Literature, Artifact]
@@ -106,7 +107,7 @@ def version_control_overwrite(id):
     current_version = db.session.query(CurrentVersion).first()
     if current_version:
         current_version.username = version.username
-        current_version.time_version = version.time_version
+        current_version.time_version = latest_edit.created_at
     db.session.commit()
     return redirect(url_for("version_control_bp.versions_"))
 

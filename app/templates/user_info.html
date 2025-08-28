@@ -213,10 +213,21 @@
 </style>
 {% endblock %}
 
-
+{% block flash_messages %}{% endblock %}
 
 {% block content %}
 <div class="background-container">
+    <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
     <h1 style="text-align: center; margin-bottom: 1rem;">
         <span class="greek-heading_2" style="display: block; font-size: 2rem;">{{emperors_edit_additions.in_greek}}</span>
     <span class="latin-heading_2" style="display: block; font-size: 2rem;">{{emperors_edit_additions.title}}</span>
@@ -231,27 +242,23 @@
         <span class="latin-heading_3"><strong>Reign:</strong>{{emperors_edit_additions.reign}}</span>
     </div>
 
-    <div class="container-split">
-    <div class="container-left" style="font-size: 1rem; text-align: center">{% if emperors_edit_additions.temporary_images %}
-            <img src="{{emperors_edit_additions.temporary_images[0].url}}" alt = "{{emperors_edit_additions.temporary_images[0].filename}}" style="max-width: 100%; height:auto;">
+        <div class="text-wrap-container latin-heading_new" >{% if emperors_edit_additions.temporary_images %}
+            <img src="{{emperors_edit_additions.temporary_images[0].url}}" alt = "{{emperors_edit_additions.temporary_images[0].filename}}"  class="image-left-wrap">
             {% else %}
             No image
-            {% endif %}</div>
-        <div class="divider"></div>
+            {% endif %}
+    <p>        {{ emperors_edit_additions.life.replace('\n', '<br>')| safe }}</p>
 
-    <div class="container-right latin-heading_new" style=" text-align: left; line-height: 1.6;">
-        {{ emperors_edit_additions.life.replace('\n', '<br>')| safe }}
     </div>
-        <div class="latin-heading_new desktop-margins_3" style=" text-align: left; line-height: 1.6">
+
+    <div class="latin-heading_new desktop-margins" style=" text-align: left; line-height: 1.6;">
       References: <br>{{ emperors_edit_additions.references.replace('\n', '<br>')| safe }}
-    </div>
     </div>
 
     {% if current_user.is_authenticated %}
     <button class="btn btn-dark" onclick="document.getElementById('edit-form').style.display='block'; this.style.display ='none';">
         Edit Emperor
     </button>
-
 
     <div id = 'edit-form' class="latin-heading_new w-50 mx-auto" style="background-color: transparent;  {% if form_open %} display: block; {% else %} display: none; {% endif %}; font-size: 1.2rem;">
         <form method="post" action="{{ url_for('emperor_bp.edit_emperor_users', id = emperors_edit_additions.id) }}" enctype="multipart/form-data" novalidate>
