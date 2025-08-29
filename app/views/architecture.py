@@ -44,12 +44,14 @@ def add_info_architecture(id):
 @admin_only
 def delete_architecture_(id):
     delete_architecture_ = db.session.get(Architecture, id)
+    to_csv(current_user.username, delete_architecture_.title)
     if delete_architecture_.images:
         delete_images_ = delete_architecture_.images
         for image in delete_images_:
             db.session.delete(image)
     db.session.delete(delete_architecture_)
     db.session.commit()
+    to_csv_overwrite(current_user.username)
     return redirect(url_for('architecture_bp.architecture_info'))
 
 
@@ -118,13 +120,13 @@ def add_new_architecture():
     building_html = buildings_map._repr_html_()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin":
-            to_csv(current_user.username)
             column_names = [column.name for column in Architecture.__table__.columns if column.name != "id"]
             new_architecture = Architecture(
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
             db.session.add(new_architecture)
             new_log_16 = LogBook(original_id=new_architecture.id, title=new_architecture.title,
                                 username=current_user.username)
+            to_csv(current_user.username, new_architecture.title)
             db.session.add(new_log_16)
             db.session.commit()
             # print(form.portrait.data.filename)
@@ -161,11 +163,11 @@ def edit_architecture(id):
         form = ArchitectureForm(obj=architecture_first, data={"edit": architecture_first.id})
     if form.validate_on_submit():
         if current_user.role == "Admin":
-            to_csv(current_user.username)
             architecture_new_edit = db.session.get(Architecture, int(form.edit.data))
             form.populate_obj(architecture_new_edit)
             new_log_18 = LogBook(original_id=id, title=architecture_new_edit.title,
                                  username=current_user.username)
+            to_csv(current_user.username, architecture_new_edit.title)
             db.session.add(new_log_18)
             if form.image.data:
                 save_uploaded_images(file=form.image.data, obj_id=architecture_new_edit.id, field_name="architecture_id",
@@ -215,9 +217,9 @@ def edit_architecture_users(id):
 @admin_only
 def approve_architecture_edit(id):
     try:
-        to_csv(current_user.username)
         architecture_first = db.session.get(TemporaryArchitecture, id)
         new_architecture = db.session.get(Architecture, int(architecture_first.old_id))
+        to_csv(current_user.username, new_architecture.title)
         column_names = [column.name for column in Architecture.__table__.columns if column.name not in ("id", "old_id")]
         for column in column_names:
             setattr(new_architecture, column, getattr(architecture_first, column))
@@ -239,11 +241,11 @@ def approve_architecture_edit(id):
 @architecture_bp.route("/approve_architecture_add/<int:id>", methods=['GET', 'POST'], endpoint = "approve_architecture_add")
 @admin_only
 def approve_architecture_add(id):
-    to_csv(current_user.username)
     add_architecture = db.session.get(TemporaryArchitecture, id)
     column_names = [column.name for column in Architecture.__table__.columns if column.name != "id"]
     new_architecture = Architecture(
         **{column: getattr(add_architecture, column) for column in column_names if hasattr(add_architecture, column)})
+    to_csv(current_user.username, new_architecture.title)
     user = db.session.query(User).filter_by(username = add_architecture.username).first()
     db.session.add(new_architecture)
     db.session.commit()
@@ -274,14 +276,12 @@ def reject_architecture_add_edit(id):
 @architecture_bp.route("/admin_delete_architecture/<int:id>", methods = ['GET', 'POST'], endpoint = "admin_delete_architecture")
 @admin_only
 def admin_delete_architecture(id):
-    to_csv(current_user.username)
     delete_architecture_temporary = db.session.get(TemporaryArchitecture, id)
     if delete_architecture_temporary.temporary_images:
         delete_image_temporary = delete_architecture_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_architecture_temporary)
     db.session.commit()
-    to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
 
 

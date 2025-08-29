@@ -71,7 +71,7 @@ def login():
         user_now.active_session = session_token
         current_version = db.session.query(CurrentVersion).first()
         db.session.commit()
-        login_user(user, remember=form.remember_me.data)
+        login_user(user)
         session['active_session'] = session_token
         if user_now.role != "Admin":
             pass
@@ -91,9 +91,13 @@ def login():
 
 @login_logout_bp.route('/logout', endpoint = "logout")
 def logout():
-    current_user.active_session = None
-    db.session.commit()
+    user = db.session.get(User, current_user.id)
+    if user:
+        current_user.active_session = None
+        db.session.commit()
     logout_user()
     session.clear()
-    return redirect(url_for('home_bp.home'))
+    response = redirect(url_for('home_bp.home'))
+    response.set_cookie('remember_token', '', expires=0)
+    return response
 

@@ -133,7 +133,7 @@ def approve_emperor_add(id):
         approval_add_image(add_emperor, obj_id=new_emperor.id, field_name="emperor_id", model=Image)
     approval_email(user_email=user.email, emperor_title=new_emperor.title)
     db.session.delete(add_emperor)
-    to_csv(current_user.username)
+    to_csv(current_user.username, new_emperor.title)
     db.session.commit()
     to_csv_overwrite(current_user.username)
     return redirect(url_for('admin_bp.manage_additions'))
@@ -162,7 +162,7 @@ def approve_emperor_edit(id):
         new_log_14 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title,
                              username=current_user.username)
         db.session.add(new_log_14)
-        to_csv(current_user.username)
+        to_csv(current_user.username, emperor_new_edit.title)
         if edit_emperor.temporary_images:
             approval_add_image(edit_emperor, obj_id=emperor_new_edit.id, field_name="emperor_id", model=Image)
         approval_email(user_email=user.email, emperor_title=edit_emperor.title)
@@ -178,11 +178,13 @@ def approve_emperor_edit(id):
 @admin_only
 def delete_emperors_(id):
     delete_emperors_ = db.session.get(Emperor, id)
+    to_csv(current_user.username, delete_emperors_.title)
     if delete_emperors_.images:
         delete_images_ = delete_emperors_.images[0]
         db.session.delete(delete_images_)
     db.session.delete(delete_emperors_)
     db.session.commit()
+    to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
 
 
@@ -244,7 +246,6 @@ def add_new_emperor(dynasty):
     macedonian_lst = db.session.query(Emperor).filter_by(dynasty = dynasty).all()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin" :
-            to_csv(current_user.username)
             column_names = [column.name for column in Emperor.__table__.columns if column.name != "id"]
             new_emperor = Emperor(**{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
             db.session.add(new_emperor)
@@ -254,6 +255,7 @@ def add_new_emperor(dynasty):
                 id_data = db.session.query(Image).first()
                 new_log_300000 = LogBook(original_id=new_emperor.id, title=new_emperor.title,
                                          username=current_user.username)
+                to_csv(current_user.username, new_emperor.title)
                 db.session.add(new_log_300000)
                 db.session.commit()
             else:
@@ -298,13 +300,13 @@ def edit_emperor(id):
         form = AllEmperorForm(obj=emperor_first, data={"edit": emperor_first.id})
     if form.validate_on_submit():
         if current_user.role == "Admin":
-            to_csv(current_user.username)
             #This part is designed for "locust" stress testing
             if "test" not in form.title.data:
                 emperor_new_edit = db.session.get(Emperor, int(form.edit.data))
                 form.populate_obj(emperor_new_edit)
                 new_log_2 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title,
                                     username=current_user.username)
+                to_csv(current_user.username, emperor_new_edit.title)
                 db.session.add(new_log_2)
                 if form.portrait.data:
                     save_uploaded_images(file=form.portrait.data, obj_id=emperor_new_edit.id, field_name="emperor_id", model=Image)
@@ -332,12 +334,10 @@ def edit_emperor(id):
 @emperor_bp.route("/admin_delete_emperor/<int:id>", methods = ['GET', 'POST'], endpoint = "admin_delete_emperor")
 @admin_only
 def admin_delete_emperor(id):
-    to_csv(current_user.username)
     delete_emperor_temporary = db.session.get(TemporaryEmperor, id)
     if delete_emperor_temporary.temporary_images:
         delete_image_temporary = delete_emperor_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_emperor_temporary)
     db.session.commit()
-    to_csv_overwrite(current_user.username)
     return redirect(request.referrer)

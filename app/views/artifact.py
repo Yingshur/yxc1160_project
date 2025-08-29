@@ -38,12 +38,14 @@ def add_info_artifact(id):
 @admin_only
 def delete_artifacts_(id):
     delete_artifacts_ = db.session.get(Artifact, id)
+    to_csv(current_user.username, delete_artifacts_.title)
     if delete_artifacts_.images:
         delete_images_ = delete_artifacts_.images
         for image in delete_images_:
             db.session.delete(image)
     db.session.delete(delete_artifacts_)
     db.session.commit()
+    to_csv_overwrite(current_user.username)
     return redirect(url_for('artifact_bp.artifact_info'))
 
 
@@ -72,13 +74,13 @@ def add_new_artifact():
     artifact_lst = db.session.query(Artifact).all()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin":
-            to_csv(current_user.username)
             column_names = [column.name for column in Artifact.__table__.columns if column.name != "id"]
             new_artifact = Artifact(
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
             db.session.add(new_artifact)
             new_log_35 = LogBook(original_id=new_artifact.id, title=new_artifact.title,
                                  username=current_user.username)
+            to_csv(current_user.username, new_artifact.title)
             db.session.add(new_log_35)
             db.session.commit()
             # print(form.portrait.data.filename)
@@ -114,8 +116,8 @@ def edit_artifact(id):
         form = ArtifactForm(obj=artifact_first, data={"edit": artifact_first.id})
     if form.validate_on_submit():
         if current_user.role == "Admin":
-            to_csv(current_user.username)
             artifact_new_edit = db.session.get(Artifact, int(form.edit.data))
+            to_csv(current_user.username, artifact_new_edit.title)
             form.populate_obj(artifact_new_edit)
             new_log_37 = LogBook(original_id=artifact_new_edit.id, title=artifact_new_edit.title, username=current_user.username)
             db.session.add(new_log_37)
@@ -166,9 +168,9 @@ def edit_artifact_users(id):
 @admin_only
 def approve_artifact_edit(id):
     try:
-        to_csv(current_user.username)
         artifact_first = db.session.get(TemporaryArtifact, id)
         new_artifact = db.session.get(Artifact, int(artifact_first.old_id))
+        to_csv(current_user.username, new_artifact.title)
         column_names = [column.name for column in Artifact.__table__.columns if column.name not in ("id", "old_id")]
         for column in column_names:
             setattr(new_artifact, column, getattr(artifact_first, column))
@@ -190,7 +192,6 @@ def approve_artifact_edit(id):
 @artifact_bp.route("/approve_artifact_add/<int:id>", methods=['GET', 'POST'], endpoint = "approve_artifact_add")
 @admin_only
 def approve_artifact_add(id):
-    to_csv(current_user.username)
     add_artifact = db.session.get(TemporaryArtifact, id)
     column_names = [column.name for column in Artifact.__table__.columns if column.name != "id"]
     new_artifact = Artifact(
@@ -201,6 +202,7 @@ def approve_artifact_add(id):
     db.session.commit()
     new_log_4100 = LogBook(original_id=new_artifact.id, title=new_artifact.title,
                          username=current_user.username)
+    to_csv(current_user.username, new_artifact.title)
     db.session.add(new_log_4100)
     if add_artifact.temporary_images:
         approval_add_image(add_artifact, obj_id=new_artifact.id, field_name="artifact_id", model=Image)
@@ -225,14 +227,12 @@ def reject_artifact_add_edit(id):
 @artifact_bp.route("/admin_delete_artifact/<int:id>", methods = ['GET', 'POST'], endpoint ="admin_delete_artifact")
 @admin_only
 def admin_delete_artifact(id):
-    to_csv(current_user.username)
     delete_artifact_temporary = db.session.get(TemporaryArtifact, id)
     if delete_artifact_temporary.temporary_images:
         delete_image_temporary = delete_artifact_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_artifact_temporary)
     db.session.commit()
-    to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
 
 

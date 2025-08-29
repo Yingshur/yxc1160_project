@@ -38,12 +38,14 @@ def add_info_literature(id):
 @admin_only
 def delete_literature_(id):
     delete_literature_ = db.session.get(Literature, id)
+    to_csv(current_user.username, delete_literature_.title)
     if delete_literature_.images:
         delete_images_ = delete_literature_.images
         for image in delete_images_:
             db.session.delete(image)
     db.session.delete(delete_literature_)
     db.session.commit()
+    to_csv_overwrite(current_user.username)
     return redirect(url_for('literature_bp.literature_info'))
 
 
@@ -72,13 +74,13 @@ def add_new_literature():
     literature_lst = db.session.query(Literature).all()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin":
-            to_csv(current_user.username)
             column_names = [column.name for column in Literature.__table__.columns if column.name != "id"]
             new_literature = Literature(
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
             db.session.add(new_literature)
             new_log_26 = LogBook(original_id=new_literature.id, title=new_literature.title,
                                  username=current_user.username)
+            to_csv(current_user.username, new_literature.title)
             db.session.add(new_log_26)
             db.session.commit()
             # print(form.portrait.data.filename)
@@ -116,16 +118,16 @@ def edit_literature(id):
         form = LiteratureForm(obj=literature_first, data={"edit": literature_first.id})
     if form.validate_on_submit():
         if current_user.role == "Admin":
-            to_csv(current_user.username)
             literature_new_edit = db.session.get(Literature, int(form.edit.data))
             form.populate_obj(literature_new_edit)
             new_log_28 = LogBook(original_id=literature_new_edit.id, title=literature_new_edit.title,
                                  username=current_user.username)
+            to_csv(current_user.username, literature_new_edit.title)
             db.session.add(new_log_28)
             if form.image.data:
                 save_uploaded_images(file=form.image.data, obj_id=literature_new_edit.id, field_name="literature_id", model=Image)
-            to_csv_overwrite(current_user.username)
             db.session.commit()
+            to_csv_overwrite(current_user.username)
             return redirect(url_for('literature_bp.literature_info_detail', id=literature_new_edit.id))
         else:
             column_names = [column.name for column in TemporaryLiterature.__table__.columns if column.name != "id"]
@@ -168,7 +170,6 @@ def edit_literature_users(id):
 @admin_only
 def approve_literature_edit(id):
     try:
-        to_csv(current_user.username)
         literature_first = db.session.get(TemporaryLiterature, id)
         new_literature = db.session.get(Literature, int(literature_first.old_id))
         column_names = [column.name for column in Literature.__table__.columns if column.name not in ("id", "old_id")]
@@ -177,6 +178,7 @@ def approve_literature_edit(id):
         user = db.session.query(User).filter_by(username=literature_first.username).first()
         new_log_30 = LogBook(original_id=id, title=new_literature.title,
                              username=current_user.username)
+        to_csv(current_user.username, new_literature.title)
         db.session.add(new_log_30)
         if literature_first.temporary_images:
             approval_add_image(literature_first, obj_id=new_literature.id, field_name="literature_id", model=Image)
@@ -192,7 +194,6 @@ def approve_literature_edit(id):
 @literature_bp.route("/approve_literature_add/<int:id>", methods=['GET', 'POST'], endpoint = "approve_literature_add")
 @admin_only
 def approve_literature_add(id):
-    to_csv(current_user.username)
     add_literature = db.session.get(TemporaryLiterature, id)
     column_names = [column.name for column in Literature.__table__.columns if column.name != "id"]
     new_literature = Literature(
@@ -202,6 +203,7 @@ def approve_literature_add(id):
     db.session.commit()
     new_log_3200 = LogBook(original_id=new_literature.id, title=new_literature.title,
                          username=current_user.username)
+    to_csv(current_user.username, new_literature.title)
     db.session.add(new_log_3200)
     if add_literature.temporary_images:
         approval_add_image(add_literature, obj_id=new_literature.id, field_name="literature_id", model=Image)
@@ -226,14 +228,12 @@ def reject_literature_add_edit(id):
 @literature_bp.route("/admin_delete_literature/<int:id>", methods = ['GET', 'POST'], endpoint = "admin_delete_literature")
 @admin_only
 def admin_delete_literature(id):
-    to_csv(current_user.username)
     delete_literature_temporary = db.session.get(TemporaryLiterature, id)
     if delete_literature_temporary.temporary_images:
         delete_image_temporary = delete_literature_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_literature_temporary)
     db.session.commit()
-    to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
 
 

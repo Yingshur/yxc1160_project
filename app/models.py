@@ -2,7 +2,6 @@ from typing import Optional
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 from flask_login import UserMixin
-from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship, Mapped
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.new_file import db, login
@@ -277,6 +276,7 @@ class Version(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
     username: so.Mapped[str] = so.mapped_column(sa.String(256))
     unique: so.Mapped[str] = so.mapped_column(sa.String(1024))
+    title: so.Mapped[str] = so.mapped_column(sa.String(1024), default=None)
     created_at: so.Mapped[str] = so.mapped_column(sa.String(256))
 
 class CurrentVersion(db.Model):

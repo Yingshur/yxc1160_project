@@ -21,22 +21,24 @@ def edit_an_image(id):
     form_2 = ImageUploadForm()
     if (current_user.user_type == "Authorised" or current_user.role == "Admin") and form.validate_on_submit():
         if form.validate_on_submit():
-            to_csv(current_user.username)
             photo = db.session.query(Image).filter_by(id=form.id_number.data).first()
             if photo:
                 if photo.architecture_id:
+                    to_csv(current_user.username, f"architecture, id = {id}")
                     gallery_upload(form, photo, category="architecture")
                     db.session.commit()
                     to_csv_overwrite(current_user.username)
                     flash("Successfully edited", "success")
                     return redirect(url_for('architecture_bp.architecture_info_detail', id=id))
                 elif photo.literature_id:
+                    to_csv(current_user.username, f"literature, id = {id}")
                     gallery_upload(form, photo, category="literature")
                     db.session.commit()
                     to_csv_overwrite(current_user.username)
                     flash("Successfully edited", "success")
                     return redirect(url_for('literature_bp.literature_info_detail', id=id))
                 elif photo.artifact_id:
+                    to_csv(current_user.username, f"artifact, id = {id}")
                     gallery_upload(form, photo, category="artifact")
                     db.session.commit()
                     to_csv_overwrite(current_user.username)
@@ -57,18 +59,20 @@ def add_an_image(id, category):
     form_2 = ImageEditForm()
     if current_user.user_type == "Authorised" or current_user.role == "Admin":
         if form.validate_on_submit():
-            to_csv(current_user.username)
             if category == "architecture":
+                to_csv(current_user.username, f"architecture, id = {id}")
                 gallery_upload_addition(form, category, obj_id=id)
                 flash("Successfully uploaded", "success")
                 to_csv_overwrite(current_user.username)
                 return redirect(url_for('architecture_bp.architecture_info_detail', id=id))
             elif category == "literature":
+                to_csv(current_user.username, f"literature, id = {id}")
                 gallery_upload_addition(form, category, obj_id=id)
                 flash("Successfully uploaded", "success")
                 to_csv_overwrite(current_user.username)
                 return redirect(url_for('literature_bp.literature_info_detail', id=id))
             elif category == "artifact":
+                to_csv(current_user.username, f"artifact, id = {id}")
                 gallery_upload_addition(form, category, obj_id=id)
                 flash("Successfully uploaded", "success")
                 to_csv_overwrite(current_user.username)
@@ -82,7 +86,7 @@ def add_an_image(id, category):
 def delete_image(id):
     image_for_deletion = db.session.get(Image, id)
     if image_for_deletion:
-        to_csv(current_user.username)
+        to_csv(current_user.username, "image deletion")
         db.session.delete(image_for_deletion)
         db.session.commit()
         to_csv_overwrite(current_user.username)

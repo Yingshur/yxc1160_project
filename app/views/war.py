@@ -106,16 +106,19 @@ def edit_info_war(id):
 @admin_only
 def delete_wars_(id):
     delete_wars__ = db.session.get(War, id)
+    to_csv(current_user.username, delete_wars__.title)
     if delete_wars__.images:
         delete_images_ = delete_wars__.images[0]
         db.session.delete(delete_images_)
     if delete_wars__.war_type == "Civil War":
         db.session.delete(delete_wars__)
         db.session.commit()
+        to_csv_overwrite(current_user.username)
         return redirect(url_for("war_bp.civil_wars"))
     elif delete_wars__.war_type == "Foreign War":
         db.session.delete(delete_wars__)
         db.session.commit()
+        to_csv_overwrite(current_user.username)
         return redirect(url_for("war_bp.foreign_wars_1"))
     return redirect(request.referrer)
 
@@ -163,13 +166,13 @@ def add_new_war_1(war_category):
     war_html = war_map._repr_html_()
     if form.validate_on_submit() and int(form.edit.data) == -1:
         if current_user.role == "Admin":
-            to_csv(current_user.username)
             column_names = [column.name for column in War.__table__.columns if column.name != "id"]
             new_war = War(
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
             db.session.add(new_war)
             db.session.commit()
             new_log_4 = LogBook(original_id=new_war.id, title=new_war.title, username=current_user.username)
+            to_csv(current_user.username, new_war.title)
             db.session.add(new_log_4)
             # print(form.portrait.data.filename)
             if form.image.data:
@@ -202,10 +205,10 @@ def edit_war(id):
         form = WarForm(obj=war_first, data={"edit": war_first.id})
     if form.validate_on_submit():
         if current_user.role == "Admin":
-            to_csv(current_user.username)
             war_new_edit = db.session.get(War, int(form.edit.data))
             form.populate_obj(war_new_edit)
             new_log_6 = LogBook(original_id=war_new_edit.id, title=war_new_edit.title, username=current_user.username)
+            to_csv(current_user.username, war_new_edit.title)
             db.session.add(new_log_6)
             if form.image.data:
                 save_uploaded_images(file=form.image.data, obj_id=war_new_edit.id, field_name="war_id",model=Image)
@@ -264,7 +267,7 @@ def approve_war_edit(id):
         new_log_8 = LogBook(original_id=id, title=new_war.title,
                             username=current_user.username)
         db.session.add(new_log_8)
-        to_csv(current_user.username)
+        to_csv(current_user.username, new_war.title)
         if war_first.temporary_images:
             approval_add_image(war_first, obj_id=new_war.id, field_name="war_id", model=Image)
         approval_email(user_email=user.email, emperor_title=new_war.title)
@@ -280,9 +283,9 @@ def approve_war_edit(id):
 @admin_only
 def approve_war_add(id):
     add_war = db.session.get(TemporaryWar, id)
-    to_csv(current_user.username)
     column_names = [column.name for column in War.__table__.columns if column.name != "id"]
     new_war = War(**{column: getattr(add_war, column) for column in column_names if hasattr(add_war, column)})
+    to_csv(current_user.username, new_war.title)
     user = db.session.query(User).filter_by(username = add_war.username).first()
     db.session.add(new_war)
     db.session.commit()
@@ -311,12 +314,10 @@ def reject_war_add_edit(id):
 @war_bp.route("/admin_delete_war/<int:id>", methods = ['GET', 'POST'])
 @admin_only
 def admin_delete_war(id):
-    to_csv(current_user.username)
     delete_war_temporary = db.session.get(TemporaryWar, id)
     if delete_war_temporary.temporary_images:
         delete_image_temporary = delete_war_temporary.temporary_images[0]
         db.session.delete(delete_image_temporary)
     db.session.delete(delete_war_temporary)
     db.session.commit()
-    to_csv_overwrite(current_user.username)
     return redirect(request.referrer)

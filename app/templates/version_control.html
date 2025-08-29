@@ -220,6 +220,7 @@
         <tr>
             <th class="latin-heading_2" style="font-size: 1.5rem">ID</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Username</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Title/Category</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Time</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Version before this Edit/Addition</th>
         </tr>
@@ -228,7 +229,8 @@
         <tr>
             <td class="latin-heading_2" style="font-size: 1rem">{{ version.id }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ version.username }}</td>
-            <td class="greek-heading_2" style="font-size: 1rem">{{ version.created_at }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ version.title }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ version.created_at }}</td>
                 <td>    <a href="{{ url_for('version_control_bp.version_control_', id=version.id) }}" class="btn btn-dark" style="background-color: transparent"> Go back to this version </a>
                 </td>
         </tr>

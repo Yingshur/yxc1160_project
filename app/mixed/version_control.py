@@ -1,5 +1,7 @@
 from datetime import time, datetime
 import os
+
+from dominate.svg import title
 from flask import current_app as app
 from app.models import Version, CurrentVersion, NewVersion, Emperor, Artifact, Image, Literature, Architecture, War
 import csv
@@ -8,7 +10,7 @@ from app.new_file import db
 import uuid
 import threading
 
-def to_csv_function_1(user_name):
+def to_csv_function_1(user_name, title):
     #dir_old_version = os.path.join(os.getcwd(), "old_versions")
     #os.makedirs(r"C:\Users\verit\PycharmProjects\yxc1160 project\old_versions", exist_ok=True)
     unique_number = uuid.uuid4().hex
@@ -27,7 +29,7 @@ def to_csv_function_1(user_name):
                     writer.writerow(columns)
                     for row in rows_:
                         writer.writerow(row)
-        old_version = Version(username=user_name, created_at=time_, unique=unique_number)
+        old_version = Version(username=user_name, created_at=time_, unique=unique_number, title = title)
         db.session.add(old_version)
         current_version = db.session.query(CurrentVersion).first()
         if current_version:
@@ -65,8 +67,8 @@ def to_csv_function_overwrite(user_name):
         db.session.commit()
 
 
-def to_csv(username):
-    threading.Thread(target=to_csv_function_1, args=(username,)).start()
+def to_csv(username, _title_):
+    threading.Thread(target=to_csv_function_1, args=(username,_title_,)).start()
 
 def to_csv_overwrite(username):
     threading.Thread(target=to_csv_function_overwrite, args=(username,)).start()
