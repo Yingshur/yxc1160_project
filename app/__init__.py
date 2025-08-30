@@ -29,7 +29,7 @@ app.jinja_env.undefined = StrictUndefined
 app.config.from_object(Config)
 #db = SQLAlchemy(app)
 #login = LoginManager(app)
-login.login_view = 'login'
+login.login_view = 'login_logout_bp.login'
 login.init_app(app)
 db.init_app(app)
 app.config.update(

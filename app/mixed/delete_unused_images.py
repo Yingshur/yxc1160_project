@@ -17,6 +17,7 @@ def delete_unused_images():
             path = os.path.join(folder, file)
             try:
                 os.remove(path)
+                flash("Unused image(s) deleted", "success")
             except Exception as e:
                 flash(f"Error: {e}", "danger")
     else:
