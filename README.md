@@ -88,6 +88,7 @@ Structure:
 
 API: Currently, this website only uses one free tier API access token, provided by Hugging Face, it is coded in the .env file.
 
+If you wish to repopulate the database with sample data tables, please do reset_db() after entering flask shell in the Command Prompt of your IDE.  
 
 
 
