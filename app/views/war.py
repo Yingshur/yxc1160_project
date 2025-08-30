@@ -187,11 +187,12 @@ def add_new_war_1(war_category):
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
             db.session.add(temporary_war_edit)
             db.session.commit()
+            id_data = db.session.query(TemporaryWar).filter_by(username=current_user.username).order_by(
+                TemporaryWar.id.desc()).first()
             if form.image.data:
-                id_data = db.session.query(TemporaryWar).filter_by(username = current_user.username).order_by(TemporaryWar.id.desc()).first()
                 save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_war_id",model=TemporaryImage, form_data=form, temporary=True)
                 db.session.commit()
-                confirmation_email(id = temporary_war_edit.id)
+            confirmation_email(id = id_data.id)
             return redirect(url_for(redirect_))
     return render_template(template, title = page_title, wars_lst = wars_lst, war_html =Markup(war_html), form_open = True, new_form = form )
 
@@ -222,11 +223,12 @@ def edit_war(id):
                 old_id=int(form.edit.data), username=current_user.username)
             db.session.add(temporary_edit)
             db.session.commit()
+            id_data = db.session.query(TemporaryWar).filter_by(username=current_user.username).order_by(
+                TemporaryWar.id.desc()).first()
             if form.image.data:
-                id_data = db.session.query(TemporaryWar).filter_by(username=current_user.username).order_by(TemporaryWar.id.desc()).first()
                 save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_war_id", model=TemporaryImage, form_data=form, temporary=True)
             db.session.commit()
-            confirmation_email(id=id)
+            confirmation_email(id=id_data.id)
             return redirect(url_for('war_bp.war_info_foreign_1', id=war_first.id))
     war_first = db.session.get(War, id)
     return render_template("war_info.html", id=war_first.id, form_open = True, war = war_first, new_form = form, title = "Battle information")

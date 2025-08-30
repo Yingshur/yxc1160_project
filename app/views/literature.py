@@ -97,11 +97,12 @@ def add_new_literature():
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
             db.session.add(temporary_literature_edit)
             db.session.commit()
+            id_data = db.session.query(TemporaryLiterature).filter_by(username=current_user.username).order_by(
+                TemporaryLiterature.id.desc()).first()
             if form.image.data:
-                id_data = db.session.query(TemporaryLiterature).filter_by(username = current_user.username).order_by(TemporaryLiterature.id.desc()).first()
                 save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_literature_id", model=TemporaryImage, form_data=form, temporary=True)
                 db.session.commit()
-                confirmation_email(temporary_literature_edit.id)
+            confirmation_email(id_data.id)
             return redirect(url_for("literature_bp.literature_info"))
     return render_template('literature_info.html', title = "Literature", literature_lst = literature_lst , form_open = True, new_form = form )
 
@@ -135,11 +136,12 @@ def edit_literature(id):
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
             db.session.add(temporary_edit)
             db.session.commit()
+            id_data = db.session.query(TemporaryLiterature).filter_by(username=current_user.username).order_by(
+                TemporaryLiterature.id.desc()).first()
             if form.image.data:
-                id_data = db.session.query(TemporaryLiterature).filter_by(username = current_user.username).order_by(TemporaryLiterature.id.desc()).first()
                 save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_literature_id", model=TemporaryImage, form_data=form, temporary=True)
             db.session.commit()
-            confirmation_email(id)
+            confirmation_email(id_data.id)
             return redirect(url_for('literature_bp.literature_info_detail', id=literature_first.id))
     return render_template("literature_bp.literature_info_detail.html", id=literature_first.id, form_open = True, form_1 = False, form_2 = False,book = literature_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2,title = "Literature information", images = images)
     #return render_template("war_info.html", war = war, title = "Battle information")

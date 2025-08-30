@@ -94,11 +94,12 @@ def add_new_artifact():
             temporary_artifact_edit = TemporaryArtifact(**{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
             db.session.add(temporary_artifact_edit)
             db.session.commit()
+            id_data = db.session.query(TemporaryArtifact).filter_by(username=current_user.username).order_by(
+                TemporaryArtifact.id.desc()).first()
             if form.image.data:
-                id_data = db.session.query(TemporaryArtifact).filter_by(username = current_user.username).order_by(TemporaryArtifact.id.desc()).first()
                 save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_artifact_id", model=TemporaryImage, form_data=form, temporary=True)
                 db.session.commit()
-                confirmation_email(temporary_artifact_edit.id)
+            confirmation_email(id_data.id)
             return redirect(url_for("artifact_bp.artifact_info"))
     return render_template('artifact_info.html', title = "Artifact", artifact_lst = artifact_lst , form_open = True, new_form = form )
 
@@ -132,11 +133,12 @@ def edit_artifact(id):
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
             db.session.add(temporary_edit)
             db.session.commit()
+            id_data = db.session.query(TemporaryArtifact).filter_by(username=current_user.username).order_by(
+                TemporaryArtifact.id.desc()).first()
             if form.image.data:
-                id_data = db.session.query(TemporaryArtifact).filter_by(username = current_user.username).order_by(TemporaryArtifact.id.desc()).first()
                 save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_artifact_id", model=TemporaryImage, form_data=form, temporary=True)
             db.session.commit()
-            confirmation_email(id)
+            confirmation_email(id_data.id)
             return redirect(url_for('artifact_bp.artifact_info_detail', id=artifact_first.id))
     return render_template("artifact_info_detail.html", id=artifact_first.id, form_open = True, form_1 = False, form_2 = False,artifact = artifact_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2,title = "Artifact information", images = images)
     #return render_template("war_info.html", war = war, title = "Battle information")

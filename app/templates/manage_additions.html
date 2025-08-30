@@ -203,7 +203,7 @@
     </thead>
     {% for addition in add_list %}
         <tr>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ addition.old_id }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ addition.id }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ addition.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ addition.title }}</td>
             <td class="greek-heading_2" style="font-size: 1rem">{{ addition.in_greek }}</td>
@@ -294,7 +294,7 @@
     </thead>
     {% for building in add_list_2 %}
         <tr>
-            <td class="latin-heading_2" style="font-size: 1rem">{{ building.id }}</td>
+            <td class="latin-heading_2" style="font-size: 1rem">{{ building.old_id }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.title }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.status }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ building.construction_completed }}</td>

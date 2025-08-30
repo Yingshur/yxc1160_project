@@ -276,14 +276,14 @@ def add_new_emperor(dynasty):
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
             db.session.add(temporary_edit)
             db.session.commit()
+            id_data = db.session.query(TemporaryEmperor).filter_by(username=current_user.username).order_by(
+                TemporaryEmperor.id.desc()).first()
             if form.portrait.data:
-                id_data = db.session.query(TemporaryEmperor).filter_by(username = current_user.username).order_by(TemporaryEmperor.id.desc()).first()
                 save_uploaded_images(file=form.portrait.data, obj_id=id_data.id, field_name="temporary_emperor_id",
                                      model=TemporaryImage, form_data=form, temporary=True)
-
                 db.session.commit()
-                confirmation_email(id=temporary_edit.id)
-                return redirect(url_for(redirect_))
+            confirmation_email(id=id_data.id)
+            return redirect(url_for(redirect_))
 
         else:
             return redirect(url_for(redirect_))
@@ -322,11 +322,12 @@ def edit_emperor(id):
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
             db.session.add(temporary_edit)
             db.session.commit()
+            id_data = db.session.query(TemporaryEmperor).filter_by(username=current_user.username).order_by(
+                TemporaryEmperor.id.desc()).first()
             if form.portrait.data:
-                id_data = db.session.query(TemporaryEmperor).filter_by(username = current_user.username).order_by(TemporaryEmperor.id.desc()).first()
                 save_uploaded_images(file=form.portrait.data, obj_id=id_data.id, field_name = "temporary_emperor_id",model = TemporaryImage, form_data=form, temporary=True)
             db.session.commit()
-            confirmation_email(id=id)
+            confirmation_email(id=id_data.id)
             return redirect(url_for('emperor_bp.macedonian_emperors', id=emperor_first.id))
     return render_template("macedonian_emperors.html", id=emperor_first.id, form_open = True, m_e = emperor_first, new_form = form, title = "Dynasties")
 

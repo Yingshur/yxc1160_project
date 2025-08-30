@@ -141,12 +141,13 @@ def add_new_architecture():
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
             db.session.add(temporary_architecture_edit)
             db.session.commit()
+            id_data = db.session.query(TemporaryArchitecture).filter_by(username=current_user.username).order_by(
+                TemporaryArchitecture.id.desc()).first()
             if form.image.data:
-                id_data = db.session.query(TemporaryArchitecture).filter_by(username = current_user.username).order_by(TemporaryArchitecture.id.desc()).first()
                 save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_architecture_id",
                                      model=TemporaryImage, form_data=form, temporary=True)
                 db.session.commit()
-                confirmation_email(id = temporary_architecture_edit.id)
+            confirmation_email(id = id_data.id)
             return redirect(url_for("architecture_bp.architecture_info"))
     return render_template('architecture_info.html', title = "Architecture", buildings_lst = buildings_lst , architecture_html =Markup(building_html), form_open = True, new_form = form )
 
@@ -181,11 +182,12 @@ def edit_architecture(id):
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
             db.session.add(temporary_edit)
             db.session.commit()
+            id_data = db.session.query(TemporaryArchitecture).filter_by(username=current_user.username).order_by(
+                TemporaryArchitecture.id.desc()).first()
             if form.image.data:
-                id_data = db.session.query(TemporaryArchitecture).filter_by(username = current_user.username).order_by(TemporaryArchitecture.id.desc()).first()
                 save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_architecture_id", model=TemporaryImage, form_data=form, temporary=True)
             db.session.commit()
-            confirmation_email(id = id)
+            confirmation_email(id = id_data.id)
             return redirect(url_for('architecture_bp.architecture_info_detail', id=architecture_first.id))
     return render_template("architecture_info_detail.html", id=architecture_first.id, form_open = True, building = architecture_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2,title = "Architecture information", form_open_1 = False, form_open_2 = False, images = images)
     #return render_template("war_info.html", war = war, title = "Battle information")
