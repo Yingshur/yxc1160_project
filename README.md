@@ -29,7 +29,7 @@ Run locally:
 python run.py
 
 
-On deployment (currently use railway.com):
+On deployment:
 
 
 gunicorn -w 4 -b 0.0.0.0:8006 app:app
