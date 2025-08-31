@@ -32,7 +32,7 @@ python run.py
 On deployment (currently use railway.com):
 
 
-gunicorn -w 4 -b 0.0.0.0:5086 app:app
+gunicorn -w 4 -b 0.0.0.0:8006 app:app
 
 Privacy: Full compliance with the GDPR.
 
