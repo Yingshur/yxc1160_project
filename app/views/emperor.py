@@ -250,27 +250,21 @@ def add_new_emperor(dynasty):
             new_emperor = Emperor(**{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
             db.session.add(new_emperor)
             #This function is designed for "locust" stress test
-            if "test" not in form.title.data:
-                db.session.commit()
-                id_data = db.session.query(Image).first()
-                new_log_300000 = LogBook(original_id=new_emperor.id, title=new_emperor.title,
+            db.session.commit()
+            id_data = db.session.query(Image).first()
+            new_log_300000 = LogBook(original_id=new_emperor.id, title=new_emperor.title,
                                          username=current_user.username)
-                to_csv(current_user.username, new_emperor.title)
-                db.session.add(new_log_300000)
-                db.session.commit()
-            else:
-                db.session.commit()
-                db.session.delete(new_emperor)
-                db.session.commit()
+            to_csv(current_user.username, new_emperor.title)
+            db.session.add(new_log_300000)
+            db.session.commit()
             # print(form.portrait.data.filename)
-            if form.portrait.data and "test" not in form.title.data:
+            if form.portrait.data:
                 save_uploaded_images(file=form.portrait.data, obj_id=new_emperor.id, field_name="emperor_id",
                                      model=Image)
                 db.session.commit()
             to_csv_overwrite(current_user.username)
             return redirect(url_for(redirect_))
-
-        elif current_user.role != "Admin" and "test" not in form.title.data:
+        else:
             column_names = [column.name for column in TemporaryEmperor.__table__.columns if column.name != "id"]
             temporary_edit = TemporaryEmperor(
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)}, old_id = int(form.edit.data), username = current_user.username)
@@ -283,9 +277,7 @@ def add_new_emperor(dynasty):
                                      model=TemporaryImage, form_data=form, temporary=True)
                 db.session.commit()
             confirmation_email(id=id_data.id)
-            return redirect(url_for(redirect_))
-
-        else:
+            flash("Request successfully uploaded, please wait for approval", "success" )
             return redirect(url_for(redirect_))
     return render_template(template, title = page_title, macedonian_lst = macedonian_lst, new_form = form, form_open = True, article_title = article_title)
 
@@ -301,19 +293,16 @@ def edit_emperor(id):
     if form.validate_on_submit():
         if current_user.role == "Admin":
             #This part is designed for "locust" stress testing
-            if "test" not in form.title.data:
-                emperor_new_edit = db.session.get(Emperor, int(form.edit.data))
-                form.populate_obj(emperor_new_edit)
-                new_log_2 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title,
-                                    username=current_user.username)
-                to_csv(current_user.username, emperor_new_edit.title)
-                db.session.add(new_log_2)
-                if form.portrait.data:
-                    save_uploaded_images(file=form.portrait.data, obj_id=emperor_new_edit.id, field_name="emperor_id", model=Image)
-                db.session.commit()
-            else:
-                emperor_new_edit = db.session.get(Emperor, int(form.edit.data))
-                form.populate_obj(emperor_new_edit)
+            emperor_new_edit = db.session.get(Emperor, int(form.edit.data))
+            form.populate_obj(emperor_new_edit)
+            new_log_2 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title,
+                                username=current_user.username)
+            to_csv(current_user.username, emperor_new_edit.title)
+            db.session.add(new_log_2)
+            if form.portrait.data:
+                save_uploaded_images(file=form.portrait.data, obj_id=emperor_new_edit.id, field_name="emperor_id",
+                                     model=Image)
+            db.session.commit()
             to_csv_overwrite(current_user.username)
             return redirect(url_for('emperor_bp.macedonian_emperors', id=emperor_first.id))
         else:
@@ -328,6 +317,7 @@ def edit_emperor(id):
                 save_uploaded_images(file=form.portrait.data, obj_id=id_data.id, field_name = "temporary_emperor_id",model = TemporaryImage, form_data=form, temporary=True)
             db.session.commit()
             confirmation_email(id=id_data.id)
+            flash("Request successfully uploaded, please wait for approval", "success" )
             return redirect(url_for('emperor_bp.macedonian_emperors', id=emperor_first.id))
     return render_template("macedonian_emperors.html", id=emperor_first.id, form_open = True, m_e = emperor_first, new_form = form, title = "Dynasties")
 

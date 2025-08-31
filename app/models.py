@@ -67,7 +67,7 @@ class Verification(db.Model):
 class Emperor(db.Model):
     __tablename__ = 'emperors'
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    title: so.Mapped[str] = so.mapped_column(sa.String(256), unique=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256))
     in_greek: so.Mapped[str] = so.mapped_column(sa.String(256))
     birth: so.Mapped[str] = so.mapped_column(sa.String(256))
     death: so.Mapped[str] = so.mapped_column(sa.String(256))
@@ -168,7 +168,7 @@ class Invitation(db.Model):
 class War(db.Model):
     __tablename__ = 'wars'
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    title: so.Mapped[str] = so.mapped_column(sa.String(256), unique=True)
+    title: so.Mapped[str] = so.mapped_column(sa.String(256))
     start_year: so.Mapped[int] = so.mapped_column()
     dates: so.Mapped[str] = so.mapped_column(sa.String(256))
     location: so.Mapped[str] = so.mapped_column(sa.String(256))

@@ -103,6 +103,7 @@ def add_new_literature():
                 save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_literature_id", model=TemporaryImage, form_data=form, temporary=True)
                 db.session.commit()
             confirmation_email(id_data.id)
+            flash("Request successfully uploaded, please wait for approval", "success" )
             return redirect(url_for("literature_bp.literature_info"))
     return render_template('literature_info.html', title = "Literature", literature_lst = literature_lst , form_open = True, new_form = form )
 
@@ -142,6 +143,7 @@ def edit_literature(id):
                 save_uploaded_images(file=form.image.data, obj_id=id_data.id, field_name="temporary_literature_id", model=TemporaryImage, form_data=form, temporary=True)
             db.session.commit()
             confirmation_email(id_data.id)
+            flash("Request successfully uploaded, please wait for approval", "success" )
             return redirect(url_for('literature_bp.literature_info_detail', id=literature_first.id))
     return render_template("literature_bp.literature_info_detail.html", id=literature_first.id, form_open = True, form_1 = False, form_2 = False,book = literature_first, new_form = form, new_form_1 = form_1, new_form_2 = form_2,title = "Literature information", images = images)
     #return render_template("war_info.html", war = war, title = "Battle information")

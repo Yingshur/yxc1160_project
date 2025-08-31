@@ -244,8 +244,22 @@ padding:0 !important;
 {% endblock %}
 
 
+{% block flash_messages %}{% endblock %}
+
+
 {% block content %}
 <div class="background-container">
+    <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
 <h1 class="latin-heading_3">Literature</h1>
              <div class="table-responsive">
 <div class="col-lg-9">

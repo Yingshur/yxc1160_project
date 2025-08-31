@@ -11,7 +11,6 @@ from wtforms.validators import DataRequired, EqualTo, NumberRange, ValidationErr
     AnyOf, InputRequired
 from app.new_file import db
 from app.models import User
-import datetime
 
 
 def int_validator(form, field):
