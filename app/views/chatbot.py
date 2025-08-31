@@ -31,7 +31,7 @@ def background_chatbot():
     try:
         print("Initialization starts!")
         client = InferenceClient(
-            provider="groq",
+            provider="novita",
             api_key=token_,
         )
         client.chat.completions.create(model="meta-llama/Meta-Llama-3-8B-Instruct",

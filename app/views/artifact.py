@@ -205,11 +205,11 @@ def approve_artifact_add(id):
         **{column: getattr(add_artifact, column) for column in column_names if hasattr(add_artifact, column)})
 
     user = db.session.query(User).filter_by(username = add_artifact.username).first()
+    to_csv(current_user.username, new_artifact.title)
     db.session.add(new_artifact)
     db.session.commit()
     new_log_4100 = LogBook(original_id=new_artifact.id, title=new_artifact.title,
                          username=current_user.username)
-    to_csv(current_user.username, new_artifact.title)
     db.session.add(new_log_4100)
     if add_artifact.temporary_images:
         approval_add_image(add_artifact, obj_id=new_artifact.id, field_name="artifact_id", model=Image)

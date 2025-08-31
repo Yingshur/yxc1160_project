@@ -179,13 +179,13 @@ def approve_literature_edit(id):
     try:
         literature_first = db.session.get(TemporaryLiterature, id)
         new_literature = db.session.get(Literature, int(literature_first.old_id))
+        to_csv(current_user.username, new_literature.title)
         column_names = [column.name for column in Literature.__table__.columns if column.name not in ("id", "old_id")]
         for column in column_names:
             setattr(new_literature, column, getattr(literature_first, column))
         user = db.session.query(User).filter_by(username=literature_first.username).first()
         new_log_30 = LogBook(original_id=id, title=new_literature.title,
                              username=current_user.username)
-        to_csv(current_user.username, new_literature.title)
         db.session.add(new_log_30)
         if literature_first.temporary_images:
             approval_add_image(literature_first, obj_id=new_literature.id, field_name="literature_id", model=Image)
@@ -206,11 +206,11 @@ def approve_literature_add(id):
     new_literature = Literature(
         **{column: getattr(add_literature, column) for column in column_names if hasattr(add_literature, column)})
     user = db.session.query(User).filter_by(username = add_literature.username).first()
+    to_csv(current_user.username, new_literature.title)
     db.session.add(new_literature)
     db.session.commit()
     new_log_3200 = LogBook(original_id=new_literature.id, title=new_literature.title,
                          username=current_user.username)
-    to_csv(current_user.username, new_literature.title)
     db.session.add(new_log_3200)
     if add_literature.temporary_images:
         approval_add_image(add_literature, obj_id=new_literature.id, field_name="literature_id", model=Image)

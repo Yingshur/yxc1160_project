@@ -123,6 +123,7 @@ def approve_emperor_add(id):
     add_emperor = db.session.get(TemporaryEmperor, id)
     column_names = [column.name for column in Emperor.__table__.columns if column.name != "id"]
     new_emperor = Emperor(**{column: getattr(add_emperor, column) for column in column_names if hasattr(add_emperor, column)})
+    to_csv(current_user.username, new_emperor.title)
     user = db.session.query(User).filter_by(username = add_emperor.username).first()
     db.session.add(new_emperor)
     db.session.commit()
@@ -133,7 +134,6 @@ def approve_emperor_add(id):
         approval_add_image(add_emperor, obj_id=new_emperor.id, field_name="emperor_id", model=Image)
     approval_email(user_email=user.email, emperor_title=new_emperor.title)
     db.session.delete(add_emperor)
-    to_csv(current_user.username, new_emperor.title)
     db.session.commit()
     to_csv_overwrite(current_user.username)
     return redirect(url_for('admin_bp.manage_additions'))
@@ -155,6 +155,7 @@ def approve_emperor_edit(id):
     try:
         edit_emperor = db.session.get(TemporaryEmperor, id)
         emperor_new_edit = db.session.get(Emperor, int(edit_emperor.old_id))
+        to_csv(current_user.username, emperor_new_edit.title)
         column_names = [column.name for column in Emperor.__table__.columns if column.name not in ("id", "old_id")]
         for column in column_names:
             setattr(emperor_new_edit, column, getattr(edit_emperor, column))
@@ -162,7 +163,6 @@ def approve_emperor_edit(id):
         new_log_14 = LogBook(original_id=emperor_new_edit.id, title=emperor_new_edit.title,
                              username=current_user.username)
         db.session.add(new_log_14)
-        to_csv(current_user.username, emperor_new_edit.title)
         if edit_emperor.temporary_images:
             approval_add_image(edit_emperor, obj_id=emperor_new_edit.id, field_name="emperor_id", model=Image)
         approval_email(user_email=user.email, emperor_title=edit_emperor.title)
@@ -252,12 +252,12 @@ def add_new_emperor(dynasty):
             column_names = [column.name for column in Emperor.__table__.columns if column.name != "id"]
             new_emperor = Emperor(**{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
             db.session.add(new_emperor)
+            to_csv(current_user.username, new_emperor.title)
             #This function is designed for "locust" stress test
             db.session.commit()
             id_data = db.session.query(Image).first()
             new_log_300000 = LogBook(original_id=new_emperor.id, title=new_emperor.title,
                                          username=current_user.username)
-            to_csv(current_user.username, new_emperor.title)
             db.session.add(new_log_300000)
             db.session.commit()
             # print(form.portrait.data.filename)

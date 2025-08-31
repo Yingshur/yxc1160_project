@@ -178,10 +178,10 @@ def add_new_war_1(war_category):
             column_names = [column.name for column in War.__table__.columns if column.name != "id"]
             new_war = War(
                 **{column: getattr(form, column).data for column in column_names if hasattr(form, column)})
+            to_csv(current_user.username, new_war.title)
             db.session.add(new_war)
             db.session.commit()
             new_log_4 = LogBook(original_id=new_war.id, title=new_war.title, username=current_user.username)
-            to_csv(current_user.username, new_war.title)
             db.session.add(new_log_4)
             # print(form.portrait.data.filename)
             if form.image.data:
@@ -273,6 +273,7 @@ def approve_war_edit(id):
     try:
         war_first = db.session.get(TemporaryWar, id)
         new_war = db.session.get(War, int(war_first.old_id))
+        to_csv(current_user.username, new_war.title)
         column_names = [column.name for column in War.__table__.columns if column.name not in ("id", "old_id")]
         for column in column_names:
             setattr(new_war, column, getattr(war_first, column))
@@ -280,7 +281,6 @@ def approve_war_edit(id):
         new_log_8 = LogBook(original_id=id, title=new_war.title,
                             username=current_user.username)
         db.session.add(new_log_8)
-        to_csv(current_user.username, new_war.title)
         if war_first.temporary_images:
             approval_add_image(war_first, obj_id=new_war.id, field_name="war_id", model=Image)
         approval_email(user_email=user.email, emperor_title=new_war.title)
