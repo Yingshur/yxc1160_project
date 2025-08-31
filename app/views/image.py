@@ -26,29 +26,23 @@ def edit_an_image(id):
             if photo:
                 if photo.architecture_id:
                     to_csv(current_user.username, f"architecture, id = {id}")
-                    gallery_upload(form, photo, category="architecture")
+                    gallery_upload(form, photo, "architecture")
                     db.session.commit()
                     to_csv_overwrite(current_user.username)
-                    if current_user.user_type == "Authorised":
-                        new_confirmation_email(id=photo.id, category="architecture")
                     flash("Successfully edited", "success")
                     return redirect(url_for('architecture_bp.architecture_info_detail', id=id))
                 elif photo.literature_id:
                     to_csv(current_user.username, f"literature, id = {id}")
-                    gallery_upload(form, photo, category="literature")
+                    gallery_upload(form, photo, "literature")
                     db.session.commit()
                     to_csv_overwrite(current_user.username)
-                    if current_user.user_type == "Authorised":
-                        new_confirmation_email(id=photo.id, category="literature")
                     flash("Successfully edited", "success")
                     return redirect(url_for('literature_bp.literature_info_detail', id=id))
                 elif photo.artifact_id:
                     to_csv(current_user.username, f"artifact, id = {id}")
-                    gallery_upload(form, photo, category="artifact")
+                    gallery_upload(form, photo, "artifact")
                     db.session.commit()
                     to_csv_overwrite(current_user.username)
-                    if current_user.user_type == "Authorised":
-                        new_confirmation_email(id=photo.id, category="artifact")
                     flash("Successfully edited", "success")
                     return redirect(url_for('artifact_bp.artifact_info_detail', id=id))
             else:
@@ -71,27 +65,18 @@ def add_an_image(id, category):
                 gallery_upload_addition(form, category, obj_id=id)
                 flash("Successfully uploaded", "success")
                 to_csv_overwrite(current_user.username)
-                if current_user.user_type == "Authorised":
-                    id_data = db.session.query(Image).filter_by(username=current_user.username).order_by(Image.id.desc()).first()
-                    new_confirmation_email(id=id_data.id, category="architecture")
                 return redirect(url_for('architecture_bp.architecture_info_detail', id=id))
             elif category == "literature":
                 to_csv(current_user.username, f"literature, id = {id}")
                 gallery_upload_addition(form, category, obj_id=id)
                 flash("Successfully uploaded", "success")
                 to_csv_overwrite(current_user.username)
-                if current_user.user_type == "Authorised":
-                    id_data = db.session.query(Image).filter_by(username=current_user.username).order_by(Image.id.desc()).first()
-                    new_confirmation_email(id=id_data.id, category="literature")
                 return redirect(url_for('literature_bp.literature_info_detail', id=id))
             elif category == "artifact":
                 to_csv(current_user.username, f"artifact, id = {id}")
                 gallery_upload_addition(form, category, obj_id=id)
                 flash("Successfully uploaded", "success")
                 to_csv_overwrite(current_user.username)
-                if current_user.user_type == "Authorised":
-                    id_data = db.session.query(Image).filter_by(username=current_user.username).order_by(Image.id.desc()).first()
-                    new_confirmation_email(id=id_data.id, category="artifact")
                 return redirect(url_for('artifact_bp.artifact_info_detail', id=id))
     flash("Invalid details, please resubmit the form", "warning")
     return redirect(request.referrer)

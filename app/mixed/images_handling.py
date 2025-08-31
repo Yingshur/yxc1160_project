@@ -62,7 +62,7 @@ def approval_add_image(temporary, obj_id, field_name, model):
     db.session.delete(temporary.temporary_images[0])
     db.session.commit()
 
-def gallery_upload(form, photo, category=None):
+def gallery_upload(form, photo, category):
     if not form.image.data:
         return None
     file_name = secure_filename(form.image.data.filename)
@@ -72,8 +72,6 @@ def gallery_upload(form, photo, category=None):
     new_path_for_uploading = path_for_uploading.replace('\\', '/')
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     form.image.data.save(new_path_for_uploading)
-    if current_user.username == "Authorised" and category:
-        new_confirmation_email(id=photo.id, category=category)
     photo.filename = file_name
     photo.url = url_for('static', filename=f"images/uploaded_photos/{file_name}")
     photo.caption = form.caption.data
@@ -82,6 +80,8 @@ def gallery_upload(form, photo, category=None):
                             username=current_user.username)
     db.session.add(record)
     db.session.commit()
+    if current_user.user_type == "Authorised":
+        new_confirmation_email(id=photo.id, category=category)
     return photo
 
 def gallery_upload_addition(form, category, obj_id = None):
