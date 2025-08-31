@@ -56,7 +56,7 @@ def version_control_(id):
                     for a, b in item.items():
                         if b in ("", ',', None, ''):
                             item[a] = None
-                    item.pop("id", None)
+                    #item.pop("id", None)
                 add_data = [model_table_names[actual_table_name](**row) for row in table_dictionary]
                 db.session.add_all(add_data)
     #db.session.delete(version)
@@ -100,7 +100,7 @@ def version_control_overwrite(id):
                     for a, b in item.items():
                         if b in ("", ',', None, ''):
                             item[a] = None
-                    item.pop("id", None)
+                    #item.pop("id", None)
                 add_data = [model_table_names[actual_table_name](**row) for row in table_dictionary]
                 db.session.add_all(add_data)
     #db.session.delete(version)

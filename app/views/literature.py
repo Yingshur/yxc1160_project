@@ -44,6 +44,9 @@ def delete_literature_(id):
         for image in delete_images_:
             db.session.delete(image)
     db.session.delete(delete_literature_)
+    delete_log = LogBook(original_id=id, title=delete_literature_.title,
+                         username=current_user.username)
+    db.session.add(delete_log)
     db.session.commit()
     to_csv_overwrite(current_user.username)
     return redirect(url_for('literature_bp.literature_info'))

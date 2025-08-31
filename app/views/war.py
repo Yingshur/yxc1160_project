@@ -107,16 +107,25 @@ def edit_info_war(id):
 def delete_wars_(id):
     delete_wars__ = db.session.get(War, id)
     to_csv(current_user.username, delete_wars__.title)
-    if delete_wars__.images:
-        delete_images_ = delete_wars__.images[0]
-        db.session.delete(delete_images_)
     if delete_wars__.war_type == "Civil War":
         db.session.delete(delete_wars__)
+        if delete_wars__.images:
+            delete_images_ = delete_wars__.images[0]
+            db.session.delete(delete_images_)
+        delete_log = LogBook(original_id=id, title=delete_wars__.title,
+                             username=current_user.username)
+        db.session.add(delete_log)
         db.session.commit()
         to_csv_overwrite(current_user.username)
         return redirect(url_for("war_bp.civil_wars"))
     elif delete_wars__.war_type == "Foreign War":
         db.session.delete(delete_wars__)
+        if delete_wars__.images:
+            delete_images_ = delete_wars__.images[0]
+            db.session.delete(delete_images_)
+        delete_log = LogBook(original_id=id, title=delete_wars__.title,
+                             username=current_user.username)
+        db.session.add(delete_log)
         db.session.commit()
         to_csv_overwrite(current_user.username)
         return redirect(url_for("war_bp.foreign_wars_1"))

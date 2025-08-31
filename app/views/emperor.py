@@ -183,6 +183,9 @@ def delete_emperors_(id):
         delete_images_ = delete_emperors_.images[0]
         db.session.delete(delete_images_)
     db.session.delete(delete_emperors_)
+    delete_log = LogBook(original_id=id, title=delete_emperors_.title,
+                         username=current_user.username)
+    db.session.add(delete_log)
     db.session.commit()
     to_csv_overwrite(current_user.username)
     return redirect(request.referrer)
