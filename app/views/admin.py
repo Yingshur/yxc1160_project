@@ -62,7 +62,6 @@ def manage_edits():
 def delete_user():
     form = ChooseForm()
     if form.validate_on_submit():
-        to_csv(current_user.username)
         u = db.session.get(User, int(form.choice.data))
         q = db.select(User).where((User.role == "Admin") & (User.id != u.id))
         first = db.session.scalars(q).first()
@@ -72,11 +71,9 @@ def delete_user():
             logout_user()
             db.session.delete(u)
             db.session.commit()
-            to_csv_overwrite(current_user.username)
             return redirect(url_for('home_bp.home'))
         else:
             db.session.delete(u)
-            to_csv_overwrite(current_user.username)
             db.session.commit()
     return redirect(url_for('admin_bp.admin'))
 

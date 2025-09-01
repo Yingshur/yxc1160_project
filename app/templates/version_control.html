@@ -206,12 +206,6 @@
 </table>
                     </div>
     </div>
-    {% if new_version %}
-    <div style="text-align: left;">
-    <a href="{{url_for('version_control_bp.version_control_overwrite', id = new_version[0].id)}}" class="btn btn-dark" style="background-color: transparent"> Latest Version </a>
-        </div>
-    <h1 class="latin-heading_3">Version Control</h1>
-    {% endif %}
 
 <div class="col-lg-9">
                     <div class="table-responsive">
@@ -223,6 +217,7 @@
             <th class="latin-heading_2" style="font-size: 1.5rem">Title/Category</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Time</th>
             <th class="latin-heading_2" style="font-size: 1.5rem">Version before this Edit/Addition</th>
+            <th class="latin-heading_2" style="font-size: 1.5rem">Version After this Edit/Addition</th>
         </tr>
     </thead>
     {% for version in versions %}
@@ -232,6 +227,8 @@
             <td class="latin-heading_2" style="font-size: 1rem">{{ version.title }}</td>
             <td class="latin-heading_2" style="font-size: 1rem">{{ version.created_at }}</td>
                 <td>    <a href="{{ url_for('version_control_bp.version_control_', id=version.id) }}" class="btn btn-dark" style="background-color: transparent"> Go back to this version </a>
+                </td>
+            <td>    <a href="{{ url_for('version_control_bp.version_control_overwrite', id = version.id) }}" class="btn btn-dark" style="background-color: transparent"> Go forward to this version </a>
                 </td>
         </tr>
     {% endfor %}

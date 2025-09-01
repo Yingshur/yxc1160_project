@@ -291,6 +291,7 @@ class NewVersion(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True, unique=True)
     username: so.Mapped[str] = so.mapped_column(sa.String(256))
     time_version: so.Mapped[str] = so.mapped_column(sa.String(256))
+    unique: so.Mapped[str] = so.mapped_column(sa.String(1024))
 
 
 

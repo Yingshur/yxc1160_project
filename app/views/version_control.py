@@ -78,6 +78,7 @@ def version_control_(id):
 @admin_only
 def version_control_overwrite(id):
     version = db.session.get(NewVersion, id)
+    unique_number_ = version.unique
     latest_edit = db.session.query(Version).order_by(Version.id.desc()).first()
     with db.engine.begin() as context:
         context.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
@@ -92,15 +93,17 @@ def version_control_overwrite(id):
     model_table_names = {model.__tablename__: model for model in models}
     for path_of_file in glob.glob(
             os.path.join(dir_versions, "*.csv")):
-        actual_table_name = os.path.splitext(os.path.basename(path_of_file))[0]
-        with open(path_of_file, "r", encoding="utf-8-sig") as csv_file:
+        name_of_table_full = os.path.splitext(os.path.basename(path_of_file))[0]
+        actual_table_name = name_of_table_full[:-33]
+        if name_of_table_full[-32:] == unique_number_ and actual_table_name in model_table_names:
+            with open(path_of_file, "r", encoding="utf-8-sig") as csv_file:
                 dictionary_reader = csv.DictReader(csv_file)
                 table_dictionary = [dict(row) for row in dictionary_reader]
                 for item in table_dictionary:
                     for a, b in item.items():
                         if b in ("", ',', None, ''):
                             item[a] = None
-                    #item.pop("id", None)
+                    # item.pop("id", None)
                 add_data = [model_table_names[actual_table_name](**row) for row in table_dictionary]
                 db.session.add_all(add_data)
     #db.session.delete(version)
