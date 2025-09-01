@@ -114,7 +114,6 @@ def toggle_user_type():
 @login_required
 def de_admin(id):
     if current_user.user_type == "Autocrat":
-        to_csv(current_user.username)
         form = ChooseForm()
         q = db.select(User)
         user_lst = db.session.scalars(q)
@@ -122,7 +121,6 @@ def de_admin(id):
         user.role = "Normal"
         flash("User role has now been changed to normal", "success")
         db.session.commit()
-        to_csv_overwrite(current_user.username)
     else:
         abort(403)
     return redirect(url_for('admin_bp.admin'))

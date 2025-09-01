@@ -44,6 +44,8 @@ def change_to_admin():
         if form.code.data == t.code and u.role != "Admin":
             u = db.session.get(User, current_user.id)
             u.role = "Admin"
+            if u.user_type == "Authorised":
+                u.user_type = "user"
             flash("Role changed to admin", "success")
             db.session.delete(t)
             db.session.commit()
